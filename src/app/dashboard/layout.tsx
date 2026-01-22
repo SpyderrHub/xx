@@ -114,9 +114,9 @@ const DashboardHeader = ({ title }: { title: string }) => {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/billing">
+                <Link href="/dashboard/subscription">
                   <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Billing</span>
+                  <span>Subscription</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -160,7 +160,7 @@ const DashboardSidebar = () => {
 
   const settingsItems = useMemo(
     () => [
-      { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
+      { href: '/dashboard/subscription', label: 'Subscription', icon: CreditCard },
       { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     ],
     []
@@ -311,8 +311,8 @@ export default function DashboardLayout({
         return 'Voice Library';
       case '/dashboard/my-generations':
         return 'My Generations';
-      case '/dashboard/billing':
-        return 'Billing';
+      case '/dashboard/subscription':
+        return 'Subscription';
       case '/dashboard/settings':
         return 'Settings';
       default:
