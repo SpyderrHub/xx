@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,6 +20,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import Logo from '@/components/logo';
+import { useFirebase } from '@/firebase';
+import { signUpWithEmail } from '@/lib/auth';
 
 const formSchema = z
   .object({
@@ -55,8 +58,8 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <path
       fill="#4CAF50"
       d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-    />
-    <path
+...
+  <path
       fill="#1976D2"
       d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.902,35.61,44,29.813,44,24C44,22.659,43.862,21.35,43.611,20.083z"
     />
@@ -67,6 +70,8 @@ export function SignUpForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { auth, firestore } = useFirebase();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,13 +83,22 @@ export function SignUpForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log(values);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signUpWithEmail(
+        auth,
+        firestore,
+        values.fullName,
+        values.email,
+        values.password
+      );
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Sign up failed:', error);
+    } finally {
       setIsLoading(false);
-    }, 3000);
+    }
   }
 
   const PasswordVisibilityToggle = ({

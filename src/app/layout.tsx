@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
   title: 'VoxAI',
-  description: 'Generate realistic AI voices with advanced text-to-speech technology.',
+  description:
+    'Generate realistic AI voices with advanced text-to-speech technology.',
 };
 
 export default function RootLayout({
@@ -28,13 +30,12 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={cn(
-          'font-body antialiased',
-          'min-h-screen bg-background'
-        )}
+        className={cn('font-body antialiased', 'min-h-screen bg-background')}
       >
-        <div className="relative flex min-h-dvh flex-col">{children}</div>
-        <Toaster />
+        <FirebaseClientProvider>
+          <div className="relative flex min-h-dvh flex-col">{children}</div>
+          <Toaster />
+        </FirebaseClientProvider>
       </body>
     </html>
   );

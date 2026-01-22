@@ -22,6 +22,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import Logo from '@/components/logo';
+import { useFirebase } from '@/firebase';
+import { signInWithEmail } from '@/lib/auth';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -60,6 +62,7 @@ export function LoginForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { auth } = useFirebase();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,14 +73,16 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log(values);
-    // Simulate API call and redirect
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await signInWithEmail(auth, values.email, values.password);
       router.push('/dashboard');
-    }, 2000);
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const PasswordVisibilityToggle = ({
