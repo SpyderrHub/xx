@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { CheckCircle2, Languages, Zap, Gift } from 'lucide-react';
 import Logo from '@/components/logo';
