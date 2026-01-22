@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the system, storing their profile information and associated data.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique identifier for the user entity. This is the Firebase User ID."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was created. Stored as a stringified date-time value.",
+          "format": "date-time"
+        },
+        "plan": {
+          "type": "string",
+          "description": "The user's current pricing plan (e.g., 'free', 'basic', 'premium')."
+        },
+        "credits": {
+          "type": "number",
+          "description": "The number of credits the user has available for using AI services."
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role in the system (e.g., 'user', 'admin')."
+        }
+      },
+      "required": [
+        "uid",
+        "name",
+        "email",
+        "createdAt",
+        "plan",
+        "credits",
+        "role"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. The 'userId' parameter corresponds to the Firebase Authentication UID, ensuring that only the authenticated user can access their own data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, matching the Firebase Authentication UID."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure secure and scalable user data management for the VoxAI application. It follows the principle of Authorization Independence by avoiding `get()` calls in security rules. All user data is stored under the `/users/{userId}` path, making ownership explicit and simplifying security rules.\n\nThe chosen structure supports the required QAPs (Rules are not Filters) because access control is enforced at the path level. Each user's data is isolated, preventing unauthorized access to other users' information. The security rules only check if `request.auth.uid` matches the `userId` in the path, which is efficient and secure.\n\nBy storing user-specific data directly under `/users/{userId}`, we avoid the need for complex queries or filtering on the client-side, which could potentially expose data to unauthorized users. The denormalization of user roles is not required in this basic setup but should be considered if access to other collections is required (e.g., content moderation)."
+  }
+}
