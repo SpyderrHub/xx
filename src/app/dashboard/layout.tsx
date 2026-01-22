@@ -108,13 +108,13 @@ const DashboardHeader = ({ title }: { title: string }) => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/settings">
+                <Link href="/dashboard/settings">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/billing">
+                <Link href="/dashboard/billing">
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Billing</span>
                 </Link>
@@ -148,20 +148,20 @@ const DashboardSidebar = () => {
     () => [
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       {
-        href: '/text-to-speech',
+        href: '/dashboard/text-to-speech',
         label: 'Text to Speech',
         icon: MessageSquare,
       },
-      { href: '/voice-library', label: 'Voice Library', icon: Library },
-      { href: '/my-generations', label: 'My Generations', icon: History },
+      { href: '/dashboard/voice-library', label: 'Voice Library', icon: Library },
+      { href: '/dashboard/my-generations', label: 'My Generations', icon: History },
     ],
     []
   );
 
   const settingsItems = useMemo(
     () => [
-      { href: '/billing', label: 'Billing', icon: CreditCard },
-      { href: '/settings', label: 'Settings', icon: Settings },
+      { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
+      { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     ],
     []
   );
@@ -259,7 +259,7 @@ const DashboardSidebar = () => {
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Link href="/settings" className="w-full">
+                    <Link href="/dashboard/settings" className="w-full">
                       Settings
                     </Link>
                   </DropdownMenuItem>
@@ -305,15 +305,15 @@ export default function DashboardLayout({
     switch (pathname) {
       case '/dashboard':
         return 'Dashboard';
-      case '/text-to-speech':
+      case '/dashboard/text-to-speech':
         return 'Text to Speech';
-      case '/voice-library':
+      case '/dashboard/voice-library':
         return 'Voice Library';
-      case '/my-generations':
+      case '/dashboard/my-generations':
         return 'My Generations';
-      case '/billing':
+      case '/dashboard/billing':
         return 'Billing';
-      case '/settings':
+      case '/dashboard/settings':
         return 'Settings';
       default:
         return 'Dashboard';

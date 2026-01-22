@@ -1,5 +1,5 @@
-import PlaceholderContent from '@/components/dashboard/placeholder';
+import { redirect } from 'next/navigation';
 
 export default function VoiceLibraryPage() {
-  return <PlaceholderContent title="Voice Library" />;
+  redirect('/dashboard/voice-library');
 }

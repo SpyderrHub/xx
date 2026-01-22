@@ -1,5 +1,5 @@
-import PlaceholderContent from '@/components/dashboard/placeholder';
+import { redirect } from 'next/navigation';
 
 export default function MyGenerationsPage() {
-  return <PlaceholderContent title="My Generations" />;
+  redirect('/dashboard/my-generations');
 }

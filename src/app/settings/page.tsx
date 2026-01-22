@@ -1,5 +1,5 @@
-import PlaceholderContent from '@/components/dashboard/placeholder';
+import { redirect } from 'next/navigation';
 
 export default function SettingsPage() {
-  return <PlaceholderContent title="Settings" />;
+  redirect('/dashboard/settings');
 }

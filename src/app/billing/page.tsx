@@ -1,5 +1,5 @@
-import PlaceholderContent from '@/components/dashboard/placeholder';
+import { redirect } from 'next/navigation';
 
 export default function BillingPage() {
-  return <PlaceholderContent title="Billing" />;
+  redirect('/dashboard/billing');
 }
