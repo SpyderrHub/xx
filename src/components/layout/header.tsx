@@ -11,23 +11,23 @@ const Header = () => {
         </Link>
         <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
           <Link
-            href="#features"
+            href="/#features"
             className="transition-colors hover:text-primary"
           >
             Features
           </Link>
-          <Link href="#api" className="transition-colors hover:text-primary">
+          <Link href="/#api" className="transition-colors hover:text-primary">
             API
           </Link>
           <Link
-            href="#pricing"
+            href="/#pricing"
             className="transition-colors hover:text-primary"
           >
             Pricing
           </Link>
         </nav>
         <Button asChild>
-          <Link href="#pricing">Get Started</Link>
+          <Link href="/sign-up">Get Started</Link>
         </Button>
       </div>
     </header>

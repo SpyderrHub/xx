@@ -121,7 +121,7 @@ const PricingSection = () => {
                   className="w-full"
                   variant={plan.isHighlighted ? 'default' : 'outline'}
                 >
-                  <Link href="#">{plan.cta}</Link>
+                  <Link href={plan.name === 'Business' ? 'mailto:sales@voxai.dev' : '/sign-up'}>{plan.cta}</Link>
                 </Button>
               </CardFooter>
             </Card>
