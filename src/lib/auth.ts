@@ -11,9 +11,7 @@ import {
 import { doc, Firestore, setDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { useToast } from '@/hooks/use-toast';
-
-const { toast } = useToast();
+import { toast } from '@/hooks/use-toast';
 
 export async function signUpWithEmail(
   auth: Auth,
