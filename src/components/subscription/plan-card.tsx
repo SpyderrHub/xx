@@ -32,12 +32,6 @@ export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessi
     ],
   };
 
-  const handleButtonClick = () => {
-    if (plan.razorpayPlanId) {
-      onPurchase(plan.name);
-    }
-  };
-
   const getButtonAction = () => {
     if (isCurrent) return 'Current Plan';
     if (plan.name === 'Business') return 'Contact Sales';
@@ -54,6 +48,12 @@ export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessi
   };
   
   const buttonAction = getButtonAction();
+
+  const handleButtonClick = () => {
+    if (plan.razorpayPlanId) {
+      onPurchase(plan.name);
+    }
+  };
 
   return (
     <motion.div
