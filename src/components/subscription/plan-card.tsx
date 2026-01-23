@@ -14,43 +14,51 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessing }: any) {
+const plans = {
+  monthly: [
+    { priceNumeric: 0, name: 'Free' },
+    { priceNumeric: 29, name: 'Creator' },
+    { priceNumeric: 99, name: 'Pro' },
+    { priceNumeric: -1, name: 'Business' },
+  ],
+  yearly: [
+    { priceNumeric: 0, name: 'Free' },
+    { priceNumeric: 278, name: 'Creator' },
+    { priceNumeric: 950, name: 'Pro' },
+    { priceNumeric: -1, name: 'Business' },
+  ],
+};
+
+export default function PlanCard({
+  plan,
+  currentPlanName,
+  onPurchase,
+  isProcessing,
+}: any) {
   const isCurrent = plan.name.toLowerCase() === currentPlanName.toLowerCase();
-  
-  const plans = {
-    monthly: [
-      { priceNumeric: 0, name: 'Free'},
-      { priceNumeric: 29, name: 'Creator' },
-      { priceNumeric: 99, name: 'Pro' },
-      { priceNumeric: -1, name: 'Business' },
-    ],
-    yearly: [
-        { priceNumeric: 0, name: 'Free'},
-        { priceNumeric: 278, name: 'Creator' },
-        { priceNumeric: 950, name: 'Pro' },
-        { priceNumeric: -1, name: 'Business' },
-    ],
-  };
 
   const getButtonAction = () => {
     if (isCurrent) return 'Current Plan';
     if (plan.name === 'Business') return 'Contact Sales';
 
     const currentPlanDetails = [
-        ...plans.monthly,
-        ...plans.yearly
-    ].find(p => p.name.toLowerCase() === currentPlanName.toLowerCase());
+      ...plans.monthly,
+      ...plans.yearly,
+    ].find((p) => p.name.toLowerCase() === currentPlanName.toLowerCase());
 
-    if (currentPlanDetails && plan.priceNumeric > currentPlanDetails.priceNumeric) {
+    if (
+      currentPlanDetails &&
+      plan.priceNumeric > currentPlanDetails.priceNumeric
+    ) {
       return 'Upgrade';
     }
     return 'Downgrade';
   };
-  
+
   const buttonAction = getButtonAction();
 
   const handleButtonClick = () => {
-    if (plan.razorpayPlanId) {
+    if (buttonAction === 'Upgrade') {
       onPurchase(plan.name);
     }
   };
@@ -80,10 +88,14 @@ export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessi
               {plan.price}
             </span>
             {plan.period && (
-              <span className="ml-1 text-muted-foreground">{plan.period}</span>
+              <span className="ml-1 text-muted-foreground">
+                {plan.period}
+              </span>
             )}
           </div>
-          <CardDescription className="pt-2 min-h-[40px]">{plan.description}</CardDescription>
+          <CardDescription className="pt-2 min-h-[40px]">
+            {plan.description}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex-1 p-6 pt-0">
           <ul className="space-y-4">
@@ -97,19 +109,28 @@ export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessi
         </CardContent>
         <CardFooter className="p-6 pt-0">
           {plan.name === 'Business' ? (
-             <Button asChild size="lg" className="w-full font-bold" variant={plan.isHighlighted ? 'default' : 'outline'}>
-                <Link href="mailto:sales@voxai.dev">{buttonAction}</Link>
-             </Button>
+            <Button
+              asChild
+              size="lg"
+              className="w-full font-bold"
+              variant={plan.isHighlighted ? 'default' : 'outline'}
+            >
+              <Link href="mailto:sales@voxai.dev">{buttonAction}</Link>
+            </Button>
           ) : (
             <Button
-                size="lg"
-                className="w-full font-bold"
-                variant={plan.isHighlighted ? 'default' : 'outline'}
-                disabled={isCurrent || isProcessing}
-                onClick={handleButtonClick}
+              size="lg"
+              className="w-full font-bold"
+              variant={plan.isHighlighted ? 'default' : 'outline'}
+              disabled={
+                isCurrent || isProcessing || buttonAction !== 'Upgrade'
+              }
+              onClick={handleButtonClick}
             >
-                {isProcessing && !isCurrent ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {buttonAction}
+              {isProcessing && buttonAction === 'Upgrade' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {buttonAction}
             </Button>
           )}
         </CardFooter>
