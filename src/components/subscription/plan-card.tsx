@@ -17,6 +17,21 @@ import Link from 'next/link';
 export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessing }: any) {
   const isCurrent = plan.name.toLowerCase() === currentPlanName.toLowerCase();
   
+  const plans = {
+    monthly: [
+      { priceNumeric: 0, name: 'Free'},
+      { priceNumeric: 29, name: 'Creator' },
+      { priceNumeric: 99, name: 'Pro' },
+      { priceNumeric: -1, name: 'Business' },
+    ],
+    yearly: [
+        { priceNumeric: 0, name: 'Free'},
+        { priceNumeric: 278, name: 'Creator' },
+        { priceNumeric: 950, name: 'Pro' },
+        { priceNumeric: -1, name: 'Business' },
+    ],
+  };
+
   const handleButtonClick = () => {
     if (plan.razorpayPlanId) {
       onPurchase(plan.name);
@@ -39,20 +54,6 @@ export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessi
   };
   
   const buttonAction = getButtonAction();
-  const plans = {
-    monthly: [
-      { priceNumeric: 0, name: 'Free'},
-      { priceNumeric: 29, name: 'Creator' },
-      { priceNumeric: 99, name: 'Pro' },
-      { priceNumeric: -1, name: 'Business' },
-    ],
-    yearly: [
-        { priceNumeric: 0, name: 'Free'},
-        { priceNumeric: 278, name: 'Creator' },
-        { priceNumeric: 950, name: 'Pro' },
-        { priceNumeric: -1, name: 'Business' },
-    ],
-  };
 
   return (
     <motion.div
