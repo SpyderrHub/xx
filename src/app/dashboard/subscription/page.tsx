@@ -1,10 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import Script from 'next/script';
 import CurrentPlanCard from '@/components/subscription/current-plan-card';
 import PlanCard from '@/components/subscription/plan-card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { toast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const plans = {
   monthly: [
@@ -22,6 +27,7 @@ const plans = {
       ],
       isCurrent: true,
       isHighlighted: false,
+      razorpayPlanId: null,
     },
     {
       name: 'Creator',
@@ -39,6 +45,7 @@ const plans = {
       ],
       isCurrent: false,
       isHighlighted: true,
+      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CREATOR_MONTHLY,
     },
     {
       name: 'Pro',
@@ -56,6 +63,7 @@ const plans = {
       ],
       isCurrent: false,
       isHighlighted: false,
+      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_PRO_MONTHLY,
     },
     {
       name: 'Business',
@@ -72,6 +80,7 @@ const plans = {
       ],
       isCurrent: false,
       isHighlighted: false,
+      razorpayPlanId: null,
     },
   ],
   yearly: [
@@ -89,6 +98,7 @@ const plans = {
       ],
       isCurrent: true,
       isHighlighted: false,
+      razorpayPlanId: null,
     },
     {
       name: 'Creator',
@@ -106,6 +116,7 @@ const plans = {
       ],
       isCurrent: false,
       isHighlighted: true,
+      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CREATOR_YEARLY,
     },
     {
       name: 'Pro',
@@ -123,6 +134,7 @@ const plans = {
       ],
       isCurrent: false,
       isHighlighted: false,
+      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_PRO_YEARLY,
     },
     {
       name: 'Business',
@@ -139,56 +151,136 @@ const plans = {
       ],
       isCurrent: false,
       isHighlighted: false,
+      razorpayPlanId: null,
     },
   ],
 };
 
-const currentUserPlan = plans.monthly[0];
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
 
 export default function SubscriptionPage() {
   const [isYearly, setIsYearly] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { user, firestore } = useFirebase();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
+
+  const handlePurchase = async (planName: string) => {
+    if (!user) {
+        toast({ title: 'Authentication Error', description: 'You must be logged in to subscribe.', variant: 'destructive' });
+        return;
+    }
+    setIsProcessing(true);
+
+    try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/razorpay/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ planName }),
+        });
+
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message || 'Failed to create subscription.');
+        }
+
+        const { subscriptionId } = await res.json();
+
+        const options = {
+            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+            subscription_id: subscriptionId,
+            name: 'VoxAI',
+            description: `${planName} Plan`,
+            handler: function (response: any) {
+                toast({ title: 'Payment Successful', description: `Welcome to the ${planName} plan!`});
+            },
+            prefill: {
+                name: user.displayName || '',
+                email: user.email || '',
+            },
+            theme: {
+                color: '#4F46E5',
+            },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (response: any){
+            toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
+        });
+        rzp.open();
+
+    } catch (error: any) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+        setIsProcessing(false);
+    }
+  };
+
   const displayPlans = isYearly ? plans.yearly : plans.monthly;
+  const currentPlanName = userData?.plan || 'free';
 
   return (
-    <div className="space-y-12">
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Subscription</h1>
-          <p className="mt-2 text-muted-foreground">
-            Manage your plan and billing details.
-          </p>
+    <>
+      <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
+      <div className="space-y-12">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Subscription</h1>
+            <p className="mt-2 text-muted-foreground">
+              Manage your plan and billing details.
+            </p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Label htmlFor="billing-cycle">Monthly</Label>
+            <Switch
+              id="billing-cycle"
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+              aria-label="Toggle billing cycle"
+            />
+            <Label htmlFor="billing-cycle">Yearly</Label>
+            <div className="rounded-full border border-green-500/50 bg-green-500/10 px-3 py-1 text-xs text-green-400">
+              Save 20%
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Label htmlFor="billing-cycle">Monthly</Label>
-          <Switch
-            id="billing-cycle"
-            checked={isYearly}
-            onCheckedChange={setIsYearly}
-            aria-label="Toggle billing cycle"
-          />
-          <Label htmlFor="billing-cycle">Yearly</Label>
-          <div className="rounded-full border border-green-500/50 bg-green-500/10 px-3 py-1 text-xs text-green-400">
-            Save 20%
+
+        {isUserLoading ? (
+          <Skeleton className="h-64 w-full" />
+        ) : (
+          <CurrentPlanCard userData={userData} />
+        )}
+
+        <div>
+          <h2 className="mb-6 text-2xl font-semibold tracking-tight">
+            Available Plans
+          </h2>
+          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
+            {displayPlans.map((plan) => (
+              <PlanCard
+                key={plan.name}
+                plan={plan}
+                currentPlanName={currentPlanName}
+                onPurchase={handlePurchase}
+                isProcessing={isProcessing}
+              />
+            ))}
           </div>
         </div>
       </div>
-
-      <CurrentPlanCard plan={currentUserPlan} />
-
-      <div>
-        <h2 className="mb-6 text-2xl font-semibold tracking-tight">
-          Available Plans
-        </h2>
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-          {displayPlans.map((plan) => (
-            <PlanCard
-              key={plan.name}
-              plan={plan}
-              currentPlanName={currentUserPlan.name}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

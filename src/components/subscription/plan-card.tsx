@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Loader2 } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -13,40 +12,48 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
-export default function PlanCard({ plan, currentPlanName }: any) {
-  const isCurrent = plan.name === currentPlanName;
+export default function PlanCard({ plan, currentPlanName, onPurchase, isProcessing }: any) {
+  const isCurrent = plan.name.toLowerCase() === currentPlanName.toLowerCase();
+  
+  const handleButtonClick = () => {
+    if (plan.razorpayPlanId) {
+      onPurchase(plan.name);
+    }
+  };
 
   const getButtonAction = () => {
     if (isCurrent) return 'Current Plan';
     if (plan.name === 'Business') return 'Contact Sales';
 
-    const plans = {
-      monthly: [
-        { priceNumeric: 0, name: 'Free'},
-        { priceNumeric: 29, name: 'Creator' },
-        { priceNumeric: 99, name: 'Pro' },
-        { priceNumeric: -1, name: 'Business' },
-      ],
-      yearly: [
-          { priceNumeric: 0, name: 'Free'},
-          { priceNumeric: 278, name: 'Creator' },
-          { priceNumeric: 950, name: 'Pro' },
-          { priceNumeric: -1, name: 'Business' },
-      ],
-    };
+    const currentPlanDetails = [
+        ...plans.monthly,
+        ...plans.yearly
+    ].find(p => p.name.toLowerCase() === currentPlanName.toLowerCase());
 
-    const currentPlan =
-      plans.monthly.find((p) => p.name === currentPlanName) || plans.yearly.find((p) => p.name === currentPlanName);
-
-    if (currentPlan && plan.priceNumeric > currentPlan.priceNumeric) {
+    if (currentPlanDetails && plan.priceNumeric > currentPlanDetails.priceNumeric) {
       return 'Upgrade';
     }
     return 'Downgrade';
   };
   
   const buttonAction = getButtonAction();
-  
+  const plans = {
+    monthly: [
+      { priceNumeric: 0, name: 'Free'},
+      { priceNumeric: 29, name: 'Creator' },
+      { priceNumeric: 99, name: 'Pro' },
+      { priceNumeric: -1, name: 'Business' },
+    ],
+    yearly: [
+        { priceNumeric: 0, name: 'Free'},
+        { priceNumeric: 278, name: 'Creator' },
+        { priceNumeric: 950, name: 'Pro' },
+        { priceNumeric: -1, name: 'Business' },
+    ],
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.03, y: -5 }}
@@ -88,19 +95,22 @@ export default function PlanCard({ plan, currentPlanName }: any) {
           </ul>
         </CardContent>
         <CardFooter className="p-6 pt-0">
-          <Button
-            asChild={plan.name === 'Business'}
-            size="lg"
-            className="w-full font-bold"
-            variant={plan.isHighlighted ? 'default' : 'outline'}
-            disabled={isCurrent}
-          >
-            {plan.name === 'Business' ? (
+          {plan.name === 'Business' ? (
+             <Button asChild size="lg" className="w-full font-bold" variant={plan.isHighlighted ? 'default' : 'outline'}>
                 <Link href="mailto:sales@voxai.dev">{buttonAction}</Link>
-            ) : (
-                <span>{buttonAction}</span>
-            )}
-          </Button>
+             </Button>
+          ) : (
+            <Button
+                size="lg"
+                className="w-full font-bold"
+                variant={plan.isHighlighted ? 'default' : 'outline'}
+                disabled={isCurrent || isProcessing}
+                onClick={handleButtonClick}
+            >
+                {isProcessing && !isCurrent ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {buttonAction}
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </motion.div>

@@ -35,6 +35,24 @@
         "role": {
           "type": "string",
           "description": "The user's role in the system (e.g., 'user', 'admin')."
+        },
+        "subscriptionId": {
+          "type": "string",
+          "description": "The user's Razorpay subscription ID."
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "The status of the user's subscription (e.g., 'active', 'cancelled', 'expired')."
+        },
+        "currentPeriodStart": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start of the current billing cycle."
+        },
+        "currentPeriodEnd": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End of the current billing cycle."
         }
       },
       "required": [
@@ -45,6 +63,47 @@
         "plan",
         "credits",
         "role"
+      ]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "type": "object",
+      "description": "Represents a subscription transaction record.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user ID associated with this subscription."
+        },
+        "plan": {
+          "type": "string",
+          "description": "The name of the subscribed plan."
+        },
+        "razorpaySubscriptionId": {
+          "type": "string"
+        },
+        "razorpayPaymentId": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "plan",
+        "razorpaySubscriptionId",
+        "status",
+        "createdAt"
       ]
     }
   },
@@ -70,6 +129,16 @@
               "description": "The unique identifier for the user, matching the Firebase Authentication UID."
             }
           ]
+        }
+      },
+      {
+        "path": "/subscriptions/{subscriptionId}",
+        "definition": {
+          "entityName": "Subscription",
+          "schema": {
+            "$ref": "#/backend/entities/Subscription"
+          },
+          "description": "Stores individual subscription transaction records."
         }
       }
     ],

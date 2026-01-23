@@ -38,6 +38,10 @@ export async function signUpWithEmail(
       plan: 'free',
       credits: 600,
       role: 'user',
+      subscriptionId: null,
+      paymentStatus: 'inactive',
+      currentPeriodStart: null,
+      currentPeriodEnd: null,
     };
 
     const userDocRef = doc(firestore, 'users', user.uid);
