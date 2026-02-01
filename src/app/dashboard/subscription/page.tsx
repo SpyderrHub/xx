@@ -30,7 +30,6 @@ const plans = {
         'Community support',
       ],
       isHighlighted: false,
-      razorpayPlanId: null,
     },
     {
       name: 'Creator',
@@ -47,7 +46,6 @@ const plans = {
         'Email support',
       ],
       isHighlighted: true,
-      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CREATOR_MONTHLY,
     },
     {
       name: 'Pro',
@@ -64,7 +62,6 @@ const plans = {
         'Priority support',
       ],
       isHighlighted: false,
-      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_PRO_MONTHLY,
     },
     {
       name: 'Business',
@@ -80,7 +77,6 @@ const plans = {
         'Dedicated support manager',
       ],
       isHighlighted: false,
-      razorpayPlanId: null,
     },
   ],
   yearly: [
@@ -97,7 +93,6 @@ const plans = {
         'Community support',
       ],
       isHighlighted: false,
-      razorpayPlanId: null,
     },
     {
       name: 'Creator',
@@ -114,7 +109,6 @@ const plans = {
         'Email support',
       ],
       isHighlighted: true,
-      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CREATOR_YEARLY,
     },
     {
       name: 'Pro',
@@ -131,7 +125,6 @@ const plans = {
         'Priority support',
       ],
       isHighlighted: false,
-      razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_PRO_YEARLY,
     },
     {
       name: 'Business',
@@ -147,7 +140,6 @@ const plans = {
         'Dedicated support manager',
       ],
       isHighlighted: false,
-      razorpayPlanId: null,
     },
   ],
 };
@@ -194,9 +186,18 @@ export default function SubscriptionPage() {
         }
 
         const { subscriptionId } = await res.json();
+        
+        // TODO: Replace this placeholder with your actual Razorpay Key ID from your dashboard.
+        const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag';
+
+        if (!RAZORPAY_KEY_ID) {
+            toast({ title: 'Configuration Error', description: 'Razorpay Key ID is not configured.', variant: 'destructive'});
+            setIsProcessing(false);
+            return;
+        }
 
         const options = {
-            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+            key: RAZORPAY_KEY_ID,
             subscription_id: subscriptionId,
             name: 'VoxAI',
             description: `${planName} Plan`,

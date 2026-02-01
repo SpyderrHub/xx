@@ -3,11 +3,12 @@ import { headers } from 'next/headers';
 import crypto from 'crypto';
 import { adminDb } from '@/lib/firebase-admin';
 
+// TODO: Replace this placeholder with your actual Razorpay Webhook Secret.
 const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
 export async function POST(req: NextRequest) {
   if (!webhookSecret) {
-    console.error('RAZORPAY_WEBHOOK_SECRET is not set.');
+    console.error('RAZORPAY_WEBHOOK_SECRET is not set in environment variables.');
     return NextResponse.json(
       { error: 'Webhook secret is not configured.' },
       { status: 500 }

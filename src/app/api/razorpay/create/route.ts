@@ -3,10 +3,11 @@ import { razorpay } from '@/lib/razorpay';
 import { adminAuth } from '@/lib/firebase-admin';
 
 // Map internal plan names to Razorpay Plan IDs
+// TODO: Replace these placeholder IDs with your actual Razorpay Plan IDs from your dashboard.
 const RAZORPAY_PLANS: Record<string, string> = {
-  Creator: process.env.RAZORPAY_PLAN_ID_CREATOR || '',
-  Pro: process.env.RAZORPAY_PLAN_ID_PRO || '',
-  Business: process.env.RAZORPAY_PLAN_ID_BUSINESS || '',
+  Creator: process.env.RAZORPAY_PLAN_ID_CREATOR || 'plan_OMg6A8a5tJ4VqP',
+  Pro: process.env.RAZORPAY_PLAN_ID_PRO || 'plan_OMg7s5Z9g6g4sX',
+  Business: process.env.RAZORPAY_PLAN_ID_BUSINESS || 'plan_OMg8p2gY8d6Z4T',
 };
 
 export async function POST(request: NextRequest) {
