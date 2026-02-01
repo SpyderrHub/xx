@@ -12,8 +12,8 @@ const RAZORPAY_PLANS: Record<string, string> = {
 export async function POST(request: NextRequest) {
   if (!razorpay) {
     console.error('Razorpay is not initialized. Check your environment variables.');
-    return new NextResponse(
-      'Payment service is not configured. Please contact support.',
+    return NextResponse.json(
+      { message: 'Payment service is not configured. Please contact support.' },
       { status: 500 }
     );
   }
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const { planName } = await request.json();
 
     if (!planName || !RAZORPAY_PLANS[planName]) {
-      return new NextResponse('Invalid plan specified.', { status: 400 });
+      return NextResponse.json({ message: 'Invalid plan specified.' }, { status: 400 });
     }
 
     const razorpayPlanId = RAZORPAY_PLANS[planName];
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ subscriptionId: subscription.id });
   } catch (error: any) {
     console.error('Error creating Razorpay subscription:', error);
-    return new NextResponse(
-      'An error occurred while creating the subscription.',
+    return NextResponse.json(
+      { message: error.message || 'An error occurred while creating the subscription.' },
       { status: 500 }
     );
   }
