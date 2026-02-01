@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import Script from 'next/script';
+import { motion } from 'framer-motion';
+
 import CurrentPlanCard from '@/components/subscription/current-plan-card';
 import PlanCard from '@/components/subscription/plan-card';
+import UsageStats from '@/components/subscription/usage-stats';
+import PaymentHistoryTable from '@/components/subscription/payment-history-table';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
@@ -25,7 +29,6 @@ const plans = {
         '1 project',
         'Community support',
       ],
-      isCurrent: true,
       isHighlighted: false,
       razorpayPlanId: null,
     },
@@ -43,7 +46,6 @@ const plans = {
         'API Access',
         'Email support',
       ],
-      isCurrent: false,
       isHighlighted: true,
       razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CREATOR_MONTHLY,
     },
@@ -61,7 +63,6 @@ const plans = {
         'Team collaboration (3 seats)',
         'Priority support',
       ],
-      isCurrent: false,
       isHighlighted: false,
       razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_PRO_MONTHLY,
     },
@@ -78,7 +79,6 @@ const plans = {
         'Enterprise SSO & security',
         'Dedicated support manager',
       ],
-      isCurrent: false,
       isHighlighted: false,
       razorpayPlanId: null,
     },
@@ -96,7 +96,6 @@ const plans = {
         '1 project',
         'Community support',
       ],
-      isCurrent: true,
       isHighlighted: false,
       razorpayPlanId: null,
     },
@@ -114,7 +113,6 @@ const plans = {
         'API Access',
         'Email support',
       ],
-      isCurrent: false,
       isHighlighted: true,
       razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_CREATOR_YEARLY,
     },
@@ -132,7 +130,6 @@ const plans = {
         'Team collaboration (3 seats)',
         'Priority support',
       ],
-      isCurrent: false,
       isHighlighted: false,
       razorpayPlanId: process.env.NEXT_PUBLIC_RAZORPAY_PLAN_ID_PRO_YEARLY,
     },
@@ -149,7 +146,6 @@ const plans = {
         'Enterprise SSO & security',
         'Dedicated support manager',
       ],
-      isCurrent: false,
       isHighlighted: false,
       razorpayPlanId: null,
     },
@@ -193,8 +189,8 @@ export default function SubscriptionPage() {
         });
 
         if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.message || 'Failed to create subscription.');
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to create subscription.');
         }
 
         const { subscriptionId } = await res.json();
@@ -235,16 +231,21 @@ export default function SubscriptionPage() {
   return (
     <>
       <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
-      <div className="space-y-12">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-12"
+      >
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Subscription</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Subscription & Billing</h1>
             <p className="mt-2 text-muted-foreground">
-              Manage your plan and billing details.
+              Manage your plan, usage, and payment details.
             </p>
           </div>
-          <div className="flex items-center space-x-3">
-            <Label htmlFor="billing-cycle">Monthly</Label>
+          <div className="flex items-center space-x-3 rounded-full bg-card/50 p-1 border">
+            <Label htmlFor="billing-cycle" className="pl-2">Monthly</Label>
             <Switch
               id="billing-cycle"
               checked={isYearly}
@@ -259,16 +260,22 @@ export default function SubscriptionPage() {
         </div>
 
         {isUserLoading ? (
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
         ) : (
           <CurrentPlanCard userData={userData} />
         )}
+        
+        {isUserLoading ? (
+            <Skeleton className="h-48 w-full rounded-2xl" />
+        ) : (
+            <UsageStats userData={userData} />
+        )}
 
         <div>
-          <h2 className="mb-6 text-2xl font-semibold tracking-tight">
-            Available Plans
+          <h2 className="mb-8 text-2xl font-semibold tracking-tight text-center">
+            Choose the plan that's right for you
           </h2>
-          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4">
             {displayPlans.map((plan) => (
               <PlanCard
                 key={plan.name}
@@ -276,11 +283,14 @@ export default function SubscriptionPage() {
                 currentPlanName={currentPlanName}
                 onPurchase={handlePurchase}
                 isProcessing={isProcessing}
+                isYearly={isYearly}
               />
             ))}
           </div>
         </div>
-      </div>
+
+        <PaymentHistoryTable />
+      </motion.div>
     </>
   );
 }
