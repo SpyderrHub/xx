@@ -53,6 +53,10 @@
           "type": "string",
           "format": "date-time",
           "description": "End of the current billing cycle."
+        },
+        "billingCycle": {
+          "type": "string",
+          "description": "The billing cycle of the subscription ('monthly' or 'yearly')."
         }
       },
       "required": [

@@ -162,7 +162,7 @@ export default function SubscriptionPage() {
 
   const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
 
-  const handlePurchase = async (planName: string) => {
+  const handlePurchase = async (planName: string, billingCycle: 'monthly' | 'yearly') => {
     if (!user) {
         toast({ title: 'Authentication Error', description: 'You must be logged in to subscribe.', variant: 'destructive' });
         return;
@@ -177,7 +177,7 @@ export default function SubscriptionPage() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ planName }),
+            body: JSON.stringify({ planName, billingCycle }),
         });
 
         if (!res.ok) {
@@ -187,7 +187,7 @@ export default function SubscriptionPage() {
 
         const { subscriptionId } = await res.json();
         
-        const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag';
+        const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
         if (!RAZORPAY_KEY_ID) {
             toast({ title: 'Configuration Error', description: 'Razorpay Key ID is not configured.', variant: 'destructive'});
@@ -199,7 +199,7 @@ export default function SubscriptionPage() {
             key: RAZORPAY_KEY_ID,
             subscription_id: subscriptionId,
             name: 'VoxAI',
-            description: `${planName} Plan`,
+            description: `${planName} Plan (${billingCycle})`,
             handler: function (response: any) {
                 toast({ title: 'Payment Successful', description: `Welcome to the ${planName} plan!`});
             },

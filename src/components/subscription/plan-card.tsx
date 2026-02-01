@@ -28,15 +28,23 @@ export default function PlanCard({
   onPurchase,
   isProcessing,
   isYearly, // Pass isYearly state
-}: any) {
+}: {
+  plan: any;
+  currentPlanName: string;
+  onPurchase: (planName: string, billingCycle: 'monthly' | 'yearly') => void;
+  isProcessing: boolean;
+  isYearly: boolean;
+}) {
   const isCurrent = plan.name.toLowerCase() === currentPlanName.toLowerCase();
 
   const getButtonAction = () => {
     if (isCurrent) return 'Current Plan';
     if (plan.name === 'Business') return 'Contact Sales';
 
-    const currentPlanPrice = planPrices[currentPlanName.toLowerCase()][isYearly ? 'yearly' : 'monthly'];
+    const currentPlanPrice = planPrices[currentPlanName.toLowerCase()]?.[isYearly ? 'yearly' : 'monthly'] ?? 0;
     const targetPlanPrice = plan.priceNumeric;
+    
+    if (targetPlanPrice < 0) return 'Contact Sales'; // For custom plans
 
     if (targetPlanPrice > currentPlanPrice) {
       return 'Upgrade';
@@ -48,7 +56,7 @@ export default function PlanCard({
 
   const handleButtonClick = () => {
     if (buttonAction === 'Upgrade') {
-      onPurchase(plan.name);
+      onPurchase(plan.name, isYearly ? 'yearly' : 'monthly');
     }
   };
 

@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
         const { id: subscriptionId, notes, plan_id, current_start, current_end } = payload.subscription.entity;
         const uid = notes.firebase_uid;
         const planName = notes.plan_name;
+        const billingCycle = notes.billing_cycle;
 
         if (!uid) {
           console.error('Webhook Error: Firebase UID not found in subscription notes.');
@@ -67,8 +68,9 @@ export async function POST(req: NextRequest) {
           currentPeriodStart: new Date(current_start * 1000).toISOString(),
           currentPeriodEnd: new Date(current_end * 1000).toISOString(),
           updatedAt: new Date().toISOString(),
+          billingCycle: billingCycle,
         });
-        console.log(`Subscription activated for user ${uid}, plan ${planName}`);
+        console.log(`Subscription activated for user ${uid}, plan ${planName} (${billingCycle})`);
         break;
 
       case 'subscription.cancelled':
