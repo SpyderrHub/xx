@@ -10,6 +10,14 @@ const RAZORPAY_PLANS: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
+  if (!razorpay) {
+    console.error('Razorpay is not initialized. Check your environment variables.');
+    return new NextResponse(
+      'Payment service is not configured. Please contact support.',
+      { status: 500 }
+    );
+  }
+
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
