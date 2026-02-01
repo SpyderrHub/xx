@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -42,13 +43,13 @@ const stats = [
 ];
 
 const voiceLibrary = [
-  { name: 'Aria', language: 'English, US' },
-  { name: 'Javier', language: 'Spanish' },
-  { name: 'Chloé', language: 'French' },
-  { name: 'Kenji', language: 'Japanese' },
-  { name: 'Isabella', language: 'English, UK' },
-  { name: 'Marco', language: 'Italian' },
-  { name: 'Lena', language: 'German' },
+  { name: 'Aria', language: 'English, US', avatarUrl: 'https://picsum.photos/seed/aria/400/250' },
+  { name: 'Javier', language: 'Spanish', avatarUrl: 'https://picsum.photos/seed/javier/400/250' },
+  { name: 'Chloé', language: 'French', avatarUrl: 'https://picsum.photos/seed/chloe/400/250' },
+  { name: 'Kenji', language: 'Japanese', avatarUrl: 'https://picsum.photos/seed/kenji/400/250' },
+  { name: 'Isabella', language: 'English, UK', avatarUrl: 'https://picsum.photos/seed/isabella/400/250' },
+  { name: 'Marco', language: 'Italian', avatarUrl: 'https://picsum.photos/seed/marco/400/250' },
+  { name: 'Lena', language: 'German', avatarUrl: 'https://picsum.photos/seed/lena/400/250' },
 ];
 
 export default function DashboardPage() {
@@ -69,11 +70,11 @@ export default function DashboardPage() {
       {/* Grid for Quick Action and Recent Generations */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <Card className="h-full bg-white/5 backdrop-blur-sm">
+          <Card className="h-full bg-card/80 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Recent Generations</CardTitle>
               <Button asChild variant="ghost" size="sm">
-                <Link href="/my-generations">
+                <Link href="/dashboard/my-generations">
                   View all <ChevronRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
@@ -99,7 +100,7 @@ export default function DashboardPage() {
               asChild
               className="mt-6 w-full justify-between bg-white/90 text-indigo-700 hover:bg-white"
             >
-              <Link href="/text-to-speech">
+              <Link href="/dashboard/text-to-speech">
                 <span>Go to Text to Speech</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -113,7 +114,7 @@ export default function DashboardPage() {
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Explore the Voice Library</h3>
           <Button asChild variant="ghost" size="sm">
-            <Link href="/voice-library">
+            <Link href="/dashboard/voice-library">
               View all <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
@@ -125,13 +126,13 @@ export default function DashboardPage() {
           }}
           className="w-full"
         >
-          <CarouselContent>
+          <CarouselContent className="-ml-4">
             {voiceLibrary.map((voice) => (
               <CarouselItem
                 key={voice.name}
-                className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
+                className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
               >
-                <VoiceCard name={voice.name} language={voice.language} />
+                <VoiceCard name={voice.name} language={voice.language} avatarUrl={voice.avatarUrl} />
               </CarouselItem>
             ))}
           </CarouselContent>
