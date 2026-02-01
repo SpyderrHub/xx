@@ -35,6 +35,14 @@ export async function POST(req: NextRequest) {
     console.warn('RAZORPAY_WEBHOOK_SECRET is not set. Skipping signature verification. DO NOT USE IN PRODUCTION.');
   }
 
+  if (!adminDb) {
+    console.error('Firebase Admin SDK is not initialized. Cannot process webhooks.');
+    return NextResponse.json(
+      { error: 'Database service is not configured.' },
+      { status: 500 }
+    );
+  }
+
   try {
     const event = JSON.parse(rawBody);
     const eventType = event.event;

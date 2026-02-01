@@ -1,10 +1,13 @@
 import admin from 'firebase-admin';
 
+let adminAuth: admin.auth.Auth;
+let adminDb: admin.firestore.Firestore;
+
 if (!admin.apps.length) {
   try {
     const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
-    if (!privateKey) {
-      throw new Error('FIREBASE_ADMIN_PRIVATE_KEY is not set');
+    if (!privateKey || !process.env.FIREBASE_ADMIN_PROJECT_ID || !process.env.FIREBASE_ADMIN_CLIENT_EMAIL) {
+      throw new Error('Firebase Admin SDK environment variables are not set.');
     }
 
     admin.initializeApp({
@@ -14,10 +17,16 @@ if (!admin.apps.length) {
         privateKey: privateKey.replace(/\\n/g, '\n'),
       }),
     });
+    
+    adminAuth = admin.auth();
+    adminDb = admin.firestore();
+
   } catch (error: any) {
-    console.error('Firebase Admin initialization error:', error.message);
+    console.warn('Firebase Admin initialization error:', error.message, 'Admin-dependent features will be disabled.');
   }
+} else {
+  adminAuth = admin.auth();
+  adminDb = admin.firestore();
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
+export { adminAuth, adminDb };

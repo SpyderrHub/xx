@@ -19,6 +19,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (!adminAuth) {
+    console.error('Firebase Admin SDK is not initialized. Check your environment variables.');
+    return NextResponse.json(
+      { message: 'Authentication service is not configured. Please contact support.' },
+      { status: 500 }
+    );
+  }
+
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
