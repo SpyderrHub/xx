@@ -32,6 +32,10 @@ export default function CurrentPlanCard({ userData }: any) {
     }
   }
 
+  const handleUpgradeClick = () => {
+    document.getElementById('pricing-plans')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <Card className="bg-gradient-to-br from-card/80 to-card/50 backdrop-blur-lg">
       <CardHeader className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -59,7 +63,7 @@ export default function CurrentPlanCard({ userData }: any) {
           </p>
       </CardContent>
       <CardFooter className="flex gap-2">
-        <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700">Upgrade Plan</Button>
+        <Button onClick={handleUpgradeClick} className="bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700">Upgrade Plan</Button>
         <Button variant="outline" disabled={plan === 'free'}>Cancel Subscription</Button>
       </CardFooter>
     </Card>

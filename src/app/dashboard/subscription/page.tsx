@@ -187,7 +187,6 @@ export default function SubscriptionPage() {
 
         const { subscriptionId } = await res.json();
         
-        // TODO: Replace this placeholder with your actual Razorpay Key ID from your dashboard.
         const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag';
 
         if (!RAZORPAY_KEY_ID) {
@@ -272,7 +271,7 @@ export default function SubscriptionPage() {
             <UsageStats userData={userData} />
         )}
 
-        <div>
+        <div id="pricing-plans">
           <h2 className="mb-8 text-2xl font-semibold tracking-tight text-center">
             Choose the plan that's right for you
           </h2>
