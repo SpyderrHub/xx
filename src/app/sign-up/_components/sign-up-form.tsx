@@ -93,7 +93,7 @@ export function SignUpForm() {
         values.email,
         values.password
       );
-      router.push('/dashboard/subscription');
+      router.push('/dashboard');
     } catch (error) {
       console.error('Sign up failed:', error);
     } finally {
