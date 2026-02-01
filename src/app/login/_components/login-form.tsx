@@ -77,7 +77,7 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       await signInWithEmail(auth, values.email, values.password);
-      router.push('/dashboard');
+      router.push('/dashboard/subscription');
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
