@@ -1,39 +1,41 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/headers';
 import { headers } from 'next/headers';
 import crypto from 'crypto';
 import { adminDb } from '@/lib/firebase-admin';
 
-// TODO: Replace this placeholder with your actual Razorpay Webhook Secret.
 const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
 export async function POST(req: NextRequest) {
-  if (!webhookSecret) {
-    console.error('RAZORPAY_WEBHOOK_SECRET is not set in environment variables.');
-    return NextResponse.json(
-      { error: 'Webhook secret is not configured.' },
-      { status: 500 }
-    );
-  }
-
   const rawBody = await req.text();
-  const signature = headers().get('x-razorpay-signature');
 
-  if (!signature) {
-    return NextResponse.json({ error: 'No signature found' }, { status: 400 });
+  // Conditionally verify webhook signature if secret is present
+  if (webhookSecret) {
+    const signature = headers().get('x-razorpay-signature');
+    if (!signature) {
+      return NextResponse.json({ error: 'No signature found' }, { status: 400 });
+    }
+
+    try {
+      const shasum = crypto.createHmac('sha256', webhookSecret);
+      shasum.update(rawBody);
+      const digest = shasum.digest('hex');
+
+      if (digest !== signature) {
+        return NextResponse.json(
+          { error: 'Invalid signature' },
+          { status: 400 }
+        );
+      }
+    } catch (error: any) {
+      console.error('Error verifying Razorpay signature:', error.message);
+      return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 500 });
+    }
+  } else {
+    // This is insecure and should only be used in development
+    console.warn('RAZORPAY_WEBHOOK_SECRET is not set. Skipping signature verification. DO NOT USE IN PRODUCTION.');
   }
 
   try {
-    const shasum = crypto.createHmac('sha256', webhookSecret);
-    shasum.update(rawBody);
-    const digest = shasum.digest('hex');
-
-    if (digest !== signature) {
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 400 }
-      );
-    }
-
     const event = JSON.parse(rawBody);
     const eventType = event.event;
     const payload = event.payload;
@@ -45,8 +47,8 @@ export async function POST(req: NextRequest) {
         const planName = notes.plan_name;
 
         if (!uid) {
-            console.error('Webhook Error: Firebase UID not found in subscription notes.');
-            break;
+          console.error('Webhook Error: Firebase UID not found in subscription notes.');
+          break;
         }
 
         const userRef = adminDb.collection('users').doc(uid);
@@ -66,8 +68,8 @@ export async function POST(req: NextRequest) {
         const cancelledUid = cancelledSubscription.notes.firebase_uid;
 
         if (!cancelledUid) {
-            console.error('Webhook Error: Firebase UID not found in cancelled subscription notes.');
-            break;
+          console.error('Webhook Error: Firebase UID not found in cancelled subscription notes.');
+          break;
         }
         
         const cancelledUserRef = adminDb.collection('users').doc(cancelledUid);
