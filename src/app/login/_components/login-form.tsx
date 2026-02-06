@@ -82,8 +82,10 @@ export function LoginForm() {
       
       // Strict Role-based redirect
       if (firestore) {
+        // Fetch fresh user data to determine correct destination
         const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
         const userData = userDoc.data();
+        
         if (userData?.role === 'admin') {
           router.replace('/author');
         } else {

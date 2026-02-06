@@ -295,13 +295,14 @@ export default function DashboardLayout({
       if (!user) {
         router.replace('/login');
       } else if (role === 'admin') {
-        // Redirect admins away from the user dashboard to their studio
+        // Redirect admins away from the user dashboard to their studio immediately
         router.replace('/author');
       }
     }
   }, [user, isUserLoading, role, isRoleLoading, router]);
 
-  if (isUserLoading || isRoleLoading) {
+  // Prevent rendering dashboard content for admins or while loading roles
+  if (isUserLoading || isRoleLoading || (user && role === 'admin')) {
     return (
       <div className="dark flex min-h-screen items-center justify-center bg-background">
         <Skeleton className="h-12 w-12 rounded-full" />
@@ -309,6 +310,7 @@ export default function DashboardLayout({
     );
   }
 
+  // Double check protection: If user is unauthorized, return null
   if (!user || role === 'admin') return null;
 
   const getTitle = () => {
