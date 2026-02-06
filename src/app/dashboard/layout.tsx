@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useEffect } from 'react';
@@ -287,7 +286,6 @@ export default function DashboardLayout({
   const { user, isUserLoading } = useFirebase();
   const { role, isLoading: isRoleLoading } = useUserRole();
   const router = useRouter();
-  const pathname = usePathname();
 
   // Strict Role-based access control for /dashboard
   useEffect(() => {
@@ -301,8 +299,8 @@ export default function DashboardLayout({
     }
   }, [user, isUserLoading, role, isRoleLoading, router]);
 
-  // Prevent rendering dashboard content for admins or while loading roles
-  if (isUserLoading || isRoleLoading || (user && role === 'admin')) {
+  // Show loading screen while verifying identity and role
+  if (isUserLoading || isRoleLoading) {
     return (
       <div className="dark flex min-h-screen items-center justify-center bg-background">
         <Skeleton className="h-12 w-12 rounded-full" />
@@ -310,9 +308,10 @@ export default function DashboardLayout({
     );
   }
 
-  // Double check protection: If user is unauthorized, return null
+  // Double check protection: If user is unauthorized or wrong role, don't render
   if (!user || role === 'admin') return null;
 
+  const pathname = usePathname();
   const getTitle = () => {
     switch (pathname) {
       case '/dashboard':

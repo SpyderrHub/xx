@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
@@ -12,13 +11,15 @@ export function useUserRole() {
     return doc(firestore, 'users', user.uid);
   }, [user, firestore]);
 
-  const { data: userData, isLoading } = useDoc(userDocRef);
+  const { data: userData, isLoading, error } = useDoc(userDocRef);
 
-  // Return null for role if still loading or if no data found yet
-  // This prevents UI flashing or incorrect redirects before role is known
+  // Effectively loading if we have a user but haven't confirmed their role data yet
+  const isEffectivelyLoading = isLoading || (!!user && !userData && !error);
+
   return {
     role: userData?.role || null,
-    isLoading: isLoading,
-    userData
+    isLoading: isEffectivelyLoading,
+    userData,
+    error
   };
 }

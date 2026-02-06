@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -122,6 +121,7 @@ export default function AuthorLayout({
   const router = useRouter();
 
   useEffect(() => {
+    // Only proceed with redirect logic when ALL loading states are finished
     if (!isUserLoading && !isRoleLoading) {
       if (!user) {
         router.replace('/login');
@@ -131,6 +131,7 @@ export default function AuthorLayout({
     }
   }, [user, isUserLoading, role, isRoleLoading, router]);
 
+  // Show loading screen while verifying identity and role
   if (isUserLoading || isRoleLoading) {
     return (
       <div className="dark flex min-h-screen items-center justify-center bg-background">
@@ -139,6 +140,7 @@ export default function AuthorLayout({
     );
   }
 
+  // Prevent rendering if the user shouldn't be here (let the useEffect handle the redirect)
   if (!user || role !== 'admin') return null;
 
   return (
