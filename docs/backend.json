@@ -77,6 +77,8 @@
       "properties": {
         "userId": { "type": "string" },
         "name": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "description": { "type": "string" },
         "language": { "type": "string" },
         "gender": { "type": "string" },
         "accent": { "type": "string" },
@@ -85,7 +87,7 @@
         "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "name", "language", "gender", "status", "createdAt"]
+      "required": ["userId", "name", "language", "gender", "status", "createdAt", "description"]
     }
   },
   "auth": {
