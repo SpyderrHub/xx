@@ -80,17 +80,17 @@ export function LoginForm() {
     try {
       const userCredential = await signInWithEmail(auth, values.email, values.password);
       
-      // Role-based redirect
+      // Strict Role-based redirect
       if (firestore) {
         const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
         const userData = userDoc.data();
         if (userData?.role === 'admin') {
-          router.push('/author');
+          router.replace('/author');
         } else {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }
       } else {
-        router.push('/dashboard');
+        router.replace('/dashboard');
       }
     } catch (error) {
       console.error('Login failed:', error);

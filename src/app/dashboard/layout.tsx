@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -40,6 +41,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSidebar } from '@/components/ui/sidebar';
+import { useUserRole } from '@/hooks/use-user-role';
 
 const DashboardHeader = ({ title }: { title: string }) => {
   const { isMobile, toggleSidebar } = useSidebar();
@@ -283,10 +285,23 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { user, isUserLoading } = useFirebase();
+  const { role, isLoading: isRoleLoading } = useUserRole();
   const router = useRouter();
   const pathname = usePathname();
 
-  if (isUserLoading) {
+  // Strict Role-based access control for /dashboard
+  useEffect(() => {
+    if (!isUserLoading && !isRoleLoading) {
+      if (!user) {
+        router.replace('/login');
+      } else if (role === 'admin') {
+        // Redirect admins away from the user dashboard to their studio
+        router.replace('/author');
+      }
+    }
+  }, [user, isUserLoading, role, isRoleLoading, router]);
+
+  if (isUserLoading || isRoleLoading) {
     return (
       <div className="dark flex min-h-screen items-center justify-center bg-background">
         <Skeleton className="h-12 w-12 rounded-full" />
@@ -294,12 +309,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (!user) {
-    if (typeof window !== 'undefined') {
-      router.replace('/login');
-    }
-    return null;
-  }
+  if (!user || role === 'admin') return null;
 
   const getTitle = () => {
     switch (pathname) {
