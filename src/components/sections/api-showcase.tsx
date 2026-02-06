@@ -4,14 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const ApiShowcaseSection = () => {
   const codeString = `
-fetch('https://api.voxai.dev/v1/generate', {
+fetch('https://api.bhoomi.ai/v1/generate', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    text: "Hello from VoxAI!",
+    text: "Hello from Bhoomi AI!",
     voice: "alex-male-en-us",
   })
 })
@@ -31,7 +31,7 @@ fetch('https://api.voxai.dev/v1/generate', {
             Developer-Friendly API
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Integrate VoxAI's powerful voice generation into your applications
+            Integrate Bhoomi AI's powerful voice generation into your applications
             with just a few lines of code.
           </p>
         </div>

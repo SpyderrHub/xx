@@ -58,7 +58,7 @@ const InteractiveDemo = () => {
         <Textarea
           placeholder="Type or paste your text here to generate audio..."
           className="min-h-[120px] rounded-xl text-base"
-          defaultValue="Hello, welcome to VoxAI. Experience the future of voice generation with our cutting-edge technology."
+          defaultValue="Hello, welcome to Bhoomi AI. Experience the future of voice generation with our cutting-edge technology."
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select defaultValue="en-us">

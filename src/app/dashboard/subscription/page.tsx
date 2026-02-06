@@ -198,7 +198,7 @@ export default function SubscriptionPage() {
         const options = {
             key: RAZORPAY_KEY_ID,
             subscription_id: subscriptionId,
-            name: 'VoxAI',
+            name: 'Bhoomi AI',
             description: `${planName} Plan (${billingCycle})`,
             handler: function (response: any) {
                 toast({ title: 'Payment Successful', description: `Welcome to the ${planName} plan!`});

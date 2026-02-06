@@ -13,7 +13,7 @@ const Footer = () => {
               <Logo className="h-7" />
             </Link>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} VoxAI. All rights reserved.
+              © {new Date().getFullYear()} Bhoomi AI. All rights reserved.
             </p>
           </div>
           <div className="flex flex-col items-center gap-8 md:items-start md:gap-12">

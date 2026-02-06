@@ -19,7 +19,7 @@ interface GeneratedAudio {
 
 export default function TextToSpeechPage() {
   const [text, setText] = useState(
-    'Welcome to VoxAI, where your words come to life with the most advanced and expressive AI voices.'
+    'Welcome to Bhoomi AI, where your words come to life with the most advanced and expressive AI voices.'
   );
   const [selectedVoice, setSelectedVoice] = useState('aria-female-en');
   const [stability, setStability] = useState(75);

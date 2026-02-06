@@ -124,7 +124,7 @@ export function LoginForm() {
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-gray-300">
-            Log in to continue to VoxAI.
+            Log in to continue to Bhoomi AI.
           </p>
         </div>
 
