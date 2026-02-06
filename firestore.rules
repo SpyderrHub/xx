@@ -1,98 +1,28 @@
-/**
- * # Firestore Security Rules
- *
- * ## Core Philosophy
- * This ruleset enforces a strict user-ownership model. The fundamental principle is that users have complete control over their own data, and absolutely no access to the data of other users. This is a highly secure and private model suitable for applications where user data is siloed.
- *
- * ## Data Structure
- * The data is organized into a single top-level collection: `/users`. Each document within this collection is identified by the user's unique Firebase Authentication UID. All information pertaining to a single user is stored within this document.
- *
- * ## Key Security Decisions
- * - **No User Listing:** To protect user privacy and prevent data scraping, querying the entire `/users` collection is explicitly disallowed. Clients can only fetch specific user documents they are authorized to access (i.e., their own).
- * - **Path-Based Security:** Authorization is based on the document path (`/users/{userId}`). This is highly performant as it avoids the need for extra database reads (`get` or `exists` calls) to check for ownership.
- * - **Immutable Ownership:** Critical relational fields, such as the `uid` stored within a user document, are immutable after creation. This ensures the link between the document and its owner cannot be broken or reassigned.
- * - **Privilege Escalation Prevention:** Users are explicitly prevented from changing their `role` to 'admin', ensuring that authorization roles cannot be self-assigned.
- *
- * ## Denormalization for Authorization
- * The current structure is simple and does not require denormalization. The user's UID is used as the document ID, which is the most efficient way to link data to a user and enforce ownership rules. This pattern inherently avoids costly lookups.
- *
- * ## Structural Segregation
- * This security model does not currently feature public or shared data, so structural segregation into different collections is not necessary. All data is considered private to the user who owns it.
- */
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // ----------------------------------------------------------------------
-    // Helper Functions
-    // ----------------------------------------------------------------------
-
-    /**
-     * Checks if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
-
-    /**
-     * Checks if the requesting user's UID matches the provided userId.
-     * This is the primary function for establishing document ownership.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-
-    /**
-     * Checks for ownership on an existing document. Used for update and delete
-     * operations to ensure the target document exists before the operation.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    /**
-     * Validates required fields for user document creation that are critical
-     * for authorization and relational integrity.
-     */
-    function isValidUserCreate(userId) {
-      // Enforce that the document's internal `uid` field matches the
-      // document ID, linking the data to the user path.
-      return request.resource.data.uid == userId;
-    }
-
-    /**
-     * Validates user document updates. Enforces immutability of critical
-     * fields and prevents privilege escalation.
-     */
-    function isAllowedUserUpdate() {
-      // The user's unique ID and creation timestamp must never change.
-      let isIdImmutable = request.resource.data.uid == resource.data.uid;
-      let isCreatedAtImmutable = request.resource.data.createdAt == resource.data.createdAt;
-
-      // Prevent a user from elevating their own role to 'admin'.
-      let isNotElevatingToAdmin = request.resource.data.role != 'admin' || resource.data.role == 'admin';
-
-      return isIdImmutable && isCreatedAtImmutable && isNotElevatingToAdmin;
-    }
-
-    // ----------------------------------------------------------------------
-    // Collection Rules
-    // ----------------------------------------------------------------------
-
-    /**
-     * @description Manages user profile documents. A user can create, read, update,
-     *   and delete their own document, but cannot access anyone else's.
-     * @path /users/{userId}
-     * @allow (create) A new user signing up: `auth.uid` matches `{userId}`.
-     * @deny (list) An authenticated user trying to list all users in the app.
-     * @principle Restricts access to a user's own data tree.
-     */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && isValidUserCreate(userId);
-      allow update: if isExistingOwner(userId) && isAllowedUserUpdate();
-      allow delete: if isExistingOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && (request.resource.data.role == resource.data.role || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /voices/{voiceId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAdmin() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin() && resource.data.userId == request.auth.uid;
     }
   }
 }

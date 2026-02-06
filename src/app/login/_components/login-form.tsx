@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -24,6 +25,7 @@ import {
 import Logo from '@/components/logo';
 import { useFirebase } from '@/firebase';
 import { signInWithEmail } from '@/lib/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -62,7 +64,7 @@ export function LoginForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { auth } = useFirebase();
+  const { auth, firestore } = useFirebase();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,8 +78,20 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signInWithEmail(auth, values.email, values.password);
-      router.push('/dashboard');
+      const userCredential = await signInWithEmail(auth, values.email, values.password);
+      
+      // Role-based redirect
+      if (firestore) {
+        const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
+        const userData = userDoc.data();
+        if (userData?.role === 'admin') {
+          router.push('/author');
+        } else {
+          router.push('/dashboard');
+        }
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error) {
       console.error('Login failed:', error);
     } finally {

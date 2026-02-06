@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -34,7 +35,7 @@
         },
         "role": {
           "type": "string",
-          "description": "The user's role in the system (e.g., 'user', 'admin')."
+          "description": "The user's role in the system (e.g., 'user', 'admin'). 'admin' refers to Voice Authors."
         },
         "subscriptionId": {
           "type": "string",
@@ -69,46 +70,22 @@
         "role"
       ]
     },
-    "Subscription": {
-      "title": "Subscription",
+    "Voice": {
+      "title": "Voice",
       "type": "object",
-      "description": "Represents a subscription transaction record.",
+      "description": "Represents a voice sample uploaded by an author.",
       "properties": {
-        "uid": {
-          "type": "string",
-          "description": "The user ID associated with this subscription."
-        },
-        "plan": {
-          "type": "string",
-          "description": "The name of the subscribed plan."
-        },
-        "razorpaySubscriptionId": {
-          "type": "string"
-        },
-        "razorpayPaymentId": {
-          "type": "string"
-        },
-        "amount": {
-          "type": "number"
-        },
-        "currency": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "language": { "type": "string" },
+        "gender": { "type": "string" },
+        "accent": { "type": "string" },
+        "style": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "uid",
-        "plan",
-        "razorpaySubscriptionId",
-        "status",
-        "createdAt"
-      ]
+      "required": ["userId", "name", "language", "gender", "status", "createdAt"]
     }
   },
   "auth": {
@@ -125,27 +102,19 @@
           "entityName": "User",
           "schema": {
             "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profile information. The 'userId' parameter corresponds to the Firebase Authentication UID, ensuring that only the authenticated user can access their own data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user, matching the Firebase Authentication UID."
-            }
-          ]
+          }
         }
       },
       {
-        "path": "/subscriptions/{subscriptionId}",
+        "path": "/voices/{voiceId}",
         "definition": {
-          "entityName": "Subscription",
+          "entityName": "Voice",
           "schema": {
-            "$ref": "#/backend/entities/Subscription"
+            "$ref": "#/backend/entities/Voice"
           },
-          "description": "Stores individual subscription transaction records."
+          "description": "Stores voice samples submitted by authors for review."
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed to ensure secure and scalable user data management for the VoxAI application. It follows the principle of Authorization Independence by avoiding `get()` calls in security rules. All user data is stored under the `/users/{userId}` path, making ownership explicit and simplifying security rules.\n\nThe chosen structure supports the required QAPs (Rules are not Filters) because access control is enforced at the path level. Each user's data is isolated, preventing unauthorized access to other users' information. The security rules only check if `request.auth.uid` matches the `userId` in the path, which is efficient and secure.\n\nBy storing user-specific data directly under `/users/{userId}`, we avoid the need for complex queries or filtering on the client-side, which could potentially expose data to unauthorized users. The denormalization of user roles is not required in this basic setup but should be considered if access to other collections is required (e.g., content moderation)."
+    ]
   }
 }
