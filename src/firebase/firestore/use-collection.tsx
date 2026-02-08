@@ -55,8 +55,8 @@ export function useCollection<T = any>(
   const [isLoading, setIsLoading] = useState<boolean>(!!memoizedTargetRefOrQuery);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
   
-  // Use a ref to track mounting status and prevents state updates on unmounted components
   const isMounted = useRef(true);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     isMounted.current = true;
@@ -70,6 +70,12 @@ export function useCollection<T = any>(
 
     setIsLoading(true);
     setError(null);
+
+    // Clean up any existing listener before creating a new one
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
 
     const unsubscribe = onSnapshot(
       memoizedTargetRefOrQuery,
@@ -93,7 +99,6 @@ export function useCollection<T = any>(
           if (memoizedTargetRefOrQuery.type === 'collection') {
             path = (memoizedTargetRefOrQuery as CollectionReference).path;
           } else {
-            // Attempt to extract path from internal query object for debugging
             path = (memoizedTargetRefOrQuery as unknown as InternalQuery)._query?.path?.canonicalString() || 'query';
           }
         } catch (e) {
@@ -112,14 +117,19 @@ export function useCollection<T = any>(
       }
     );
 
+    unsubscribeRef.current = unsubscribe;
+
     return () => {
       isMounted.current = false;
-      unsubscribe();
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
     };
   }, [memoizedTargetRefOrQuery]);
 
   if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
-    throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
+    throw new Error('Target was not properly memoized using useMemoFirebase');
   }
   return { data, isLoading, error };
 }
