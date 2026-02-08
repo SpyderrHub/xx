@@ -1,12 +1,23 @@
-
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Mic2, User, Globe, UserCircle } from 'lucide-react';
+import { Play, Pause, Mic2, User, Globe, UserCircle, Trash2, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useVoiceManagement } from '@/hooks/use-voice-management';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface AuthorVoiceCardProps {
   voice: any;
@@ -15,6 +26,7 @@ interface AuthorVoiceCardProps {
 export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { deleteVoice, isDeleting } = useVoiceManagement();
 
   useEffect(() => {
     return () => {
@@ -39,13 +51,50 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
     setIsPlaying(!isPlaying);
   };
 
+  const handleDelete = async () => {
+    await deleteVoice(voice.id, voice.avatarUrl, voice.audioUrl);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="h-full"
     >
-      <Card className="h-full bg-card/40 backdrop-blur-md border-white/5 hover:border-primary/20 transition-all overflow-hidden group">
+      <Card className="h-full bg-card/40 backdrop-blur-md border-white/5 hover:border-primary/20 transition-all overflow-hidden group relative">
+        {/* Delete Trigger positioned absolutely */}
+        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive" 
+                size="icon" 
+                className="h-7 w-7 rounded-full bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white transition-all border border-red-500/30"
+                disabled={isDeleting}
+              >
+                {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-card border-white/10">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-white">Delete Voice?</AlertDialogTitle>
+                <AlertDialogDescription className="text-muted-foreground">
+                  This action will permanently delete this voice and all related data. This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white hover:bg-red-700 font-bold"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+
         <CardContent className="p-3 sm:p-4 flex flex-col h-full">
           {/* Header: Avatar, Name, Style */}
           <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
@@ -57,7 +106,7 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-xs sm:text-base truncate">{voice.voiceName}</h3>
+              <h3 className="font-bold text-xs sm:text-base truncate pr-6">{voice.voiceName}</h3>
               <p className="text-[10px] text-primary flex items-center gap-1">
                 <Mic2 className="h-2.5 w-2.5" /> {voice.style}
               </p>
