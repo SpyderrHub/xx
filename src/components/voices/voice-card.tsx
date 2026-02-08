@@ -121,7 +121,7 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
               {isPlaying ? <PlayingWaveform /> : <Waveform />}
           </div>
           
-          <p className="text-[10px] sm:text-xs text-muted-foreground flex-1 mb-3 sm:mb-4 line-clamp-3 min-h-[3.5rem] leading-relaxed">
+          <p className="text-[10px] sm:text-xs text-muted-foreground flex-1 mb-3 sm:mb-4 line-clamp-3 overflow-hidden min-h-[3.2rem] leading-relaxed">
             {voice.description || "An expressive AI voice profile built for storytelling, narration, and high-fidelity vocal output."}
           </p>
           
