@@ -5,24 +5,40 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
+    
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    
     function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isSignedIn() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) && (request.resource.data.role == resource.data.role || isAdmin());
+      // Only admins can change roles, but owners can update their own profile data
+      allow update: if isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || 
+        isAdmin()
+      );
       allow delete: if isAdmin();
     }
 
     match /voices/{voiceId} {
-      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Authors only need to see their own voices. 
+      // This rule allows queries filtered by userId == auth.uid to pass without requiring a get() call for isAdmin.
+      allow read: if isSignedIn() && (
+        (resource != null && resource.data.userId == request.auth.uid) || 
+        isAdmin()
+      );
+      
+      // Only authors (admins) can create/update/delete voices, and they must be the owner.
       allow create: if isAdmin() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAdmin() && resource.data.userId == request.auth.uid;
+      allow update: if isAdmin() && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin() && resource.data.userId == request.auth.uid;
     }
   }
 }

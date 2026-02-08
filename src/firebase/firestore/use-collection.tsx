@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -81,18 +82,22 @@ export function useCollection<T = any>(
       memoizedTargetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
         const results: ResultItemType[] = [];
-        for (const doc of snapshot.docs) {
-          results.push({ ...(doc.data() as T), id: doc.id });
+        for (const docSnapshot of snapshot.docs) {
+          results.push({ ...(docSnapshot.data() as T), id: docSnapshot.id });
         }
         setData(results);
         setError(null);
         setIsLoading(false);
       },
       (serverError: FirestoreError) => {
-        const path: string =
-          memoizedTargetRefOrQuery.type === 'collection'
+        let path = 'unknown';
+        try {
+          path = memoizedTargetRefOrQuery.type === 'collection'
             ? (memoizedTargetRefOrQuery as CollectionReference).path
             : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
+        } catch (e) {
+          path = 'query';
+        }
 
         const contextualError = new FirestorePermissionError({
           operation: 'list',
