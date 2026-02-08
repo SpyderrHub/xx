@@ -1,14 +1,11 @@
-
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Clock, CheckCircle2, XCircle, Mic2, User } from 'lucide-react';
+import { Play, Pause, Mic2, User, Globe, UserCircle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface AuthorVoiceCardProps {
   voice: any;
@@ -41,29 +38,6 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
     setIsPlaying(!isPlaying);
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return (
-          <Badge className="bg-green-500/10 text-green-500 border-green-500/20 gap-1">
-            <CheckCircle2 className="h-3 w-3" /> Approved
-          </Badge>
-        );
-      case 'rejected':
-        return (
-          <Badge variant="destructive" className="gap-1">
-            <XCircle className="h-3 w-3" /> Rejected
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 gap-1">
-            <Clock className="h-3 w-3" /> Pending
-          </Badge>
-        );
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -72,44 +46,56 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
     >
       <Card className="h-full bg-card/40 backdrop-blur-md border-white/5 hover:border-primary/20 transition-all overflow-hidden group">
         <CardContent className="p-4 flex flex-col h-full">
+          {/* Header: Avatar, Name, Style */}
           <div className="flex items-center gap-4 mb-4">
-            <div className="relative h-12 w-12 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-white/10">
+            <div className="relative h-14 w-14 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-white/10 shrink-0">
               {voice.avatarUrl ? (
                 <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
               ) : (
-                <User className="h-6 w-6 text-muted-foreground/50" />
+                <User className="h-7 w-7 text-muted-foreground/50" />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-sm truncate">{voice.voiceName}</h3>
-              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <h3 className="font-bold text-base truncate">{voice.voiceName}</h3>
+              <p className="text-xs text-primary flex items-center gap-1">
                 <Mic2 className="h-3 w-3" /> {voice.style}
               </p>
             </div>
           </div>
 
-          <div className="space-y-2 mb-4 flex-1">
-            <div className="flex justify-between text-[10px]">
-              <span className="text-muted-foreground">Language</span>
-              <span className="font-medium">{voice.language}</span>
-            </div>
-            <div className="flex justify-between text-[10px]">
-              <span className="text-muted-foreground">Submitted</span>
-              <span className="font-medium">
-                {formatDistanceToNow(new Date(voice.createdAt), { addSuffix: true })}
+          {/* Details: Language, Gender */}
+          <div className="grid grid-cols-2 gap-2 mb-4 bg-black/20 p-3 rounded-xl border border-white/5">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
+                <Globe className="h-2.5 w-2.5" /> Language
               </span>
+              <span className="text-xs font-medium truncate">{voice.language}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground uppercase flex items-center gap-1">
+                <UserCircle className="h-2.5 w-2.5" /> Gender
+              </span>
+              <span className="text-xs font-medium truncate">{voice.gender}</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2 mt-auto">
-            {getStatusBadge(voice.status)}
+          {/* Preview / Footer */}
+          <div className="flex items-center justify-between mt-auto pt-2">
+            <div className="flex flex-col">
+              <p className="text-[10px] text-muted-foreground italic">
+                {voice.ageRange || 'Voice Profile'}
+              </p>
+              {voice.accent && (
+                 <p className="text-[9px] text-muted-foreground/60">{voice.accent}</p>
+              )}
+            </div>
             <Button
               variant="secondary"
               size="sm"
-              className="h-8 w-8 rounded-full p-0 bg-primary/10 text-primary hover:bg-primary/20"
+              className="h-10 w-10 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-transform active:scale-95"
               onClick={togglePlay}
             >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
             </Button>
           </div>
         </CardContent>
