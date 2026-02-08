@@ -1,18 +1,21 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow public read for avatars so they can be displayed in the library and profiles.
-    // Allow write access only to the owner of the folder (matched by userId).
-    match /avatars/{userId}/{allPaths=**} {
+    // Explicitly match the avatar path structure: avatars/{uid}/{voiceId}/{fileName}
+    match /avatars/{userId}/{voiceId}/{fileName} {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Allow public read for voice samples so they can be played in the library.
-    // Allow write access only to the owner of the folder.
-    match /voices/{userId}/{allPaths=**} {
+    // Explicitly match the voice sample path structure: voices/{uid}/{voiceId}/{fileName}
+    match /voices/{userId}/{voiceId}/{fileName} {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default deny for everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }
