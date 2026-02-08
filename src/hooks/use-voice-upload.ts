@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useFirebase } from '@/firebase';
-import { ref, uploadBytesResumable, getDownloadURL, UploadTask } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
 
@@ -24,28 +23,35 @@ export function useVoiceUpload() {
 
   const uploadFile = (file: File, path: string, weight: number, baseProgress: number): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * weight;
-          setProgress(Math.round(baseProgress + fileProgress));
-        },
-        (error) => {
-          console.error('Upload task error:', error);
-          reject(error);
-        },
-        async () => {
-          try {
-            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve(downloadUrl);
-          } catch (error) {
-            reject(error);
-          }
+      try {
+        if (!storage) {
+          throw new Error('Storage service is not available');
         }
-      );
+        const storageRef = ref(storage, path);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * weight;
+            setProgress(Math.round(baseProgress + fileProgress));
+          },
+          (error) => {
+            console.error('Storage upload error:', error);
+            reject(error);
+          },
+          async () => {
+            try {
+              const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadUrl);
+            } catch (error) {
+              reject(error);
+            }
+          }
+        );
+      } catch (err) {
+        reject(err);
+      }
     });
   };
 
@@ -55,7 +61,12 @@ export function useVoiceUpload() {
     formData: VoiceUploadData
   ) => {
     if (!user) {
-      toast({ title: "Authentication required", variant: "destructive" });
+      toast({ title: "Authentication required", description: "You must be logged in to upload.", variant: "destructive" });
+      return false;
+    }
+
+    if (!storage || !firestore) {
+      toast({ title: "Service Unavailable", description: "Firebase services are not ready.", variant: "destructive" });
       return false;
     }
 
@@ -67,30 +78,30 @@ export function useVoiceUpload() {
       const voiceId = crypto.randomUUID();
       let avatarUrl = "";
 
-      // 2. Upload Avatar (Weight: 30%, Base: 0%)
+      // 2. Upload Avatar (Weight: 20%, Base: 0%)
       if (avatarFile) {
         avatarUrl = await uploadFile(
           avatarFile, 
           `avatars/${user.uid}/${voiceId}/avatar.png`, 
-          30, 
+          20, 
           0
         );
       } else {
-        setProgress(30);
+        setProgress(20);
       }
 
-      // 3. Upload Audio (Weight: 60%, Base: 30%)
+      // 3. Upload Audio (Weight: 70%, Base: 20%)
       const audioUrl = await uploadFile(
         audioFile, 
         `voices/${user.uid}/${voiceId}/voice_sample.wav`, 
-        60, 
-        30
+        70, 
+        20
       );
 
       // 4. Calculate Audio Duration
       const audioDuration = await getAudioDuration(audioFile);
 
-      // 5. Save metadata to Firestore (90% to 100%)
+      // 5. Save metadata to Firestore (Base: 90%)
       setProgress(95);
       const voiceDocRef = doc(firestore, 'voices', voiceId);
       const voiceData = {
@@ -123,11 +134,11 @@ export function useVoiceUpload() {
       });
       return false;
     } finally {
-      // Wait a bit so the user sees 100% before closing
+      // Small delay for UX so user sees 100%
       setTimeout(() => {
         setIsUploading(false);
         setProgress(0);
-      }, 500);
+      }, 800);
     }
   };
 
@@ -136,14 +147,20 @@ export function useVoiceUpload() {
 
 async function getAudioDuration(file: File): Promise<number> {
   return new Promise((resolve) => {
-    const audio = new Audio();
-    audio.src = URL.createObjectURL(file);
-    audio.onloadedmetadata = () => {
-      resolve(audio.duration);
-      URL.revokeObjectURL(audio.src);
-    };
-    audio.onerror = () => {
+    try {
+      const audio = new Audio();
+      const objectUrl = URL.createObjectURL(file);
+      audio.src = objectUrl;
+      audio.onloadedmetadata = () => {
+        resolve(audio.duration);
+        URL.revokeObjectURL(objectUrl);
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(0);
+      };
+    } catch (e) {
       resolve(0);
-    };
+    }
   });
 }
