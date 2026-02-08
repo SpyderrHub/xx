@@ -1,17 +1,23 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Helper for auth
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     // Authors have full access to their own storage directories.
-    // This covers /avatars/{uid}/... and /voices/{uid}/...
+    // Paths follow: avatars/{uid}/{voiceId}/{fileName}
+    // and voices/{uid}/{voiceId}/{fileName}
     
     match /avatars/{userId}/{allPaths=**} {
       allow read: if true; // Avatars are publicly readable for the library
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
     
     match /voices/{userId}/{allPaths=**} {
       allow read: if true; // Voice samples are publicly readable for the library
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
 
     // Default deny for everything else

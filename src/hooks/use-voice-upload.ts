@@ -79,10 +79,11 @@ export function useVoiceUpload() {
       let avatarUrl = "";
 
       // 2. Upload Avatar (Weight: 20%, Base: 0%)
+      // Requested Path Format: avatars/{uid}/{voiceId}/{fileName}.PNG
       if (avatarFile) {
         avatarUrl = await uploadFile(
           avatarFile, 
-          `avatars/${user.uid}/${voiceId}/avatar.png`, 
+          `avatars/${user.uid}/${voiceId}/avatar.PNG`, 
           20, 
           0
         );
@@ -91,6 +92,7 @@ export function useVoiceUpload() {
       }
 
       // 3. Upload Audio (Weight: 70%, Base: 20%)
+      // Path: voices/{userId}/{voiceId}/voice_sample.wav
       const audioUrl = await uploadFile(
         audioFile, 
         `voices/${user.uid}/${voiceId}/voice_sample.wav`, 
