@@ -3,10 +3,9 @@
 
 import { useState } from 'react';
 import { useFirebase } from '@/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL, UploadTask } from 'firebase/storage';
+import { doc, setDoc } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
-import { v4 as uuidv4 } from 'uuid';
 
 export interface VoiceUploadData {
   voiceName: string;
@@ -23,6 +22,33 @@ export function useVoiceUpload() {
   const [progress, setProgress] = useState(0);
   const { storage, firestore, user } = useFirebase();
 
+  const uploadFile = (file: File, path: string, weight: number, baseProgress: number): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * weight;
+          setProgress(Math.round(baseProgress + fileProgress));
+        },
+        (error) => {
+          console.error('Upload task error:', error);
+          reject(error);
+        },
+        async () => {
+          try {
+            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(downloadUrl);
+          } catch (error) {
+            reject(error);
+          }
+        }
+      );
+    });
+  };
+
   const uploadVoice = async (
     avatarFile: File | null,
     audioFile: File,
@@ -30,34 +56,42 @@ export function useVoiceUpload() {
   ) => {
     if (!user) {
       toast({ title: "Authentication required", variant: "destructive" });
-      return;
+      return false;
     }
 
     setIsUploading(true);
-    setProgress(10);
+    setProgress(0);
 
     try {
-      const voiceId = uuidv4();
+      // 1. Generate unique voice ID
+      const voiceId = crypto.randomUUID();
       let avatarUrl = "";
-      
-      // 1. Upload Avatar if exists
+
+      // 2. Upload Avatar (Weight: 30%, Base: 0%)
       if (avatarFile) {
-        const avatarRef = ref(storage, `avatars/${user.uid}/${voiceId}/avatar.png`);
-        const avatarSnap = await uploadBytes(avatarRef, avatarFile);
-        avatarUrl = await getDownloadURL(avatarSnap.ref);
+        avatarUrl = await uploadFile(
+          avatarFile, 
+          `avatars/${user.uid}/${voiceId}/avatar.png`, 
+          30, 
+          0
+        );
+      } else {
+        setProgress(30);
       }
-      setProgress(40);
 
-      // 2. Upload Audio
-      const audioRef = ref(storage, `voices/${user.uid}/${voiceId}/voice_sample.wav`);
-      const audioSnap = await uploadBytes(audioRef, audioFile);
-      const audioUrl = await getDownloadURL(audioSnap.ref);
-      setProgress(70);
+      // 3. Upload Audio (Weight: 60%, Base: 30%)
+      const audioUrl = await uploadFile(
+        audioFile, 
+        `voices/${user.uid}/${voiceId}/voice_sample.wav`, 
+        60, 
+        30
+      );
 
-      // 3. Get Audio Duration
+      // 4. Calculate Audio Duration
       const audioDuration = await getAudioDuration(audioFile);
 
-      // 4. Save to Firestore
+      // 5. Save metadata to Firestore (90% to 100%)
+      setProgress(95);
       const voiceDocRef = doc(firestore, 'voices', voiceId);
       const voiceData = {
         voiceId,
@@ -75,21 +109,25 @@ export function useVoiceUpload() {
       setProgress(100);
 
       toast({ 
-        title: "Success", 
-        description: "Voice profile submitted for review!",
+        title: "Upload Successful", 
+        description: "Your voice profile has been submitted for review.",
       });
       
-      return voiceId;
+      return true;
     } catch (error: any) {
-      console.error("Upload failed:", error);
+      console.error("Upload process failed:", error);
       toast({ 
-        title: "Upload failed", 
-        description: error.message || "An unexpected error occurred", 
+        title: "Upload Failed", 
+        description: error.message || "An unexpected error occurred during upload.", 
         variant: "destructive" 
       });
+      return false;
     } finally {
-      setIsUploading(false);
-      setProgress(0);
+      // Wait a bit so the user sees 100% before closing
+      setTimeout(() => {
+        setIsUploading(false);
+        setProgress(0);
+      }, 500);
     }
   };
 
@@ -102,6 +140,10 @@ async function getAudioDuration(file: File): Promise<number> {
     audio.src = URL.createObjectURL(file);
     audio.onloadedmetadata = () => {
       resolve(audio.duration);
+      URL.revokeObjectURL(audio.src);
+    };
+    audio.onerror = () => {
+      resolve(0);
     };
   });
 }
