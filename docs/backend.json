@@ -76,18 +76,21 @@
       "description": "Represents a voice sample uploaded by an author.",
       "properties": {
         "userId": { "type": "string" },
-        "name": { "type": "string" },
+        "voiceName": { "type": "string" },
         "avatarUrl": { "type": "string" },
         "description": { "type": "string" },
         "language": { "type": "string" },
         "gender": { "type": "string" },
         "accent": { "type": "string" },
         "style": { "type": "string" },
+        "ageRange": { "type": "string" },
         "audioUrl": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "audioDuration": { "type": "number" },
+        "audioFormat": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending_review", "approved", "rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "name", "language", "gender", "status", "createdAt", "description"]
+      "required": ["userId", "voiceName", "language", "gender", "status", "createdAt", "description"]
     }
   },
   "auth": {
