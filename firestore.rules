@@ -14,19 +14,16 @@ service cloud.firestore {
     }
 
     // Voices collection:
-    // Authors have full control (CRUD) over their own voice profiles.
-    // Everyone signed in can read APPROVED voices.
+    // Everyone signed in can read any voice profile.
+    // Only the owner can create, update, or delete their own voice profiles.
     match /voices/{voiceId} {
-      // Allow reading if they are the owner OR if the voice is approved
-      allow read: if isSignedIn() && (
-        (resource != null && resource.data.userId == request.auth.uid) ||
-        (resource != null && resource.data.status == 'approved')
-      );
+      // Allow any signed-in user to read all voice profiles
+      allow read: if isSignedIn();
       
       // Allow creating if they set themselves as the owner
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       
-      // Allow updating and deleting if they are the owner
+      // Allow updating and deleting only if they are the owner
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }

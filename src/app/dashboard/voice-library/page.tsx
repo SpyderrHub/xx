@@ -22,7 +22,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query } from 'firebase/firestore';
 
 const FilterControls = ({ filters, setFilters, clearFilters, availableOptions, inSheet = false }: any) => {
   const containerClasses = inSheet ? 'flex flex-col gap-4' : 'hidden lg:flex flex-wrap gap-2 sm:flex-nowrap';
@@ -139,8 +139,8 @@ export default function VoiceLibraryPage() {
 
   const voicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    // We only want to show approved voices in the public library
-    return query(collection(firestore, 'voices'), where('status', '==', 'approved'));
+    // Show all uploaded voice profiles in the library
+    return query(collection(firestore, 'voices'));
   }, [firestore]);
 
   const { data: voices, isLoading } = useCollection(voicesQuery);
