@@ -91,6 +91,16 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "voiceName", "language", "gender", "status", "createdAt", "description"]
+    },
+    "MyVoice": {
+      "title": "MyVoice",
+      "type": "object",
+      "description": "A voice added to a user's personal library.",
+      "properties": {
+        "voiceId": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["voiceId", "addedAt"]
     }
   },
   "auth": {
@@ -107,7 +117,18 @@
           "entityName": "User",
           "schema": {
             "$ref": "#/backend/entities/User"
-          }
+          },
+          "subcollections": [
+            {
+              "path": "myVoices/{voiceId}",
+              "definition": {
+                "entityName": "MyVoice",
+                "schema": {
+                  "$ref": "#/backend/entities/MyVoice"
+                }
+              }
+            }
+          ]
         }
       },
       {
@@ -117,7 +138,7 @@
           "schema": {
             "$ref": "#/backend/entities/Voice"
           },
-          "description": "Stores voice samples submitted by authors for review."
+          "description": "Stores voice profiles visible in the library."
         }
       }
     ]

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -5,9 +6,11 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Heart, Plus, Check, User } from 'lucide-react';
+import { Play, Pause, Heart, Plus, Check, User, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { doc, deleteDoc, setDoc } from 'firebase/firestore';
 
 export type Voice = {
   id: string;
@@ -54,8 +57,18 @@ const PlayingWaveform = () => (
 export default function VoiceCard({ voice }: VoiceCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [isAdded, setIsAdded] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  const { user, firestore } = useFirebase();
+  
+  const myVoiceRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid, 'myVoices', voice.id);
+  }, [user, firestore, voice.id]);
+
+  const { data: myVoiceData, isLoading: isMyVoiceLoading } = useDoc(myVoiceRef);
+  const isAdded = !!myVoiceData;
 
   useEffect(() => {
     return () => {
@@ -66,7 +79,8 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
     };
   }, []);
 
-  const togglePlay = () => {
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!voice.audioUrl) return;
 
     if (!audioRef.current) {
@@ -80,6 +94,28 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
       audioRef.current.play();
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const handleToggleAdd = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user || !firestore || isToggling) return;
+
+    setIsToggling(true);
+    try {
+      const docRef = doc(firestore, 'users', user.uid, 'myVoices', voice.id);
+      if (isAdded) {
+        await deleteDoc(docRef);
+      } else {
+        await setDoc(docRef, {
+          voiceId: voice.id,
+          addedAt: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling voice:', error);
+    } finally {
+      setIsToggling(false);
+    }
   };
 
   return (
@@ -147,9 +183,16 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
                     variant={isAdded ? "secondary" : "outline"} 
                     size="sm" 
                     className="h-7 sm:h-8 rounded-lg px-2 sm:px-3 text-[10px] sm:text-xs font-semibold"
-                    onClick={() => setIsAdded(!isAdded)}
+                    onClick={handleToggleAdd}
+                    disabled={isMyVoiceLoading || isToggling}
                 >
-                    {isAdded ? <Check className="mr-1 h-3 w-3 sm:h-4 w-4" /> : <Plus className="mr-1 h-3 w-3 sm:h-4 w-4" />}
+                    {isToggling ? (
+                      <Loader2 className="mr-1 h-3 w-3 sm:h-4 w-4 animate-spin" />
+                    ) : isAdded ? (
+                      <Check className="mr-1 h-3 w-3 sm:h-4 w-4" />
+                    ) : (
+                      <Plus className="mr-1 h-3 w-3 sm:h-4 w-4" />
+                    )}
                     {isAdded ? 'Added' : 'Add'}
                 </Button>
              </div>

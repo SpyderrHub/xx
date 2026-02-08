@@ -1,29 +1,23 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if a user is signed in
     function isSignedIn() {
       return request.auth != null;
     }
     
-    // Users collection:
-    // Only the owner can write to their own profile.
     match /users/{userId} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && request.auth.uid == userId;
+      
+      match /myVoices/{voiceId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
     }
 
-    // Voices collection:
-    // Everyone signed in can read any voice profile.
-    // Only the owner can create, update, or delete their own voice profiles.
     match /voices/{voiceId} {
-      // Allow any signed-in user to read all voice profiles
       allow read: if isSignedIn();
-      
-      // Allow creating if they set themselves as the owner
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      
-      // Allow updating and deleting only if they are the owner
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }
