@@ -6,16 +6,18 @@ service cloud.firestore {
     }
     
     match /users/{userId} {
-      // Users can only read and write their own profile.
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      // Allow any signed-in user to read profiles (to see author names/avatars in the library).
+      // Only the owner can write to their own profile.
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /voices/{voiceId} {
-      // Users can only read voices they own. 
-      // This allows both single document get and filtered collection list queries.
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // Allow owners to read their own voices (even if pending).
+      // Allow everyone to read approved voices for the public library.
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid) || resource.data.status == 'approved';
       
-      // Users can only create, update, or delete voices they own.
+      // Only owners can create or manage their own voice records.
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
