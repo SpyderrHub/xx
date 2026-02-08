@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Mic,
-  Library,
-  BookOpen,
   User,
   LogOut,
   Menu,
@@ -159,22 +157,6 @@ export default function AuthorLayout({
                   <Link href="/author">
                     <Mic />
                     <span>Upload Voice</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="My Uploaded Voices">
-                  <Link href="/author/voices">
-                    <Library />
-                    <span>My Uploaded Voices</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Upload Guidelines">
-                  <Link href="/author/guidelines">
-                    <BookOpen />
-                    <span>Upload Guidelines</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
