@@ -27,7 +27,7 @@ export function VoiceUploadCard() {
     voiceName: '',
     language: 'English, US',
     gender: 'Male',
-    ageRange: 'Middle-Aged',
+    ageRange: '',
     accent: '',
     style: 'Narration',
     description: ''
@@ -78,7 +78,7 @@ export function VoiceUploadCard() {
         voiceName: '',
         language: 'English, US',
         gender: 'Male',
-        ageRange: 'Middle-Aged',
+        ageRange: '',
         accent: '',
         style: 'Narration',
         description: ''
@@ -125,8 +125,16 @@ export function VoiceUploadCard() {
                 <SelectContent>
                   <SelectItem value="English, US">English, US</SelectItem>
                   <SelectItem value="English, UK">English, UK</SelectItem>
-                  <SelectItem value="Hindi">Hindi</SelectItem>
                   <SelectItem value="Spanish">Spanish</SelectItem>
+                  <SelectItem value="Hindi">Hindi</SelectItem>
+                  <SelectItem value="Bengali">Bengali</SelectItem>
+                  <SelectItem value="Telugu">Telugu</SelectItem>
+                  <SelectItem value="Marathi">Marathi</SelectItem>
+                  <SelectItem value="Tamil">Tamil</SelectItem>
+                  <SelectItem value="Gujarati">Gujarati</SelectItem>
+                  <SelectItem value="Kannada">Kannada</SelectItem>
+                  <SelectItem value="Malayalam">Malayalam</SelectItem>
+                  <SelectItem value="Punjabi">Punjabi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -153,6 +161,11 @@ export function VoiceUploadCard() {
                   <SelectItem value="Conversational">Conversational</SelectItem>
                   <SelectItem value="Emotional">Emotional</SelectItem>
                   <SelectItem value="News Style">News Style</SelectItem>
+                  <SelectItem value="Storytelling">Storytelling</SelectItem>
+                  <SelectItem value="Motivational">Motivational</SelectItem>
+                  <SelectItem value="Documentary">Documentary</SelectItem>
+                  <SelectItem value="Inspirational">Inspirational</SelectItem>
+                  <SelectItem value="Friendly">Friendly</SelectItem>
                 </SelectContent>
               </Select>
             </div>

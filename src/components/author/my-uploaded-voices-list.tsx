@@ -11,7 +11,7 @@ export function MyUploadedVoicesList() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-40 rounded-2xl" />
         ))}
@@ -32,7 +32,7 @@ export function MyUploadedVoicesList() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
       {voices.map((voice) => (
         <AuthorVoiceCard key={voice.id} voice={voice} />
       ))}
