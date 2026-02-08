@@ -1,26 +1,24 @@
-
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Heart, Plus, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Play, Pause, Heart, Plus, Check, User } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 export type Voice = {
   id: string;
-  name: string;
+  voiceName: string;
   description: string;
-  tags: string[];
-  category: string;
-  creator: string;
-  avatarUrl: string;
-  isPremium: boolean;
-  rating: number;
+  language: string;
+  gender: string;
+  style: string;
+  avatarUrl?: string;
+  audioUrl?: string;
+  userId: string;
 };
 
 interface VoiceCardProps {
@@ -53,11 +51,36 @@ const PlayingWaveform = () => (
     </div>
 );
 
-
 export default function VoiceCard({ voice }: VoiceCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const togglePlay = () => {
+    if (!voice.audioUrl) return;
+
+    if (!audioRef.current) {
+      audioRef.current = new Audio(voice.audioUrl);
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
 
   return (
     <motion.div
@@ -72,62 +95,58 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
         <CardContent className="flex flex-1 flex-col p-3 sm:p-4">
           <div className="relative mb-3 sm:mb-4 flex items-center justify-between">
              <div className="flex items-center gap-2 sm:gap-3">
-                 <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0">
-                    <Image src={voice.avatarUrl} alt={voice.name} fill className="rounded-full object-cover" />
+                 <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 overflow-hidden rounded-full bg-primary/10 border border-white/10 flex items-center justify-center">
+                    {voice.avatarUrl ? (
+                      <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+                    ) : (
+                      <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground/50" />
+                    )}
                     <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="absolute inset-0 h-full w-full rounded-full bg-black/30 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                        onClick={() => setIsPlaying(!isPlaying)}
+                        className="absolute inset-0 h-full w-full rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={togglePlay}
                     >
-                        {isPlaying ? <Pause className="h-4 w-4 sm:h-5 sm:w-5"/> : <Play className="h-4 w-4 sm:h-5 sm:w-5" />}
+                        {isPlaying ? <Pause className="h-4 w-4 sm:h-5 sm:w-5"/> : <Play className="h-4 w-4 sm:h-5 sm:w-5 ml-0.5" />}
                     </Button>
                  </div>
                  <div className="min-w-0">
-                    <h3 className="font-bold text-sm sm:text-base md:text-lg truncate">{voice.name}</h3>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">by {voice.creator}</p>
+                    <h3 className="font-bold text-sm sm:text-base truncate pr-2">{voice.voiceName}</h3>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate italic">{voice.style}</p>
                  </div>
              </div>
-             {voice.isPremium && (
-               <Badge className="absolute -top-1 -right-1 bg-primary/20 text-primary border-primary/30 text-[10px] px-1 sm:px-2 sm:text-xs">
-                 Premium
-               </Badge>
-             )}
           </div>
 
           <div className="h-6 sm:h-8 mb-3 sm:mb-4">
               {isPlaying ? <PlayingWaveform /> : <Waveform />}
           </div>
           
-          <p className="text-[10px] sm:text-sm text-muted-foreground flex-1 mb-3 sm:mb-4 line-clamp-2 sm:h-10">
-            {voice.description}
+          <p className="text-[10px] sm:text-xs text-muted-foreground flex-1 mb-3 sm:mb-4 line-clamp-2 min-h-[2.5rem]">
+            {voice.description || "An expressive AI voice profile."}
           </p>
           
           <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
-            {voice.tags.slice(0, 2).map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="border-none bg-primary/10 text-primary/90 text-[9px] sm:text-[10px] px-1.5 py-0"
-              >
-                {tag}
-              </Badge>
-            ))}
+            <Badge variant="secondary" className="border-none bg-primary/10 text-primary/90 text-[9px] sm:text-[10px] px-1.5 py-0">
+              {voice.language}
+            </Badge>
+            <Badge variant="secondary" className="border-none bg-indigo-500/10 text-indigo-400 text-[9px] sm:text-[10px] px-1.5 py-0">
+              {voice.gender}
+            </Badge>
           </div>
 
-          <div className="mt-auto flex items-center justify-between text-[10px] sm:text-xs text-muted-foreground">
-             <div className="flex items-center gap-1">
+          <div className="mt-auto flex items-center justify-between">
+             <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
                 <span className="text-yellow-400">⭐</span>
-                <span>{voice.rating}</span>
+                <span>4.8</span>
              </div>
-             <div className="flex items-center gap-1 sm:gap-2">
-                <Button variant="ghost" size="icon" className="h-6 w-6 sm:h-7 sm:w-7" onClick={() => setIsLiked(!isLiked)}>
-                    <Heart className={cn("h-3.5 w-3.5 sm:h-4 w-4", isLiked && "fill-red-500 text-red-500")}/>
+             <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsLiked(!isLiked)}>
+                    <Heart className={cn("h-4 w-4", isLiked && "fill-red-500 text-red-500")}/>
                 </Button>
                 <Button 
                     variant={isAdded ? "secondary" : "outline"} 
                     size="sm" 
-                    className="h-7 sm:h-8 rounded-lg px-2 sm:px-3 text-[10px] sm:text-xs"
+                    className="h-7 sm:h-8 rounded-lg px-2 sm:px-3 text-[10px] sm:text-xs font-semibold"
                     onClick={() => setIsAdded(!isAdded)}
                 >
                     {isAdded ? <Check className="mr-1 h-3 w-3 sm:h-4 w-4" /> : <Plus className="mr-1 h-3 w-3 sm:h-4 w-4" />}
