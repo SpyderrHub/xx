@@ -26,18 +26,13 @@ service cloud.firestore {
     }
 
     match /voices/{voiceId} {
-      // Authors and admins can read voices. 
-      // Ownership check is prioritized for filtered queries (list).
-      allow read: if isSignedIn() && (
-        (resource != null && resource.data.userId == request.auth.uid) || 
-        isAdmin()
-      );
+      // Users can only read voices they own. 
+      // This allows both single document get and filtered collection list queries.
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
       
-      // Creating a voice: must be an admin (Author) and setting themselves as owner.
-      allow create: if isAdmin() && request.resource.data.userId == request.auth.uid;
-      
-      // Updating/Deleting: must be the owner and an admin.
-      allow update, delete: if isAdmin() && resource.data.userId == request.auth.uid;
+      // Users can only create, update, or delete voices they own.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }
 }
