@@ -7,24 +7,27 @@ service cloud.firestore {
     }
     
     // Users collection:
-    // Any signed-in user can read profiles (needed for library attribution)
-    // Only the owner can write to their own profile
+    // Only the owner can write to their own profile.
+    // Reading is allowed if signed in (needed for attribution/role checks).
     match /users/{userId} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && request.auth.uid == userId;
     }
 
     // Voices collection:
-    // Strictly enforced isolation. Users can only read, create, update, or delete
-    // documents where the userId matches their own authenticated UID.
+    // Authors have full control (CRUD) over their own voice profiles.
+    // Isolation is enforced by checking the userId field.
     match /voices/{voiceId} {
-      // Allow reading only if the document belongs to the authenticated user
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // Allow reading (get/list) if the user owns the document
+      // Note: Queries must be filtered by userId == auth.uid to succeed
+      allow read: if isSignedIn() && (
+        resource == null || resource.data.userId == request.auth.uid
+      );
       
-      // Allow creation only if the userId in the new document matches the authenticated user
+      // Allow creating if they set themselves as the owner
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       
-      // Allow update and delete only if the existing document belongs to the authenticated user
+      // Allow updating and deleting if they are the owner
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }
