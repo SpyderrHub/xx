@@ -1,4 +1,3 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -19,7 +18,6 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId);
-      // Only admins can change roles, but owners can update their own profile data
       allow update: if isOwner(userId) && (
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || 
         isAdmin()
@@ -28,17 +26,18 @@ service cloud.firestore {
     }
 
     match /voices/{voiceId} {
-      // Authors only need to see their own voices. 
-      // This rule allows queries filtered by userId == auth.uid to pass without requiring a get() call for isAdmin.
+      // Authors and admins can read voices. 
+      // Ownership check is prioritized for filtered queries (list).
       allow read: if isSignedIn() && (
         (resource != null && resource.data.userId == request.auth.uid) || 
         isAdmin()
       );
       
-      // Only authors (admins) can create/update/delete voices, and they must be the owner.
+      // Creating a voice: must be an admin (Author) and setting themselves as owner.
       allow create: if isAdmin() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin() && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
-      allow delete: if isAdmin() && resource.data.userId == request.auth.uid;
+      
+      // Updating/Deleting: must be the owner and an admin.
+      allow update, delete: if isAdmin() && resource.data.userId == request.auth.uid;
     }
   }
 }

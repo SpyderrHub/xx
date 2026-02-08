@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Query,
   onSnapshot,
@@ -55,19 +54,13 @@ export function useCollection<T = any>(
   const [data, setData] = useState<StateDataType>(null);
   const [isLoading, setIsLoading] = useState<boolean>(!!memoizedTargetRefOrQuery);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
-  const [prevQueryHash, setPrevQueryHash] = useState<string | null>(null);
-
-  // Attempt to identify query changes for immediate loading state reset
-  const currentHash = memoizedTargetRefOrQuery ? 
-    (memoizedTargetRefOrQuery.type === 'collection' ? (memoizedTargetRefOrQuery as CollectionReference).path : 'query') : null;
-
-  if (currentHash !== prevQueryHash) {
-    setPrevQueryHash(currentHash);
-    setIsLoading(!!memoizedTargetRefOrQuery);
-    if (!memoizedTargetRefOrQuery) setData(null);
-  }
+  
+  // Use a ref to track mounting status and prevents state updates on unmounted components
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
+    
     if (!memoizedTargetRefOrQuery) {
       setData(null);
       setIsLoading(false);
@@ -81,20 +74,28 @@ export function useCollection<T = any>(
     const unsubscribe = onSnapshot(
       memoizedTargetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
+        if (!isMounted.current) return;
+        
         const results: ResultItemType[] = [];
-        for (const docSnapshot of snapshot.docs) {
+        snapshot.forEach((docSnapshot) => {
           results.push({ ...(docSnapshot.data() as T), id: docSnapshot.id });
-        }
+        });
+        
         setData(results);
         setError(null);
         setIsLoading(false);
       },
       (serverError: FirestoreError) => {
+        if (!isMounted.current) return;
+        
         let path = 'unknown';
         try {
-          path = memoizedTargetRefOrQuery.type === 'collection'
-            ? (memoizedTargetRefOrQuery as CollectionReference).path
-            : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString();
+          if (memoizedTargetRefOrQuery.type === 'collection') {
+            path = (memoizedTargetRefOrQuery as CollectionReference).path;
+          } else {
+            // Attempt to extract path from internal query object for debugging
+            path = (memoizedTargetRefOrQuery as unknown as InternalQuery)._query?.path?.canonicalString() || 'query';
+          }
         } catch (e) {
           path = 'query';
         }
@@ -111,7 +112,10 @@ export function useCollection<T = any>(
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      isMounted.current = false;
+      unsubscribe();
+    };
   }, [memoizedTargetRefOrQuery]);
 
   if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
