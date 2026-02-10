@@ -74,11 +74,6 @@ export default function PlanCard({
         )}
       >
         <CardHeader className="p-6 relative">
-          {plan.isHighlighted && (
-            <div className="absolute top-0 right-6 -translate-y-1/2 rounded-full bg-primary px-4 py-1 text-sm font-semibold text-primary-foreground">
-              Most Popular
-            </div>
-          )}
           <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
           <div className="flex items-baseline pt-2">
             <span className="text-4xl font-extrabold tracking-tight">

@@ -84,11 +84,6 @@ const PricingSection = () => {
               )}
             >
               <CardHeader className="p-8">
-                {plan.isHighlighted && (
-                  <div className="absolute -top-3 right-6 rounded-full bg-primary px-4 py-1 text-sm font-semibold text-primary-foreground">
-                    Most Popular
-                  </div>
-                )}
                 <CardTitle className="font-headline text-2xl">
                   {plan.name}
                 </CardTitle>
