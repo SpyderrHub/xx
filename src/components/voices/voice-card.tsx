@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -28,13 +27,24 @@ interface VoiceCardProps {
   voice: Voice;
 }
 
-const Waveform = () => (
+const Waveform = () => {
+  const [heights, setHeights] = useState<number[]>([]);
+  
+  useEffect(() => {
+    setHeights(Array.from({ length: 20 }, () => Math.random() * 80 + 20));
+  }, []);
+
+  return (
     <div className="flex w-full h-8 items-center justify-center space-x-1">
-        {[...Array(20)].map((_, i) => (
-            <div key={i} className="w-0.5 bg-primary/50" style={{ height: `${Math.random() * 80 + 20}%`}}/>
+        {heights.map((height, i) => (
+            <div key={i} className="w-0.5 bg-primary/50" style={{ height: `${height}%`}}/>
+        ))}
+        {heights.length === 0 && Array.from({ length: 20 }).map((_, i) => (
+          <div key={i} className="w-0.5 bg-primary/50 h-[40%]" />
         ))}
     </div>
-);
+  );
+};
 
 const PlayingWaveform = () => (
      <div className="flex w-full h-8 items-end justify-center space-x-1">

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
@@ -6,8 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Play, Mic, Waves, ArrowRight, Zap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 const HeroSection = () => {
+  const [waveHeights, setWaveHeights] = useState<number[]>([]);
+
+  useEffect(() => {
+    // Generate random heights only on the client to avoid hydration mismatch
+    setWaveHeights(Array.from({ length: 24 }, () => Math.random() * 80 + 20));
+  }, []);
+
   return (
     <section className="relative overflow-hidden pt-20 pb-32 lg:pt-32 lg:pb-48">
       {/* Background Neural Glow */}
@@ -100,12 +107,15 @@ const HeroSection = () => {
                       <Play className="h-5 w-5 fill-current ml-0.5" />
                     </Button>
                     <div className="flex-1 h-6 flex items-center gap-1 justify-center">
-                       {[...Array(24)].map((_, i) => (
+                       {waveHeights.map((height, i) => (
                          <div 
                           key={i} 
                           className="w-1 bg-primary/40 rounded-full" 
-                          style={{ height: `${Math.random() * 80 + 20}%` }}
+                          style={{ height: `${height}%` }}
                          />
+                       ))}
+                       {waveHeights.length === 0 && Array.from({ length: 24 }).map((_, i) => (
+                         <div key={i} className="w-1 bg-primary/40 rounded-full h-[50%]" />
                        ))}
                     </div>
                   </div>
