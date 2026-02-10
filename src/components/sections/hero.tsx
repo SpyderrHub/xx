@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -84,12 +85,12 @@ const HeroSection = () => {
                     <div className="h-3 w-3 rounded-full bg-yellow-500/50" />
                     <div className="h-3 w-3 rounded-full bg-green-500/50" />
                   </div>
-                  <div className="text-[10px] text-muted-foreground font-mono">Bhoomi Studio Pro v2.4</div>
+                  <div className="text-[10px] text-muted-foreground font-mono">Soochi Studio Pro v2.4</div>
                 </div>
                 <div className="p-6 space-y-6">
                   <div className="h-32 rounded-lg bg-white/5 border border-white/5 p-4 relative overflow-hidden">
                     <div className="text-xs text-primary/70 mb-2">Text Input</div>
-                    <div className="text-sm text-gray-400">Welcome to Bhoomi AI. Experience the future of voice...</div>
+                    <div className="text-sm text-gray-400">Welcome to Soochi AI. Experience the future of voice...</div>
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary/20" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">

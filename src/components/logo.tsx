@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 
 const Logo = (props: React.SVGProps<SVGSVGElement>) => (
@@ -15,7 +16,7 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
       className="fill-foreground font-bold"
       style={{ fontSize: '20px', fontFamily: 'Inter, sans-serif' }}
     >
-      Bhoomi
+      Soochi
       <tspan className="fill-primary"> AI</tspan>
     </text>
   </svg>

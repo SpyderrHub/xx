@@ -47,7 +47,7 @@ const PlatformsSection = () => {
             Use AI Voices Anywhere
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Bhoomi AI provides the flexibility to integrate high-quality speech into any hardware or software platform.
+            Soochi AI provides the flexibility to integrate high-quality speech into any hardware or software platform.
           </p>
         </div>
 

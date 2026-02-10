@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -198,7 +199,7 @@ export default function SubscriptionPage() {
         const options = {
             key: RAZORPAY_KEY_ID,
             subscription_id: subscriptionId,
-            name: 'Bhoomi AI',
+            name: 'Soochi AI',
             description: `${planName} Plan (${billingCycle})`,
             handler: function (response: any) {
                 toast({ title: 'Payment Successful', description: `Welcome to the ${planName} plan!`});

@@ -1,17 +1,18 @@
+
 'use client';
 import { CheckCircle, Code } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const ApiShowcaseSection = () => {
   const codeString = `
-fetch('https://api.bhoomi.ai/v1/generate', {
+fetch('https://api.soochi.ai/v1/generate', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    text: "Hello from Bhoomi AI!",
+    text: "Hello from Soochi AI!",
     voice: "alex-male-en-us",
   })
 })
@@ -31,7 +32,7 @@ fetch('https://api.bhoomi.ai/v1/generate', {
             Developer-Friendly API
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Integrate Bhoomi AI's powerful voice generation into your applications
+            Integrate Soochi AI's powerful voice generation into your applications
             with just a few lines of code.
           </p>
         </div>

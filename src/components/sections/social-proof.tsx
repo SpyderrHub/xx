@@ -28,7 +28,7 @@ const SocialProofSection = () => {
               role: "Creative Director at GameCraft"
             },
             {
-              quote: "Bhoomi AI has cut our audiobook production time by 80%. The Hindi voices are exceptionally natural.",
+              quote: "Soochi AI has cut our audiobook production time by 80%. The Hindi voices are exceptionally natural.",
               author: "Priya Sharma",
               role: "Head of Content, VoxMedia"
             },
