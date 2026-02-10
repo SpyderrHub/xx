@@ -1,148 +1,135 @@
+
 'use client';
-import { useState, useEffect } from 'react';
+
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Play, Loader, Pause, Mic } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-
-const InteractiveDemo = () => {
-  const [status, setStatus] = useState<
-    'idle' | 'generating' | 'playing' | 'paused'
-  >('idle');
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (status === 'playing') {
-      interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setStatus('idle');
-            return 0;
-          }
-          return prev + 1.25;
-        });
-      }, 100);
-    }
-    return () => clearInterval(interval);
-  }, [status]);
-
-  const handleGenerate = () => {
-    setStatus('generating');
-    setProgress(0);
-    setTimeout(() => {
-      setStatus('idle');
-    }, 2000);
-  };
-
-  const handlePlayPause = () => {
-    if (status === 'playing') {
-      setStatus('paused');
-    } else {
-      setStatus('playing');
-    }
-  };
-
-  return (
-    <Card className="w-full max-w-2xl rounded-2xl shadow-2xl">
-      <CardContent className="p-6 space-y-4">
-        <Textarea
-          placeholder="Type or paste your text here to generate audio..."
-          className="min-h-[120px] rounded-xl text-base"
-          defaultValue="Hello, welcome to Bhoomi AI. Experience the future of voice generation with our cutting-edge technology."
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Select defaultValue="en-us">
-            <SelectTrigger className="rounded-xl">
-              <SelectValue placeholder="Select Language" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en-us">English (US)</SelectItem>
-              <SelectItem value="en-gb">English (UK)</SelectItem>
-              <SelectItem value="es-es">Spanish (Spain)</SelectItem>
-              <SelectItem value="fr-fr">French (France)</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select defaultValue="alex">
-            <SelectTrigger className="rounded-xl">
-              <SelectValue placeholder="Select Voice" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="alex">Alex (Male)</SelectItem>
-              <SelectItem value="sara">Sara (Female)</SelectItem>
-              <SelectItem value="leo">Leo (Male)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        {status === 'idle' && progress > 0 ? (
-          <div className="flex items-center gap-4 rounded-xl border p-3">
-            <Button size="icon" variant="ghost" onClick={handlePlayPause}>
-              <Play className="h-5 w-5" />
-            </Button>
-            <Progress value={progress} className="w-full" />
-            <span className="text-sm font-mono text-muted-foreground">0:08</span>
-          </div>
-        ) : (
-          <Button
-            size="lg"
-            className="w-full rounded-xl"
-            onClick={handleGenerate}
-            disabled={status === 'generating'}
-          >
-            {status === 'generating' ? (
-              <Loader className="mr-2 h-5 w-5 animate-spin" />
-            ) : (
-              <Mic className="mr-2 h-5 w-5" />
-            )}
-            Generate Audio
-          </Button>
-        )}
-        
-        {(status === 'playing' || status === 'paused') && (
-            <div className="flex items-center gap-4 rounded-xl border bg-secondary p-3">
-                <Button size="icon" variant="ghost" onClick={handlePlayPause}>
-                    {status === 'playing' ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                </Button>
-                <Progress value={progress} className="w-full" />
-                <span className="text-sm font-mono text-muted-foreground">
-                    {`0:${Math.floor(progress / 100 * 8).toString().padStart(2, '0')}`}
-                </span>
-            </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
+import { Play, Mic, Waves, ArrowRight, Zap } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const HeroSection = () => {
   return (
-    <section className="relative overflow-hidden py-20 md:py-32">
-       <div className="absolute inset-0 -z-10 bg-secondary">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-background to-secondary"></div>
+    <section className="relative overflow-hidden pt-20 pb-32 lg:pt-32 lg:pb-48">
+      {/* Background Neural Glow */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full opacity-50" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 blur-[150px] rounded-full" />
       </div>
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center text-center">
-          <h1 className="font-headline text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-            Generate Lifelike AI Voices
-            <span className="block text-primary">in Seconds</span>
-          </h1>
-          <p className="mt-6 max-w-3xl text-lg text-muted-foreground sm:text-xl">
-            Our cutting-edge text-to-speech technology brings your content to
-            life with realistic, multi-lingual AI voices.
-          </p>
-          <div className="mt-10 w-full">
-            <InteractiveDemo />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col items-start text-left"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-6">
+              <Zap className="h-3.5 w-3.5" />
+              <span>The Next Generation of AI Voice Technology</span>
+            </div>
+            <h1 className="font-headline text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-[1.1]">
+              Generate Real Human <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-indigo-400">
+                AI Voices in Seconds
+              </span>
+            </h1>
+            <p className="mt-8 max-w-xl text-lg text-muted-foreground sm:text-xl leading-relaxed">
+              Experience ultra-realistic, multi-language AI voices for apps, videos, games, call centers, and automation. Studio quality at scale.
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Button asChild size="lg" className="h-14 rounded-xl px-8 text-lg font-bold bg-primary shadow-lg shadow-primary/20">
+                <Link href="/sign-up">Start Free Trial</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-14 rounded-xl px-8 text-lg border-white/10 bg-white/5 backdrop-blur-sm">
+                <Link href="#voice-demo">
+                  <Play className="mr-2 h-5 w-5 fill-current" />
+                  Listen Demo Voices
+                </Link>
+              </Button>
+            </div>
+            
+            <div className="mt-12 flex items-center gap-8 opacity-60">
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-white">40+</span>
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">Languages</span>
+              </div>
+              <div className="h-10 w-px bg-white/10" />
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-white">500+</span>
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">Premium Voices</span>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="relative"
+          >
+            {/* Product UI Mockup */}
+            <div className="relative z-10 rounded-2xl border border-white/10 bg-black/40 p-2 shadow-2xl backdrop-blur-xl">
+              <div className="rounded-xl bg-gray-900 overflow-hidden border border-white/5">
+                <div className="bg-white/5 p-4 border-b border-white/5 flex items-center justify-between">
+                  <div className="flex gap-1.5">
+                    <div className="h-3 w-3 rounded-full bg-red-500/50" />
+                    <div className="h-3 w-3 rounded-full bg-yellow-500/50" />
+                    <div className="h-3 w-3 rounded-full bg-green-500/50" />
+                  </div>
+                  <div className="text-[10px] text-muted-foreground font-mono">Bhoomi Studio Pro v2.4</div>
+                </div>
+                <div className="p-6 space-y-6">
+                  <div className="h-32 rounded-lg bg-white/5 border border-white/5 p-4 relative overflow-hidden">
+                    <div className="text-xs text-primary/70 mb-2">Text Input</div>
+                    <div className="text-sm text-gray-400">Welcome to Bhoomi AI. Experience the future of voice...</div>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary/20" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-20 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center flex-col gap-1">
+                      <Mic className="h-4 w-4 text-primary" />
+                      <span className="text-[10px] text-muted-foreground">Aria (Female)</span>
+                    </div>
+                    <div className="h-20 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center flex-col gap-1">
+                      <Waves className="h-4 w-4 text-indigo-400" />
+                      <span className="text-[10px] text-muted-foreground">Dynamic Waveform</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 bg-primary/10 p-3 rounded-xl border border-primary/20">
+                    <Button size="icon" className="h-10 w-10 rounded-full bg-primary">
+                      <Play className="h-5 w-5 fill-current ml-0.5" />
+                    </Button>
+                    <div className="flex-1 h-6 flex items-center gap-1 justify-center">
+                       {[...Array(24)].map((_, i) => (
+                         <div 
+                          key={i} 
+                          className="w-1 bg-primary/40 rounded-full" 
+                          style={{ height: `${Math.random() * 80 + 20}%` }}
+                         />
+                       ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating Elements */}
+            <motion.div 
+              animate={{ y: [0, -15, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-10 -right-10 z-20 bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl hidden md:block"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-green-500" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white">Fast Rendering</div>
+                  <div className="text-[10px] text-muted-foreground">0.2s Latency</div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>
