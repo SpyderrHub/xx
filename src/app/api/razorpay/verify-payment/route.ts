@@ -1,4 +1,3 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import crypto from 'crypto';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
@@ -17,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!adminAuth || !adminDb) {
-      return NextResponse.json({ message: 'Database service unavailable' }, { status: 500 });
+      return NextResponse.json({ message: 'Backend services (Auth/DB) are not available.' }, { status: 500 });
     }
 
     await adminAuth.verifyIdToken(idToken);
@@ -33,17 +32,18 @@ export async function POST(request: NextRequest) {
 
     const secret = process.env.RAZORPAY_KEY_SECRET;
     if (!secret) {
-      return NextResponse.json({ message: 'Payment verification config missing' }, { status: 500 });
+      return NextResponse.json({ message: 'Payment verification failed: RAZORPAY_KEY_SECRET is not configured on the server.' }, { status: 500 });
     }
 
-    // Step 1: Verify Signature
+    // Step 1: Verify Signature using HMAC SHA256
     const generated_signature = crypto
       .createHmac('sha256', secret)
       .update(razorpay_order_id + '|' + razorpay_payment_id)
       .digest('hex');
 
     if (generated_signature !== razorpay_signature) {
-      return NextResponse.json({ message: 'Invalid payment signature' }, { status: 400 });
+      console.error('Signature mismatch during payment verification');
+      return NextResponse.json({ message: 'Payment verification failed: Invalid signature. This could indicate a tampered request.' }, { status: 400 });
     }
 
     // Step 2: Update User Subscription and Credits
@@ -67,14 +67,13 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     });
 
-    // Step 3: Record transaction
+    // Step 3: Record transaction in a separate collection
     await adminDb.collection('subscriptions').add({
       userId,
       planId: planKey,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       status: 'active',
-      amount: 0, // In real case, fetch from order record if needed
       createdAt: new Date().toISOString(),
       expiryDate: expiryDate.toISOString(),
     });

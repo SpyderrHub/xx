@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -157,12 +156,13 @@ export default function SubscriptionPage() {
 
   const handlePurchase = async (planName: string, billingCycle: 'monthly' | 'yearly') => {
     if (!user) {
-      toast({ title: 'Error', description: 'Please log in to upgrade.', variant: 'destructive' });
+      toast({ title: 'Login Required', description: 'Please log in to upgrade your plan.', variant: 'destructive' });
       return;
     }
 
     setIsProcessing(true);
     try {
+      // Refresh token to ensure validity
       const idToken = await user.getIdToken(true);
       
       // 1. Create Order
@@ -178,7 +178,7 @@ export default function SubscriptionPage() {
       const orderData = await orderResponse.json();
       
       if (!orderResponse.ok) {
-        throw new Error(orderData.message || 'Failed to create order');
+        throw new Error(orderData.message || 'Failed to create payment order.');
       }
 
       // 2. Open Razorpay Checkout
@@ -187,11 +187,13 @@ export default function SubscriptionPage() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'Soochi AI',
-        description: `${planName} Plan - ${billingCycle}`,
+        description: `${planName} Plan (${billingCycle})`,
         order_id: orderData.orderId,
         handler: async (response: any) => {
           // 3. Verify Payment
           try {
+            toast({ title: 'Verifying Payment...', description: 'Please wait while we confirm your transaction.' });
+            
             const verifyResponse = await fetch('/api/razorpay/verify-payment', {
               method: 'POST',
               headers: {
@@ -208,9 +210,9 @@ export default function SubscriptionPage() {
 
             const verifyData = await verifyResponse.json();
             if (verifyData.success) {
-              toast({ title: 'Success!', description: `Welcome to the ${planName} plan.` });
+              toast({ title: 'Upgrade Successful!', description: `Your account has been upgraded to the ${planName} plan.` });
             } else {
-              throw new Error(verifyData.message || 'Verification failed');
+              throw new Error(verifyData.message || 'Verification failed. Please contact support.');
             }
           } catch (err: any) {
             toast({ title: 'Verification Error', description: err.message, variant: 'destructive' });
@@ -226,11 +228,22 @@ export default function SubscriptionPage() {
           color: '#a855f7',
         },
         modal: {
-          ondismiss: () => setIsProcessing(false),
+          ondismiss: () => {
+            setIsProcessing(false);
+            toast({ title: 'Payment Cancelled', description: 'You closed the payment window.' });
+          },
         },
       };
 
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        toast({
+          title: 'Payment Failed',
+          description: response.error.description || 'The payment could not be processed.',
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
+      });
       rzp.open();
     } catch (error: any) {
       toast({

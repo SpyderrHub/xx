@@ -1,17 +1,17 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import { razorpay } from '@/lib/razorpay';
 import { adminAuth } from '@/lib/firebase-admin';
 
+// Prices matching the Subscription Page UI (in INR)
 const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
-  Creator: { monthly: 29, yearly: 278 },
-  Pro: { monthly: 99, yearly: 950 },
+  Creator: { monthly: 2499, yearly: 23999 },
+  Pro: { monthly: 7999, yearly: 76999 },
 };
 
 export async function POST(request: NextRequest) {
   if (!razorpay) {
     return NextResponse.json(
-      { message: 'Payment service is not configured. Please check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.' },
+      { message: 'Razorpay is not configured. Please check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your .env.local file.' },
       { status: 500 }
     );
   }
@@ -19,11 +19,11 @@ export async function POST(request: NextRequest) {
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ message: 'Authentication required. Please log in again.' }, { status: 401 });
     }
 
     if (!adminAuth) {
-      return NextResponse.json({ message: 'Auth service unavailable' }, { status: 500 });
+      return NextResponse.json({ message: 'Firebase Admin SDK not initialized. Check your environment variables.' }, { status: 500 });
     }
 
     const decodedToken = await adminAuth.verifyIdToken(idToken);
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     const prices = PLAN_PRICES[planName];
     if (!prices) {
-      return NextResponse.json({ message: 'Invalid plan selected' }, { status: 400 });
+      return NextResponse.json({ message: `Invalid plan selected: ${planName}` }, { status: 400 });
     }
 
     const amount = billingCycle === 'yearly' ? prices.yearly : prices.monthly;
@@ -56,13 +56,13 @@ export async function POST(request: NextRequest) {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID,
+      keyId: process.env.RAZORPAY_KEY_ID, // Return public Key ID for the script
     });
   } catch (error: any) {
     console.error('Error creating Razorpay order:', error);
     return NextResponse.json(
-      { message: error.message || 'Failed to create payment order' },
-      { status: 500 }
+      { message: error.description || error.message || 'Failed to create payment order' },
+      { status: error.statusCode || 500 }
     );
   }
 }
