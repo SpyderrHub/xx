@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CurrentPlanCard from '@/components/subscription/current-plan-card';
 import PlanCard from '@/components/subscription/plan-card';
@@ -17,9 +18,7 @@ const plans = {
   monthly: [
     {
       name: 'Free',
-      price: '$0',
-      priceNumeric: 0,
-      period: '/ month',
+      price: '₹0',
       description: 'For personal projects & exploration.',
       features: [
         '10,000 characters/month',
@@ -31,9 +30,7 @@ const plans = {
     },
     {
       name: 'Creator',
-      price: '$29',
-      priceNumeric: 29,
-      period: '/ month',
+      price: '₹2,499',
       description: 'For professionals & growing businesses.',
       features: [
         '500,000 characters/month',
@@ -47,9 +44,7 @@ const plans = {
     },
     {
       name: 'Pro',
-      price: '$99',
-      priceNumeric: 99,
-      period: '/ month',
+      price: '₹7,999',
       description: 'For power users with high-volume needs.',
       features: [
         '2,000,000 characters/month',
@@ -64,8 +59,6 @@ const plans = {
     {
       name: 'Business',
       price: 'Custom',
-      priceNumeric: -1,
-      period: '',
       description: 'For large-scale applications & teams.',
       features: [
         'Unlimited characters',
@@ -80,9 +73,7 @@ const plans = {
   yearly: [
     {
       name: 'Free',
-      price: '$0',
-      priceNumeric: 0,
-      period: '/ year',
+      price: '₹0',
       description: 'For personal projects & exploration.',
       features: [
         '10,000 characters/month',
@@ -94,9 +85,7 @@ const plans = {
     },
     {
       name: 'Creator',
-      price: '$278',
-      priceNumeric: 278,
-      period: '/ year',
+      price: '₹23,999',
       description: 'Save 20% with annual billing.',
       features: [
         '500,000 characters/month',
@@ -110,9 +99,7 @@ const plans = {
     },
     {
       name: 'Pro',
-      price: '$950',
-      priceNumeric: 950,
-      period: '/ year',
+      price: '₹76,999',
       description: 'Save 20% with annual billing.',
       features: [
         '2,000,000 characters/month',
@@ -127,8 +114,6 @@ const plans = {
     {
       name: 'Business',
       price: 'Custom',
-      priceNumeric: -1,
-      period: '',
       description: 'For large-scale applications & teams.',
       features: [
         'Unlimited characters',
@@ -142,8 +127,15 @@ const plans = {
   ],
 };
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function SubscriptionPage() {
   const [isYearly, setIsYearly] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { user, firestore } = useFirebase();
 
   const userDocRef = useMemoFirebase(() => {
@@ -153,11 +145,101 @@ export default function SubscriptionPage() {
 
   const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
 
-  const handlePurchase = async (planName: string) => {
-    toast({
-      title: 'Subscription Update',
-      description: `Please contact our sales team to upgrade to the ${planName} plan.`,
-    });
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handlePurchase = async (planName: string, billingCycle: 'monthly' | 'yearly') => {
+    if (!user) {
+      toast({ title: 'Error', description: 'Please log in to upgrade.', variant: 'destructive' });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const idToken = await user.getIdToken(true);
+      
+      // 1. Create Order
+      const orderResponse = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ planName, billingCycle }),
+      });
+
+      const orderData = await orderResponse.json();
+      
+      if (!orderResponse.ok) {
+        throw new Error(orderData.message || 'Failed to create order');
+      }
+
+      // 2. Open Razorpay Checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Soochi AI',
+        description: `${planName} Plan - ${billingCycle}`,
+        order_id: orderData.orderId,
+        handler: async (response: any) => {
+          // 3. Verify Payment
+          try {
+            const verifyResponse = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({
+                ...response,
+                userId: user.uid,
+                planName,
+                billingCycle,
+              }),
+            });
+
+            const verifyData = await verifyResponse.json();
+            if (verifyData.success) {
+              toast({ title: 'Success!', description: `Welcome to the ${planName} plan.` });
+            } else {
+              throw new Error(verifyData.message || 'Verification failed');
+            }
+          } catch (err: any) {
+            toast({ title: 'Verification Error', description: err.message, variant: 'destructive' });
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: user.displayName || '',
+          email: user.email || '',
+        },
+        theme: {
+          color: '#a855f7',
+        },
+        modal: {
+          ondismiss: () => setIsProcessing(false),
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Something went wrong while initiating payment.',
+        variant: 'destructive',
+      });
+      setIsProcessing(false);
+    }
   };
 
   const displayPlans = isYearly ? plans.yearly : plans.monthly;
@@ -215,7 +297,7 @@ export default function SubscriptionPage() {
               plan={plan}
               currentPlanName={currentPlanName}
               onPurchase={handlePurchase}
-              isProcessing={false}
+              isProcessing={isProcessing}
               isYearly={isYearly}
             />
           ))}
