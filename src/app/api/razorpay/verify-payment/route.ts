@@ -9,7 +9,7 @@ const PLAN_CREDITS: Record<string, number> = {
 
 export async function POST(request: NextRequest) {
   if (!adminDb || !adminAuth) {
-    return NextResponse.json({ message: 'Database or Auth service is not configured. Check environment variables.' }, { status: 500 });
+    return NextResponse.json({ message: 'Database or Auth service is not configured. Check environment variables (FIREBASE_ADMIN_*).' }, { status: 500 });
   }
 
   try {
@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
       planName,
       billingCycle 
     } = await request.json();
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return NextResponse.json({ message: 'Missing required Razorpay payment fields.' }, { status: 400 });
+    }
 
     // 1. Verify Signature
     const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -33,6 +37,7 @@ export async function POST(request: NextRequest) {
       .digest('hex');
 
     if (generated_signature !== razorpay_signature) {
+      console.error('Payment verification failed: Signature mismatch');
       return NextResponse.json({ message: 'Invalid payment signature. Verification failed.' }, { status: 400 });
     }
 
@@ -79,7 +84,7 @@ export async function POST(request: NextRequest) {
       planId: planKey,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
-      amount: planName === 'Pro' ? (billingCycle === 'yearly' ? 950 : 99) : 29,
+      amount: planKey === 'pro' ? (billingCycle === 'yearly' ? 950 : 99) : 29,
       status: 'active',
       startDate: new Date().toISOString(),
       expiryDate: expiryDate.toISOString(),

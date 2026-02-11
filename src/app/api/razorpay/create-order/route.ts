@@ -3,13 +3,13 @@ import { razorpay } from '@/lib/razorpay';
 import { adminAuth } from '@/lib/firebase-admin';
 
 const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
-  Creator: { monthly: 2900, yearly: 27800 }, // In cents/paise (USD * 100)
-  Pro: { monthly: 9900, yearly: 95000 },
+  creator: { monthly: 2900, yearly: 27800 }, // In cents/paise (USD * 100)
+  pro: { monthly: 9900, yearly: 95000 },
 };
 
 export async function POST(request: NextRequest) {
   if (!razorpay) {
-    return NextResponse.json({ message: 'Razorpay service is not configured. Check your environment variables.' }, { status: 500 });
+    return NextResponse.json({ message: 'Razorpay service is not configured. Check your environment variables (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET).' }, { status: 500 });
   }
 
   if (!adminAuth) {
@@ -32,16 +32,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid or expired authentication token.' }, { status: 401 });
     }
 
-    const { planName, billingCycle } = await request.json();
+    const body = await request.json();
+    const { planName, billingCycle } = body;
 
-    const planPriceObj = PLAN_PRICES[planName];
+    if (!planName || !billingCycle) {
+      return NextResponse.json({ message: 'Missing planName or billingCycle in request body.' }, { status: 400 });
+    }
+
+    const planKey = planName.toLowerCase();
+    const planPriceObj = PLAN_PRICES[planKey];
+    
     if (!planPriceObj) {
-      return NextResponse.json({ message: 'Invalid plan name provided.' }, { status: 400 });
+      return NextResponse.json({ message: `Invalid plan name provided: ${planName}` }, { status: 400 });
     }
 
     const amount = planPriceObj[billingCycle as 'monthly' | 'yearly'];
+    
+    if (typeof amount !== 'number') {
+      return NextResponse.json({ message: `Invalid billing cycle provided: ${billingCycle}` }, { status: 400 });
+    }
 
-    const order = await razorpay.orders.create({
+    const orderOptions = {
       amount: amount, // Amount in paise/cents
       currency: 'USD',
       receipt: `receipt_${uid}_${Date.now()}`,
@@ -50,7 +61,9 @@ export async function POST(request: NextRequest) {
         planName,
         billingCycle,
       },
-    });
+    };
+
+    const order = await razorpay.orders.create(orderOptions);
 
     return NextResponse.json({ 
       orderId: order.id,
@@ -59,6 +72,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error creating Razorpay order:', error);
-    return NextResponse.json({ message: error.message || 'An internal error occurred while creating the order.' }, { status: 500 });
+    // Return a more descriptive error if possible
+    const errorMessage = error.description || error.message || 'An internal error occurred while creating the order.';
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }
