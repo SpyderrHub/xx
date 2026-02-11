@@ -11,9 +11,15 @@ const PLAN_CREDITS: Record<string, number> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
-    if (!idToken || !adminAuth || !adminDb) {
-      return NextResponse.json({ message: 'Unauthorized or service unavailable' }, { status: 401 });
+    if (!adminAuth || !adminDb) {
+      return NextResponse.json({ message: 'Backend service unavailable: Firebase Admin SDK not configured.' }, { status: 500 });
+    }
+
+    const authHeader = request.headers.get('authorization');
+    const idToken = authHeader?.startsWith('Bearer ') ? authHeader.split('Bearer ')[1] : null;
+
+    if (!idToken) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
 
     const decodedToken = await adminAuth.verifyIdToken(idToken);
@@ -26,7 +32,9 @@ export async function POST(request: NextRequest) {
     const payments = response.data;
     
     // Find the successful payment
-    const successPayment = payments.find((p: any) => p.payment_status === 'SUCCESS');
+    const successPayment = Array.isArray(payments) 
+      ? payments.find((p: any) => p.payment_status === 'SUCCESS')
+      : null;
 
     if (!successPayment) {
       return NextResponse.json({ success: false, message: 'No successful payment found for this order.' });
@@ -67,9 +75,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Cashfree Verification Error:', error.response?.data || error.message);
+    const errorMessage = error.response?.data?.message || error.message;
+    console.error('Cashfree Verification Error:', errorMessage);
+    
+    if (errorMessage?.toLowerCase().includes('authentication') || error.response?.status === 401) {
+      return NextResponse.json({ message: 'Cashfree Authentication Failed: Check your API keys.' }, { status: 500 });
+    }
+
     return NextResponse.json(
-      { message: error.response?.data?.message || 'Payment verification failed' },
+      { message: errorMessage || 'Payment verification failed' },
       { status: 500 }
     );
   }

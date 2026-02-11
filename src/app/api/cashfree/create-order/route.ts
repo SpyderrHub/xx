@@ -10,14 +10,36 @@ const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
-    if (!idToken || !adminAuth) {
-      return NextResponse.json({ message: 'Unauthorized or service unavailable' }, { status: 401 });
+    // 1. Check for Firebase Admin SDK
+    if (!adminAuth) {
+      console.error('Firebase Admin SDK not initialized. Check your environment variables.');
+      return NextResponse.json({ message: 'Backend service unavailable: Firebase Admin SDK not configured.' }, { status: 500 });
     }
 
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-    const uid = decodedToken.uid;
-    const userEmail = decodedToken.email || '';
+    // 2. Check for Cashfree Credentials
+    if (!process.env.CASHFREE_APP_ID || !process.env.CASHFREE_SECRET_KEY) {
+      console.error('Cashfree credentials missing.');
+      return NextResponse.json({ message: 'Backend service unavailable: Cashfree API keys not configured.' }, { status: 500 });
+    }
+
+    // 3. Verify User Token
+    const authHeader = request.headers.get('authorization');
+    const idToken = authHeader?.startsWith('Bearer ') ? authHeader.split('Bearer ')[1] : null;
+    
+    if (!idToken) {
+      return NextResponse.json({ message: 'Authentication required: No token provided.' }, { status: 401 });
+    }
+
+    let uid: string;
+    let userEmail: string;
+    try {
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      uid = decodedToken.uid;
+      userEmail = decodedToken.email || '';
+    } catch (e: any) {
+      console.error('Token verification failed:', e.message);
+      return NextResponse.json({ message: 'Authentication failed: Invalid or expired session.' }, { status: 401 });
+    }
 
     const { planName, billingCycle } = await request.json();
     const prices = PLAN_PRICES[planName];
@@ -36,7 +58,7 @@ export async function POST(request: NextRequest) {
       customer_details: {
         customer_id: uid,
         customer_email: userEmail,
-        customer_phone: "9999999999", // Placeholder as Cashfree requires a phone number
+        customer_phone: "9999999999", // Required by Cashfree
       },
       order_meta: {
         return_url: `${request.nextUrl.origin}/dashboard/subscription?order_id={order_id}`,
@@ -53,9 +75,16 @@ export async function POST(request: NextRequest) {
       order_id: response.data.order_id,
     });
   } catch (error: any) {
-    console.error('Cashfree Order Error:', error.response?.data || error.message);
+    const cashfreeError = error.response?.data?.message || error.message;
+    console.error('Cashfree Order Error:', cashfreeError);
+    
+    // Specifically handle Cashfree authentication errors (wrong App ID or Secret)
+    if (cashfreeError?.toLowerCase().includes('authentication') || error.response?.status === 401) {
+      return NextResponse.json({ message: 'Cashfree Authentication Failed: Please check your CASHFREE_APP_ID and CASHFREE_SECRET_KEY in .env.local' }, { status: 500 });
+    }
+
     return NextResponse.json(
-      { message: error.response?.data?.message || 'Failed to initiate payment session' },
+      { message: cashfreeError || 'Failed to initiate payment session' },
       { status: 500 }
     );
   }
