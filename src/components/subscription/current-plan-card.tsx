@@ -1,14 +1,16 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
 
 const planDetails: Record<string, {name: string, price: string, period: string}> = {
-    free: { name: 'Free', price: '$0', period: 'per month' },
-    creator: { name: 'Creator', price: '$29', period: 'per month' },
-    pro: { name: 'Pro', price: '$99', period: 'per month' },
+    free: { name: 'Free', price: '₹0', period: 'per month' },
+    creator: { name: 'Creator', price: '₹2,499', period: 'per month' },
+    pro: { name: 'Pro', price: '₹7,999', period: 'per month' },
     business: { name: 'Business', price: 'Custom', period: ''},
 };
 
@@ -64,7 +66,9 @@ export default function CurrentPlanCard({ userData }: any) {
       </CardContent>
       <CardFooter className="flex gap-2">
         <Button onClick={handleUpgradeClick} className="bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700">Upgrade Plan</Button>
-        <Button variant="outline" disabled={plan === 'free'}>Cancel Subscription</Button>
+        <Button variant="outline" asChild>
+          <Link href="mailto:support@soochi.ai">Contact Support</Link>
+        </Button>
       </CardFooter>
     </Card>
   );

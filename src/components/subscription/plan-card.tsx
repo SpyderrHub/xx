@@ -1,7 +1,8 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Mail } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -17,29 +18,11 @@ import Link from 'next/link';
 export default function PlanCard({
   plan,
   currentPlanName,
-  onPurchase,
-  isProcessing,
-  isYearly,
 }: {
   plan: any;
   currentPlanName: string;
-  onPurchase: (planName: string, billingCycle: 'monthly' | 'yearly') => void;
-  isProcessing: boolean;
-  isYearly: boolean;
 }) {
   const isCurrent = plan.name.toLowerCase() === currentPlanName.toLowerCase();
-
-  const getButtonAction = () => {
-    if (isCurrent) return 'Current Plan';
-    if (plan.name === 'Business') return 'Contact Sales';
-    return 'Upgrade';
-  };
-
-  const buttonAction = getButtonAction();
-
-  const handleButtonClick = () => {
-    onPurchase(plan.name, isYearly ? 'yearly' : 'monthly');
-  };
 
   return (
     <motion.div
@@ -81,24 +64,26 @@ export default function PlanCard({
           </ul>
         </CardContent>
         <CardFooter className="p-6 pt-0">
-          {plan.name === 'Business' ? (
+          {isCurrent ? (
+            <Button
+              size="lg"
+              className="w-full font-bold"
+              variant="secondary"
+              disabled
+            >
+              Current Plan
+            </Button>
+          ) : (
             <Button
               asChild
               size="lg"
               className="w-full font-bold"
               variant={plan.isHighlighted ? 'default' : 'outline'}
             >
-              <Link href="mailto:sales@soochi.ai">{buttonAction}</Link>
-            </Button>
-          ) : (
-            <Button
-              size="lg"
-              className="w-full font-bold"
-              variant={plan.isHighlighted ? 'default' : isCurrent ? 'secondary' : 'outline'}
-              disabled={isCurrent}
-              onClick={handleButtonClick}
-            >
-              {buttonAction}
+              <Link href="mailto:support@soochi.ai">
+                <Mail className="mr-2 h-4 w-4" />
+                Contact to Upgrade
+              </Link>
             </Button>
           )}
         </CardFooter>
