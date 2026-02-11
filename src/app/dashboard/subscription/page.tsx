@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -128,7 +129,7 @@ const plans = {
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Cashfree: any;
   }
 }
 
@@ -146,7 +147,7 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
     script.async = true;
     document.body.appendChild(script);
     return () => {
@@ -160,13 +161,17 @@ export default function SubscriptionPage() {
       return;
     }
 
+    if (!window.Cashfree) {
+      toast({ title: 'Payment Error', description: 'Cashfree SDK failed to load. Please refresh.', variant: 'destructive' });
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      // Refresh token to ensure validity
       const idToken = await user.getIdToken(true);
       
-      // 1. Create Order
-      const orderResponse = await fetch('/api/razorpay/create-order', {
+      // 1. Create Order Session
+      const sessionResponse = await fetch('/api/cashfree/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,34 +180,49 @@ export default function SubscriptionPage() {
         body: JSON.stringify({ planName, billingCycle }),
       });
 
-      const orderData = await orderResponse.json();
+      const sessionData = await sessionResponse.json();
       
-      if (!orderResponse.ok) {
-        throw new Error(orderData.message || 'Failed to create payment order.');
+      if (!sessionResponse.ok) {
+        throw new Error(sessionData.message || 'Failed to initiate payment.');
       }
 
-      // 2. Open Razorpay Checkout
-      const options = {
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Soochi AI',
-        description: `${planName} Plan (${billingCycle})`,
-        order_id: orderData.orderId,
-        handler: async (response: any) => {
-          // 3. Verify Payment
-          try {
+      // 2. Open Cashfree Checkout
+      const cashfree = new window.Cashfree({
+        mode: process.env.NEXT_PUBLIC_CASHFREE_ENVIRONMENT === 'PRODUCTION' ? 'production' : 'sandbox',
+      });
+
+      const checkoutOptions = {
+        paymentSessionId: sessionData.payment_session_id,
+        redirectTarget: "_self", // Redirect to return_url defined in order meta
+      };
+
+      // In a real-world scenario, you might use cashfree.checkout(checkoutOptions) 
+      // which handles the redirect and verification flow.
+      cashfree.checkout(checkoutOptions).then(async (result: any) => {
+        if (result.error) {
+          toast({ title: 'Payment Failed', description: result.error.message, variant: 'destructive' });
+          setIsProcessing(false);
+          return;
+        }
+
+        if (result.redirect) {
+          console.log("Redirecting to payment page...");
+          return;
+        }
+
+        if (result.paymentDetails) {
+           // 3. Verify Payment
+           try {
             toast({ title: 'Verifying Payment...', description: 'Please wait while we confirm your transaction.' });
             
-            const verifyResponse = await fetch('/api/razorpay/verify-payment', {
+            const verifyResponse = await fetch('/api/cashfree/verify-payment', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${idToken}`,
               },
               body: JSON.stringify({
-                ...response,
-                userId: user.uid,
+                orderId: sessionData.order_id,
                 planName,
                 billingCycle,
               }),
@@ -219,32 +239,9 @@ export default function SubscriptionPage() {
           } finally {
             setIsProcessing(false);
           }
-        },
-        prefill: {
-          name: user.displayName || '',
-          email: user.email || '',
-        },
-        theme: {
-          color: '#a855f7',
-        },
-        modal: {
-          ondismiss: () => {
-            setIsProcessing(false);
-            toast({ title: 'Payment Cancelled', description: 'You closed the payment window.' });
-          },
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (response: any) {
-        toast({
-          title: 'Payment Failed',
-          description: response.error.description || 'The payment could not be processed.',
-          variant: 'destructive',
-        });
-        setIsProcessing(false);
+        }
       });
-      rzp.open();
+
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -269,7 +266,7 @@ export default function SubscriptionPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Subscription & Billing</h1>
           <p className="mt-2 text-muted-foreground">
-            Manage your plan, usage, and payment details.
+            Manage your plan, usage, and payment details via Cashfree.
           </p>
         </div>
         <div className="flex items-center space-x-3 rounded-full bg-card/50 p-1 border">
