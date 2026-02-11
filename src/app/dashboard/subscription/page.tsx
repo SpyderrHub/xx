@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import Script from 'next/script';
 
 const plans = {
   monthly: [
@@ -29,7 +30,7 @@ const plans = {
     },
     {
       name: 'Creator',
-      price: '₹2,499',
+      price: '₹399',
       description: 'For professionals & growing businesses.',
       features: [
         '500,000 characters/month',
@@ -43,7 +44,7 @@ const plans = {
     },
     {
       name: 'Pro',
-      price: '₹7,999',
+      price: '₹699',
       description: 'For power users with high-volume needs.',
       features: [
         '2,000,000 characters/month',
@@ -52,19 +53,6 @@ const plans = {
         'Priority API access',
         'Team collaboration (3 seats)',
         'Priority support',
-      ],
-      isHighlighted: false,
-    },
-    {
-      name: 'Business',
-      price: 'Custom',
-      description: 'For large-scale applications & teams.',
-      features: [
-        'Unlimited characters',
-        'Custom voice creation',
-        'Dedicated infrastructure',
-        'Enterprise SSO & security',
-        'Dedicated support manager',
       ],
       isHighlighted: false,
     },
@@ -84,8 +72,8 @@ const plans = {
     },
     {
       name: 'Creator',
-      price: '₹23,999',
-      description: 'Save 20% with annual billing.',
+      price: '₹4,788',
+      description: 'Save big with annual billing.',
       features: [
         '500,000 characters/month',
         'Access to premium voices',
@@ -98,8 +86,8 @@ const plans = {
     },
     {
       name: 'Pro',
-      price: '₹76,999',
-      description: 'Save 20% with annual billing.',
+      price: '₹8,388',
+      description: 'Save big with annual billing.',
       features: [
         '2,000,000 characters/month',
         'All premium voices',
@@ -107,19 +95,6 @@ const plans = {
         'Priority API access',
         'Team collaboration (3 seats)',
         'Priority support',
-      ],
-      isHighlighted: false,
-    },
-    {
-      name: 'Business',
-      price: 'Custom',
-      description: 'For large-scale applications & teams.',
-      features: [
-        'Unlimited characters',
-        'Custom voice creation',
-        'Dedicated infrastructure',
-        'Enterprise SSO & security',
-        'Dedicated support manager',
       ],
       isHighlighted: false,
     },
@@ -147,6 +122,8 @@ export default function SubscriptionPage() {
       transition={{ duration: 0.5 }}
       className="space-y-12"
     >
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Subscription & Billing</h1>
@@ -185,12 +162,13 @@ export default function SubscriptionPage() {
         <h2 className="mb-8 text-2xl font-semibold tracking-tight text-center">
           Choose the plan that's right for you
         </h2>
-        <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
           {displayPlans.map((plan) => (
             <PlanCard
               key={plan.name}
               plan={plan}
               currentPlanName={currentPlanName}
+              billingCycle={isYearly ? 'yearly' : 'monthly'}
             />
           ))}
         </div>
