@@ -172,7 +172,9 @@ export default function SubscriptionPage() {
 
     try {
         const token = await user.getIdToken();
-        const res = await fetch('/api/razorpay/create', {
+        
+        // 1. Create Order
+        const orderRes = await fetch('/api/razorpay/create-order', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -181,12 +183,12 @@ export default function SubscriptionPage() {
             body: JSON.stringify({ planName, billingCycle }),
         });
 
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || 'Failed to create subscription.');
+        if (!orderRes.ok) {
+            const errorData = await orderRes.json();
+            throw new Error(errorData.message || 'Failed to create payment order.');
         }
 
-        const { subscriptionId } = await res.json();
+        const { orderId, amount, currency } = await orderRes.json();
         
         const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
@@ -196,13 +198,37 @@ export default function SubscriptionPage() {
             return;
         }
 
+        // 2. Open Razorpay Checkout
         const options = {
             key: RAZORPAY_KEY_ID,
-            subscription_id: subscriptionId,
+            amount: amount,
+            currency: currency,
             name: 'Soochi AI',
             description: `${planName} Plan (${billingCycle})`,
-            handler: function (response: any) {
-                toast({ title: 'Payment Successful', description: `Welcome to the ${planName} plan!`});
+            order_id: orderId,
+            handler: async function (response: any) {
+                // 3. Verify Payment
+                try {
+                  const verifyRes = await fetch('/api/razorpay/verify-payment', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                      ...response,
+                      planName,
+                      billingCycle
+                    }),
+                  });
+
+                  if (!verifyRes.ok) throw new Error('Payment verification failed');
+
+                  toast({ title: 'Success', description: `Welcome to the ${planName} plan!`});
+                  window.location.reload();
+                } catch (err: any) {
+                  toast({ title: 'Verification Failed', description: err.message, variant: 'destructive' });
+                }
             },
             prefill: {
                 name: user.displayName || '',

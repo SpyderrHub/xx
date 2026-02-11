@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -36,11 +37,11 @@ export async function signUpWithEmail(
       email: user.email,
       createdAt: new Date().toISOString(),
       plan: 'free',
-      credits: 600,
+      credits: 10000, // 10k initial characters
       role: 'user',
       subscriptionId: null,
       paymentStatus: 'inactive',
-      currentPeriodStart: null,
+      currentPeriodStart: new Date().toISOString(),
       currentPeriodEnd: null,
     };
 

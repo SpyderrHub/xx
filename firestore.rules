@@ -15,6 +15,12 @@ service cloud.firestore {
       }
     }
 
+    match /subscriptions/{subId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // Creation happens via admin SDK backend
+      allow write: if false;
+    }
+
     match /voices/{voiceId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;

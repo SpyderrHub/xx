@@ -39,7 +39,7 @@
         },
         "subscriptionId": {
           "type": "string",
-          "description": "The user's Razorpay subscription ID."
+          "description": "The user's Razorpay subscription or order ID."
         },
         "paymentStatus": {
           "type": "string",
@@ -69,6 +69,23 @@
         "credits",
         "role"
       ]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "type": "object",
+      "description": "A record of a payment and plan activation.",
+      "properties": {
+        "userId": { "type": "string" },
+        "planId": { "type": "string" },
+        "paymentId": { "type": "string" },
+        "orderId": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "planId", "paymentId", "status", "createdAt"]
     },
     "Voice": {
       "title": "Voice",
@@ -129,6 +146,15 @@
               }
             }
           ]
+        }
+      },
+      {
+        "path": "/subscriptions/{subscriptionId}",
+        "definition": {
+          "entityName": "Subscription",
+          "schema": {
+            "$ref": "#/backend/entities/Subscription"
+          }
         }
       },
       {
