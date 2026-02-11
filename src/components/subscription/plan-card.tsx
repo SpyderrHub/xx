@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-// Define plans outside the component so it's not re-declared on every render
 const planPrices: { [key: string]: { monthly: number, yearly: number } } = {
   free: { monthly: 0, yearly: 0 },
   creator: { monthly: 29, yearly: 278 },
@@ -27,7 +26,7 @@ export default function PlanCard({
   currentPlanName,
   onPurchase,
   isProcessing,
-  isYearly, // Pass isYearly state
+  isYearly,
 }: {
   plan: any;
   currentPlanName: string;
@@ -44,7 +43,7 @@ export default function PlanCard({
     const currentPlanPrice = planPrices[currentPlanName.toLowerCase()]?.[isYearly ? 'yearly' : 'monthly'] ?? 0;
     const targetPlanPrice = plan.priceNumeric;
     
-    if (targetPlanPrice < 0) return 'Contact Sales'; // For custom plans
+    if (targetPlanPrice < 0) return 'Contact Sales';
 
     if (targetPlanPrice > currentPlanPrice) {
       return 'Upgrade';
@@ -107,7 +106,7 @@ export default function PlanCard({
               className="w-full font-bold"
               variant={plan.isHighlighted ? 'default' : 'outline'}
             >
-              <Link href="mailto:sales@voxai.dev">{buttonAction}</Link>
+              <Link href="mailto:sales@soochi.ai">{buttonAction}</Link>
             </Button>
           ) : (
             <Button

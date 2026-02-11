@@ -26,7 +26,7 @@ import {
   SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/logo';
-import { useFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/lib/auth';
@@ -41,11 +41,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useUserRole } from '@/hooks/use-user-role';
+import { doc } from 'firebase/firestore';
+
+const planLimits: Record<string, number> = {
+  free: 10000,
+  creator: 500000,
+  pro: 2000000,
+  business: 10000000,
+};
 
 const DashboardHeader = ({ title }: { title: string }) => {
   const { isMobile, toggleSidebar } = useSidebar();
-  const { user, isUserLoading, auth } = useFirebase();
+  const { user, isUserLoading, auth, firestore } = useFirebase();
   const router = useRouter();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userData } = useDoc(userDocRef);
 
   const handleLogout = async () => {
     if (auth) {
@@ -61,6 +76,11 @@ const DashboardHeader = ({ title }: { title: string }) => {
       .join('');
   };
 
+  const creditsRemaining = userData?.credits || 0;
+  const plan = userData?.plan || 'free';
+  const limit = planLimits[plan] || 10000;
+  const creditsUsed = Math.max(0, limit - creditsRemaining);
+
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b bg-background px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       {isMobile && (
@@ -70,13 +90,17 @@ const DashboardHeader = ({ title }: { title: string }) => {
       )}
       <h1 className="flex-1 text-xl font-semibold">{title}</h1>
       <div className="flex items-center gap-4">
-        <div className="hidden flex-col items-end sm:flex">
-          <span className="text-sm font-medium">4,320 / 6,000</span>
-          <span className="text-xs text-muted-foreground">Credits Used</span>
-        </div>
+        {!isUserLoading && user && (
+          <div className="hidden flex-col items-end sm:flex">
+            <span className="text-sm font-medium">
+              {creditsUsed.toLocaleString()} / {limit.toLocaleString()}
+            </span>
+            <span className="text-xs text-muted-foreground">Credits Used</span>
+          </div>
+        )}
 
-        <Button className="hidden bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700 sm:block">
-          Upgrade
+        <Button asChild className="hidden bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700 sm:block">
+          <Link href="/dashboard/subscription">Upgrade</Link>
         </Button>
 
         {isUserLoading ? (
@@ -286,6 +310,7 @@ export default function DashboardLayout({
   const { user, isUserLoading } = useFirebase();
   const { role, isLoading: isRoleLoading } = useUserRole();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Strict Role-based access control for /dashboard
   useEffect(() => {
@@ -293,7 +318,6 @@ export default function DashboardLayout({
       if (!user) {
         router.replace('/login');
       } else if (role === 'admin') {
-        // Redirect admins away from the user dashboard to their studio immediately
         router.replace('/author');
       }
     }
@@ -308,10 +332,9 @@ export default function DashboardLayout({
     );
   }
 
-  // Double check protection: If user is unauthorized or wrong role, don't render
+  // Double check protection
   if (!user || role === 'admin') return null;
 
-  const pathname = usePathname();
   const getTitle = () => {
     switch (pathname) {
       case '/dashboard':
