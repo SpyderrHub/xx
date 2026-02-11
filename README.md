@@ -10,7 +10,6 @@ Create a `.env.local` file in the root directory and add the following variables
 ```env
 # Razorpay Credentials
 # Find these at: https://dashboard.razorpay.com/app/settings/keys
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxxx
 RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxxx
 RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
 

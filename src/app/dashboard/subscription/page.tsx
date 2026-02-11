@@ -170,10 +170,8 @@ export default function SubscriptionPage() {
     setIsProcessing(true);
 
     try {
-        // Force refresh the token to ensure it's valid for the backend
         const token = await user.getIdToken(true);
         
-        // 1. Create Order
         const orderRes = await fetch('/api/razorpay/create-order', {
             method: 'POST',
             headers: {
@@ -188,26 +186,22 @@ export default function SubscriptionPage() {
             throw new Error(errorData.message || 'Failed to create payment order.');
         }
 
-        const { orderId, amount, currency } = await orderRes.json();
+        const { orderId, amount, currency, keyId } = await orderRes.json();
         
-        const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-
-        if (!RAZORPAY_KEY_ID) {
-            toast({ title: 'Configuration Error', description: 'Razorpay Key ID is not configured in environment variables.', variant: 'destructive'});
+        if (!keyId) {
+            toast({ title: 'Configuration Error', description: 'Razorpay Key ID was not returned by the server.', variant: 'destructive'});
             setIsProcessing(false);
             return;
         }
 
-        // 2. Open Razorpay Checkout
         const options = {
-            key: RAZORPAY_KEY_ID,
+            key: keyId,
             amount: amount,
             currency: currency,
             name: 'Soochi AI',
             description: `${planName} Plan (${billingCycle})`,
             order_id: orderId,
             handler: async function (response: any) {
-                // 3. Verify Payment
                 try {
                   const verifyRes = await fetch('/api/razorpay/verify-payment', {
                     method: 'POST',

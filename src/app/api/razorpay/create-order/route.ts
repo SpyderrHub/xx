@@ -68,11 +68,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       orderId: order.id,
       amount: order.amount,
-      currency: order.currency
+      currency: order.currency,
+      keyId: process.env.RAZORPAY_KEY_ID // Send Key ID to frontend for the checkout session
     });
   } catch (error: any) {
     console.error('Error creating Razorpay order:', error);
-    // Return a more descriptive error if possible
     const errorMessage = error.description || error.message || 'An internal error occurred while creating the order.';
     return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
