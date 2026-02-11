@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Script from 'next/script';
 import { motion } from 'framer-motion';
-
 import CurrentPlanCard from '@/components/subscription/current-plan-card';
 import PlanCard from '@/components/subscription/plan-card';
 import UsageStats from '@/components/subscription/usage-stats';
@@ -144,15 +142,8 @@ const plans = {
   ],
 };
 
-declare global {
-    interface Window {
-        Razorpay: any;
-    }
-}
-
 export default function SubscriptionPage() {
   const [isYearly, setIsYearly] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const { user, firestore } = useFirebase();
 
   const userDocRef = useMemoFirebase(() => {
@@ -162,159 +153,76 @@ export default function SubscriptionPage() {
 
   const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
 
-  const handlePurchase = async (planName: string, billingCycle: 'monthly' | 'yearly') => {
-    if (!user) {
-        toast({ title: 'Authentication Error', description: 'You must be logged in to subscribe.', variant: 'destructive' });
-        return;
-    }
-    setIsProcessing(true);
-
-    try {
-        const token = await user.getIdToken(true);
-        
-        const orderRes = await fetch('/api/razorpay/create-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ planName, billingCycle }),
-        });
-
-        if (!orderRes.ok) {
-            const errorData = await orderRes.json();
-            throw new Error(errorData.message || 'Failed to create payment order.');
-        }
-
-        const { orderId, amount, currency, keyId } = await orderRes.json();
-        
-        if (!keyId) {
-            toast({ title: 'Configuration Error', description: 'Razorpay Key ID was not returned by the server.', variant: 'destructive'});
-            setIsProcessing(false);
-            return;
-        }
-
-        const options = {
-            key: keyId,
-            amount: amount,
-            currency: currency,
-            name: 'Soochi AI',
-            description: `${planName} Plan (${billingCycle})`,
-            order_id: orderId,
-            handler: async function (response: any) {
-                try {
-                  const verifyRes = await fetch('/api/razorpay/verify-payment', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                      ...response,
-                      planName,
-                      billingCycle
-                    }),
-                  });
-
-                  if (!verifyRes.ok) {
-                    const errorData = await verifyRes.json();
-                    throw new Error(errorData.message || 'Payment verification failed.');
-                  }
-
-                  toast({ title: 'Success', description: `Welcome to the ${planName} plan!`});
-                  window.location.reload();
-                } catch (err: any) {
-                  toast({ title: 'Verification Failed', description: err.message, variant: 'destructive' });
-                }
-            },
-            prefill: {
-                name: user.displayName || '',
-                email: user.email || '',
-            },
-            theme: {
-                color: '#4F46E5',
-            },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', function (response: any){
-            toast({ title: 'Payment Failed', description: response.error.description, variant: 'destructive' });
-        });
-        rzp.open();
-
-    } catch (error: any) {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } finally {
-        setIsProcessing(false);
-    }
+  const handlePurchase = async (planName: string) => {
+    toast({
+      title: 'Subscription Update',
+      description: `Please contact our sales team to upgrade to the ${planName} plan.`,
+    });
   };
 
   const displayPlans = isYearly ? plans.yearly : plans.monthly;
   const currentPlanName = userData?.plan || 'free';
 
   return (
-    <>
-      <Script id="razorpay-checkout-js" src="https://checkout.razorpay.com/v1/checkout.js" />
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-12"
-      >
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Subscription & Billing</h1>
-            <p className="mt-2 text-muted-foreground">
-              Manage your plan, usage, and payment details.
-            </p>
-          </div>
-          <div className="flex items-center space-x-3 rounded-full bg-card/50 p-1 border">
-            <Label htmlFor="billing-cycle" className="pl-2">Monthly</Label>
-            <Switch
-              id="billing-cycle"
-              checked={isYearly}
-              onCheckedChange={setIsYearly}
-              aria-label="Toggle billing cycle"
-            />
-            <Label htmlFor="billing-cycle">Yearly</Label>
-            <div className="rounded-full border border-green-500/50 bg-green-500/10 px-3 py-1 text-xs text-green-400">
-              Save 20%
-            </div>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-12"
+    >
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Subscription & Billing</h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage your plan, usage, and payment details.
+          </p>
+        </div>
+        <div className="flex items-center space-x-3 rounded-full bg-card/50 p-1 border">
+          <Label htmlFor="billing-cycle" className="pl-2">Monthly</Label>
+          <Switch
+            id="billing-cycle"
+            checked={isYearly}
+            onCheckedChange={setIsYearly}
+            aria-label="Toggle billing cycle"
+          />
+          <Label htmlFor="billing-cycle">Yearly</Label>
+          <div className="rounded-full border border-green-500/50 bg-green-500/10 px-3 py-1 text-xs text-green-400">
+            Save 20%
           </div>
         </div>
+      </div>
 
-        {isUserLoading ? (
+      {isUserLoading ? (
+        <Skeleton className="h-48 w-full rounded-2xl" />
+      ) : (
+        <CurrentPlanCard userData={userData} />
+      )}
+      
+      {isUserLoading ? (
           <Skeleton className="h-48 w-full rounded-2xl" />
-        ) : (
-          <CurrentPlanCard userData={userData} />
-        )}
-        
-        {isUserLoading ? (
-            <Skeleton className="h-48 w-full rounded-2xl" />
-        ) : (
-            <UsageStats userData={userData} />
-        )}
+      ) : (
+          <UsageStats userData={userData} />
+      )}
 
-        <div id="pricing-plans">
-          <h2 className="mb-8 text-2xl font-semibold tracking-tight text-center">
-            Choose the plan that's right for you
-          </h2>
-          <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {displayPlans.map((plan) => (
-              <PlanCard
-                key={plan.name}
-                plan={plan}
-                currentPlanName={currentPlanName}
-                onPurchase={handlePurchase}
-                isProcessing={isProcessing}
-                isYearly={isYearly}
-              />
-            ))}
-          </div>
+      <div id="pricing-plans">
+        <h2 className="mb-8 text-2xl font-semibold tracking-tight text-center">
+          Choose the plan that's right for you
+        </h2>
+        <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {displayPlans.map((plan) => (
+            <PlanCard
+              key={plan.name}
+              plan={plan}
+              currentPlanName={currentPlanName}
+              onPurchase={handlePurchase}
+              isProcessing={false}
+              isYearly={isYearly}
+            />
+          ))}
         </div>
+      </div>
 
-        <PaymentHistoryTable />
-      </motion.div>
-    </>
+      <PaymentHistoryTable />
+    </motion.div>
   );
 }

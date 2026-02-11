@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -13,13 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-
-const planPrices: { [key: string]: { monthly: number, yearly: number } } = {
-  free: { monthly: 0, yearly: 0 },
-  creator: { monthly: 29, yearly: 278 },
-  pro: { monthly: 99, yearly: 950 },
-  business: { monthly: -1, yearly: -1 },
-};
 
 export default function PlanCard({
   plan,
@@ -39,24 +32,13 @@ export default function PlanCard({
   const getButtonAction = () => {
     if (isCurrent) return 'Current Plan';
     if (plan.name === 'Business') return 'Contact Sales';
-
-    const currentPlanPrice = planPrices[currentPlanName.toLowerCase()]?.[isYearly ? 'yearly' : 'monthly'] ?? 0;
-    const targetPlanPrice = plan.priceNumeric;
-    
-    if (targetPlanPrice < 0) return 'Contact Sales';
-
-    if (targetPlanPrice > currentPlanPrice) {
-      return 'Upgrade';
-    }
-    return 'Downgrade';
+    return 'Upgrade';
   };
 
   const buttonAction = getButtonAction();
 
   const handleButtonClick = () => {
-    if (buttonAction === 'Upgrade') {
-      onPurchase(plan.name, isYearly ? 'yearly' : 'monthly');
-    }
+    onPurchase(plan.name, isYearly ? 'yearly' : 'monthly');
   };
 
   return (
@@ -113,14 +95,9 @@ export default function PlanCard({
               size="lg"
               className="w-full font-bold"
               variant={plan.isHighlighted ? 'default' : isCurrent ? 'secondary' : 'outline'}
-              disabled={
-                isCurrent || isProcessing || buttonAction === 'Downgrade'
-              }
+              disabled={isCurrent}
               onClick={handleButtonClick}
             >
-              {isProcessing && buttonAction === 'Upgrade' ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
               {buttonAction}
             </Button>
           )}

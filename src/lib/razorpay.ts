@@ -1,18 +1,2 @@
-import Razorpay from 'razorpay';
-
-let razorpay: Razorpay | null = null;
-
-if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-  try {
-    razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
-    });
-  } catch (error) {
-    console.error('Failed to initialize Razorpay:', error);
-  }
-} else {
-    console.warn('Razorpay keys are not defined in environment variables. Razorpay functionality will be disabled.');
-}
-
-export { razorpay };
+// Razorpay integration has been removed.
+export const razorpay = null;
