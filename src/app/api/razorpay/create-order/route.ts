@@ -1,4 +1,3 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import { razorpay } from '@/lib/razorpay';
 import { adminAuth } from '@/lib/firebase-admin';
@@ -10,22 +9,34 @@ const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
 
 export async function POST(request: NextRequest) {
   if (!razorpay) {
-    return NextResponse.json({ message: 'Razorpay not configured' }, { status: 500 });
+    return NextResponse.json({ message: 'Razorpay service is not configured. Check your environment variables.' }, { status: 500 });
+  }
+
+  if (!adminAuth) {
+    return NextResponse.json({ message: 'Firebase Admin SDK is not configured. Backend authentication is unavailable.' }, { status: 500 });
   }
 
   try {
-    const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
-    if (!idToken || !adminAuth) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    const authHeader = request.headers.get('authorization');
+    const idToken = authHeader?.split('Bearer ')[1];
+
+    if (!idToken) {
+      return NextResponse.json({ message: 'Authentication token is missing.' }, { status: 401 });
     }
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-    const uid = decodedToken.uid;
+
+    let uid: string;
+    try {
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      uid = decodedToken.uid;
+    } catch (e) {
+      return NextResponse.json({ message: 'Invalid or expired authentication token.' }, { status: 401 });
+    }
 
     const { planName, billingCycle } = await request.json();
 
     const planPriceObj = PLAN_PRICES[planName];
     if (!planPriceObj) {
-      return NextResponse.json({ message: 'Invalid plan' }, { status: 400 });
+      return NextResponse.json({ message: 'Invalid plan name provided.' }, { status: 400 });
     }
 
     const amount = planPriceObj[billingCycle as 'monthly' | 'yearly'];
@@ -48,6 +59,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error creating Razorpay order:', error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: error.message || 'An internal error occurred while creating the order.' }, { status: 500 });
   }
 }

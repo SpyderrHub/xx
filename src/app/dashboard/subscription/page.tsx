@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -171,7 +170,8 @@ export default function SubscriptionPage() {
     setIsProcessing(true);
 
     try {
-        const token = await user.getIdToken();
+        // Force refresh the token to ensure it's valid for the backend
+        const token = await user.getIdToken(true);
         
         // 1. Create Order
         const orderRes = await fetch('/api/razorpay/create-order', {
@@ -193,7 +193,7 @@ export default function SubscriptionPage() {
         const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
         if (!RAZORPAY_KEY_ID) {
-            toast({ title: 'Configuration Error', description: 'Razorpay Key ID is not configured.', variant: 'destructive'});
+            toast({ title: 'Configuration Error', description: 'Razorpay Key ID is not configured in environment variables.', variant: 'destructive'});
             setIsProcessing(false);
             return;
         }
@@ -222,7 +222,10 @@ export default function SubscriptionPage() {
                     }),
                   });
 
-                  if (!verifyRes.ok) throw new Error('Payment verification failed');
+                  if (!verifyRes.ok) {
+                    const errorData = await verifyRes.json();
+                    throw new Error(errorData.message || 'Payment verification failed.');
+                  }
 
                   toast({ title: 'Success', description: `Welcome to the ${planName} plan!`});
                   window.location.reload();

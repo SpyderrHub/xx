@@ -1,4 +1,3 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import crypto from 'crypto';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
@@ -10,7 +9,7 @@ const PLAN_CREDITS: Record<string, number> = {
 
 export async function POST(request: NextRequest) {
   if (!adminDb || !adminAuth) {
-    return NextResponse.json({ message: 'Database service unavailable' }, { status: 500 });
+    return NextResponse.json({ message: 'Database or Auth service is not configured. Check environment variables.' }, { status: 500 });
   }
 
   try {
@@ -24,7 +23,9 @@ export async function POST(request: NextRequest) {
 
     // 1. Verify Signature
     const secret = process.env.RAZORPAY_KEY_SECRET;
-    if (!secret) throw new Error('Razorpay secret not configured');
+    if (!secret) {
+      return NextResponse.json({ message: 'Razorpay secret is not configured on the server.' }, { status: 500 });
+    }
 
     const generated_signature = crypto
       .createHmac('sha256', secret)
@@ -32,14 +33,24 @@ export async function POST(request: NextRequest) {
       .digest('hex');
 
     if (generated_signature !== razorpay_signature) {
-      return NextResponse.json({ message: 'Invalid payment signature' }, { status: 400 });
+      return NextResponse.json({ message: 'Invalid payment signature. Verification failed.' }, { status: 400 });
     }
 
     // 2. Identify User
-    const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
-    if (!idToken) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-    const uid = decodedToken.uid;
+    const authHeader = request.headers.get('authorization');
+    const idToken = authHeader?.split('Bearer ')[1];
+    
+    if (!idToken) {
+      return NextResponse.json({ message: 'Authentication token is missing.' }, { status: 401 });
+    }
+
+    let uid: string;
+    try {
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      uid = decodedToken.uid;
+    } catch (e) {
+      return NextResponse.json({ message: 'Invalid or expired authentication token.' }, { status: 401 });
+    }
 
     // 3. Update User Data
     const userRef = adminDb.collection('users').doc(uid);
@@ -78,6 +89,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Payment verification failed:', error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: error.message || 'An error occurred during verification.' }, { status: 500 });
   }
 }
