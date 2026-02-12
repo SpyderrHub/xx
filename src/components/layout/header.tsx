@@ -27,7 +27,7 @@ const Header = () => {
         ? "bg-background/80 backdrop-blur-md border-white/10" 
         : "bg-transparent border-transparent"
     )}>
-      <div className="container mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto flex h-20 max-w-7xl items-center justify-between px-6 sm:px-10 lg:px-16">
         <div className="flex items-center gap-10">
           <Link href="/" className="flex items-center gap-2" aria-label="Home">
             <Logo className="h-7" />

@@ -10,7 +10,7 @@ const logos = [
 const SocialProofSection = () => {
   return (
     <section className="py-20 border-t border-white/5">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground mb-12">
           Trusted by Innovative Creators and Studios
         </p>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 const Footer = () => {
   return (
     <footer className="bg-black/40 border-t border-white/5 pt-20 pb-10">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" aria-label="Home">

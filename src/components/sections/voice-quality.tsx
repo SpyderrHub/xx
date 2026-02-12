@@ -19,7 +19,7 @@ const VoiceQualitySection = () => {
 
   return (
     <section id="voice-demo" className="py-24 bg-gradient-to-b from-black/40 to-transparent">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl mb-6 leading-tight">

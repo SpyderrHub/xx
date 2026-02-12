@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ import { cn } from '@/lib/utils';
 const plans = [
   {
     name: 'Starter',
-    price: '$0',
+    price: '₹0',
     period: '/ month',
     description: 'For personal projects and exploration.',
     features: [
@@ -28,7 +29,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '$29',
+    price: '₹699',
     period: '/ month',
     description: 'For professionals and growing businesses.',
     features: [
@@ -63,7 +64,7 @@ const plans = [
 const PricingSection = () => {
   return (
     <section id="pricing" className="bg-secondary py-16 sm:py-24">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
             Choose Your Plan
@@ -116,7 +117,7 @@ const PricingSection = () => {
                   className="w-full"
                   variant={plan.isHighlighted ? 'default' : 'outline'}
                 >
-                  <Link href={plan.name === 'Business' ? 'mailto:sales@voxai.dev' : '/sign-up'}>{plan.cta}</Link>
+                  <Link href={plan.name === 'Business' ? 'mailto:sales@saanchi.ai' : '/sign-up'}>{plan.cta}</Link>
                 </Button>
               </CardFooter>
             </Card>

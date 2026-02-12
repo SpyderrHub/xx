@@ -10,7 +10,7 @@ const FinalCTASection = () => {
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-primary/5" />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
