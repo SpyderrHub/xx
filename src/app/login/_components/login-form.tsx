@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -65,6 +64,15 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { auth, firestore } = useFirebase();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      rememberMe: false,
+    },
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
