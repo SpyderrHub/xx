@@ -34,7 +34,7 @@ const FeaturesSection = () => {
             Powerful Features for Every Use Case
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            From content creation to custom applications, Soochi AI provides the tools you need to innovate with voice.
+            From content creation to custom applications, Saanchi AI provides the tools you need to innovate with voice.
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-2 xl:grid-cols-4">

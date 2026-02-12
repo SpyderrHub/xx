@@ -5,14 +5,14 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const ApiShowcaseSection = () => {
   const codeString = `
-fetch('https://api.soochi.ai/v1/generate', {
+fetch('https://api.saanchi.ai/v1/generate', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    text: "Hello from Soochi AI!",
+    text: "Hello from Saanchi AI!",
     voice: "alex-male-en-us",
   })
 })
@@ -32,7 +32,7 @@ fetch('https://api.soochi.ai/v1/generate', {
             Developer-Friendly API
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Integrate Soochi AI's powerful voice generation into your applications
+            Integrate Saanchi AI's powerful voice generation into your applications
             with just a few lines of code.
           </p>
         </div>

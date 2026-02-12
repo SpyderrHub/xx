@@ -66,23 +66,12 @@ export function LoginForm() {
   const router = useRouter();
   const { auth, firestore } = useFirebase();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      rememberMe: false,
-    },
-  });
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
       const userCredential = await signInWithEmail(auth, values.email, values.password);
       
-      // Strict Role-based redirect
       if (firestore) {
-        // Fetch fresh user data to determine correct destination
         const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
         const userData = userDoc.data();
         
@@ -140,7 +129,7 @@ export function LoginForm() {
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-gray-300">
-            Log in to continue to Soochi AI.
+            Log in to continue to Saanchi AI.
           </p>
         </div>
 

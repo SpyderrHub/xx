@@ -26,7 +26,7 @@ const FinalCTASection = () => {
               Start Creating AI Voices Today
             </h2>
             <p className="text-xl text-primary-foreground/80 mb-12">
-              Join thousands of developers and creators building the future of audio content with Soochi AI. No credit card required to start.
+              Join thousands of developers and creators building the future of audio content with Saanchi AI. No credit card required to start.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button asChild size="lg" className="h-16 rounded-2xl px-10 text-xl font-bold bg-white text-primary hover:bg-gray-100 transition-transform hover:scale-105 active:scale-95">

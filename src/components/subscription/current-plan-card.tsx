@@ -67,7 +67,7 @@ export default function CurrentPlanCard({ userData }: any) {
       <CardFooter className="flex gap-2">
         <Button onClick={handleUpgradeClick} className="bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700">Upgrade Plan</Button>
         <Button variant="outline" asChild>
-          <Link href="mailto:support@soochi.ai">Contact Support</Link>
+          <Link href="mailto:support@saanchi.ai">Contact Support</Link>
         </Button>
       </CardFooter>
     </Card>

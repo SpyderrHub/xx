@@ -30,7 +30,7 @@ export default function SignUpPage() {
             Create lifelike AI voices in minutes
           </h1>
           <p className="max-w-md text-lg text-gray-300">
-            Join thousands of creators using Soochi AI for videos, audiobooks,
+            Join thousands of creators using Saanchi AI for videos, audiobooks,
             and apps.
           </p>
           <ul className="space-y-4 pt-4">
@@ -53,7 +53,7 @@ export default function SignUpPage() {
           </ul>
         </div>
         <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} Soochi AI. All rights reserved.
+          © {new Date().getFullYear()} Saanchi AI. All rights reserved.
         </p>
       </div>
 

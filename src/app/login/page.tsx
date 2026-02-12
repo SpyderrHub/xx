@@ -27,7 +27,7 @@ export default function LoginPage() {
 
         <div className="space-y-6">
           <h1 className="font-headline text-4xl font-bold tracking-tight">
-            Welcome back to Soochi AI
+            Welcome back to Saanchi AI
           </h1>
           <p className="max-w-md text-lg text-gray-300">
             Log in to generate natural-sounding AI voices in seconds.
@@ -52,7 +52,7 @@ export default function LoginPage() {
           </ul>
         </div>
         <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} Soochi AI. All rights reserved.
+          © {new Date().getFullYear()} Saanchi AI. All rights reserved.
         </p>
       </div>
 
