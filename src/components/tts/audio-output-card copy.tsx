@@ -9,7 +9,6 @@ interface AudioOutputCardProps {
   voice: string;
   duration: number;
   characters: number;
-  onMetadataLoaded?: (duration: number) => void;
 }
 
 export default function AudioOutputCard({
@@ -17,32 +16,23 @@ export default function AudioOutputCard({
   voice,
   duration,
   characters,
-  onMetadataLoaded,
 }: AudioOutputCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [localDuration, setLocalDuration] = useState(duration);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  const togglePlayPause = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-  
-    try {
+  const togglePlayPause = () => {
+    if (audioRef.current) {
       if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
+        audioRef.current.pause();
       } else {
-        await audio.play(); // ✅ user interaction → allowed
-        setIsPlaying(true);
+        audioRef.current.play();
       }
-    } catch (err) {
-      console.error("Playback failed:", err);
+      setIsPlaying(!isPlaying);
     }
   };
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || seconds === Infinity) return '0:00';
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -51,46 +41,27 @@ export default function AudioOutputCard({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-  
+
     const handleTimeUpdate = () => {
-      if (audio.duration) {
-        setProgress((audio.currentTime / audio.duration) * 100);
-      }
+      setProgress((audio.currentTime / audio.duration) * 100);
     };
-  
     const handleEnded = () => {
       setIsPlaying(false);
       setProgress(0);
     };
-  
-    const handleLoadedMetadata = () => {
-      const newDuration = audio.duration;
-      if (newDuration && newDuration !== Infinity) {
-        setLocalDuration(newDuration);
-        onMetadataLoaded?.(newDuration);
-      }
-    };
-  
+
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-  
-    // ✅ SAFE reload
+
+    // Auto-play when a new audio URL is provided
     if (audioUrl) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.src = audioUrl;
-      audio.load();
-  
-      setIsPlaying(false);
-      setProgress(0);
-      setLocalDuration(0);
+        audio.play().then(() => setIsPlaying(true)).catch(e => console.error("Autoplay failed", e));
     }
-  
+
+
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   }, [audioUrl]);
 
@@ -115,22 +86,20 @@ export default function AudioOutputCard({
             </div>
           </div>
           <span className="text-sm text-muted-foreground">
-            {formatTime(localDuration)}
+            {formatTime(duration)}
           </span>
-          <Button variant="ghost" size="icon" asChild>
-            <a href={audioUrl} download={`${voice.replace(/ /g, '_')}_${Date.now()}.wav`}>
-              <Download className="h-4 w-4" />
-            </a>
+          <Button variant="ghost" size="icon">
+            <Download className="h-4 w-4" />
           </Button>
-          {/* <Button variant="ghost" size="icon" onClick={() => navigator.clipboard.writeText(audioUrl)}>
+          <Button variant="ghost" size="icon">
             <LinkIcon className="h-4 w-4" />
-          </Button> */}
+          </Button>
         </div>
         <div className="mt-3 flex justify-end space-x-4 text-xs text-muted-foreground">
           <span>{characters} characters</span>
-          <span>{localDuration > 0 ? localDuration.toFixed(1) : '-'}s duration</span>
+          <span>{duration.toFixed(1)}s duration</span>
         </div>
-        <audio ref={audioRef} className="hidden"></audio>
+        <audio ref={audioRef} src={audioUrl} className="hidden"></audio>
       </CardContent>
     </Card>
   );

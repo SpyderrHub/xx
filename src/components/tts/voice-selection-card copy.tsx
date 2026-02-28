@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -17,14 +18,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Loader2, Library } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
 
 interface VoiceSelectionCardProps {
-  voices: any[];
-  isLoading: boolean;
-  selectedVoice: string | null;
-  setSelectedVoice: (id: string | null) => void;
+  selectedVoice: string;
+  setSelectedVoice: (id: string) => void;
   stability: number;
   setStability: (value: number) => void;
   clarity: number;
@@ -33,9 +31,14 @@ interface VoiceSelectionCardProps {
   setPitch: (value: number) => void;
 }
 
+const PREBUILT_VOICES = [
+  { id: 'Algenib', name: 'Algenib (Default)', gender: 'Male', language: 'English' },
+  { id: 'Achernar', name: 'Achernar', gender: 'Female', language: 'English' },
+  { id: 'Rigel', name: 'Rigel', gender: 'Male', language: 'English' },
+  { id: 'Sirius', name: 'Sirius', gender: 'Female', language: 'English' },
+];
+
 export default function VoiceSelectionCard({
-  voices,
-  isLoading,
   selectedVoice,
   setSelectedVoice,
   stability,
@@ -45,36 +48,6 @@ export default function VoiceSelectionCard({
   pitch,
   setPitch,
 }: VoiceSelectionCardProps) {
-  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const togglePlay = (e: React.MouseEvent, voice: any) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (playingVoiceId === voice.id) {
-      audioRef.current?.pause();
-      setPlayingVoiceId(null);
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      audioRef.current = new Audio(voice.audioUrl);
-      audioRef.current.onended = () => setPlayingVoiceId(null);
-      audioRef.current.play();
-      setPlayingVoiceId(voice.id);
-    }
-  };
-
-  // Cleanup audio on component unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, []);
-
   return (
     <Card className="flex h-full flex-col bg-white/5 backdrop-blur-sm">
       <CardHeader>
@@ -82,59 +55,31 @@ export default function VoiceSelectionCard({
       </CardHeader>
       <CardContent className="flex flex-1 flex-col overflow-hidden">
         <ScrollArea className="flex-1 pr-4">
-          {isLoading ? (
-            <div className="flex h-32 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : voices.length > 0 ? (
-            <RadioGroup
-              value={selectedVoice || ''}
-              onValueChange={setSelectedVoice}
-              className="space-y-4"
-            >
-              {voices.map((voice) => (
-                <Label
-                  key={voice.id}
-                  htmlFor={voice.id}
-                  className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-colors hover:bg-white/10 ${
-                    selectedVoice === voice.id ? 'border-primary bg-white/10' : 'border-white/10'
-                  }`}
-                >
-                  <div className="flex items-center space-x-4">
-                    <RadioGroupItem value={voice.id} id={voice.id} />
-                    <div>
-                      <p className="font-semibold">{voice.voiceName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {voice.gender} &middot; {voice.language}
-                      </p>
-                    </div>
+          <RadioGroup
+            value={selectedVoice}
+            onValueChange={setSelectedVoice}
+            className="space-y-4"
+          >
+            {PREBUILT_VOICES.map((voice) => (
+              <Label
+                key={voice.id}
+                htmlFor={voice.id}
+                className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-colors hover:bg-white/10 ${
+                  selectedVoice === voice.id ? 'border-primary bg-white/10' : 'border-white/10'
+                }`}
+              >
+                <div className="flex items-center space-x-4">
+                  <RadioGroupItem value={voice.id} id={voice.id} />
+                  <div>
+                    <p className="font-semibold">{voice.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {voice.gender} &middot; {voice.language}
+                    </p>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={(e) => togglePlay(e, voice)}
-                    className="h-8 w-8"
-                  >
-                    {playingVoiceId === voice.id ? (
-                      <Pause className="h-4 w-4" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                  </Button>
-                </Label>
-              ))}
-            </RadioGroup>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-48 text-center space-y-4">
-              <p className="text-muted-foreground text-sm">No voices added to your library yet.</p>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/voice-library">
-                  <Library className="mr-2 h-4 w-4" />
-                  Browse Voice Library
-                </Link>
-              </Button>
-            </div>
-          )}
+                </div>
+              </Label>
+            ))}
+          </RadioGroup>
         </ScrollArea>
         <Accordion type="single" collapsible className="mt-4 w-full">
           <AccordionItem value="advanced-settings">

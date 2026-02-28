@@ -23,6 +23,9 @@ RAZORPAY_PLAN_CREATOR_MONTHLY=plan_xxxxxx
 RAZORPAY_PLAN_CREATOR_YEARLY=plan_yyyyyy
 RAZORPAY_PLAN_PRO_MONTHLY=plan_zzzzzz
 RAZORPAY_PLAN_PRO_YEARLY=plan_wwwwww
+
+# API Configuration
+NEXT_PUBLIC_API_URL=https://58.224.7.137:45153/v1/text-to-speech
 ```
 
 ### 2. Firebase Setup
