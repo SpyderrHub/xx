@@ -103,46 +103,71 @@ const VoiceQualitySection = () => {
                     <div className={cn("absolute top-0 right-0 h-24 w-24 opacity-5 blur-[40px] rounded-full", colorClass)} />
                     
                     <div className="flex items-center justify-between mb-6">
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
-                        className="h-12 w-12 rounded-full bg-white text-black hover:bg-primary hover:text-white z-10"
-                        onClick={() => togglePlay(voice)}
-                      >
-                        {playingId === voice.id ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
-                      </Button>
-                      <Badge variant="outline" className="border-white/10 text-[10px] uppercase font-bold tracking-widest bg-black/20">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="relative h-14 w-14 rounded-full overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center shrink-0 cursor-pointer group/avatar shadow-lg transition-transform active:scale-95"
+                          onClick={() => togglePlay(voice)}
+                        >
+                          {voice.avatarUrl ? (
+                            <Image 
+                              src={voice.avatarUrl} 
+                              alt={voice.voiceName} 
+                              fill 
+                              className={cn(
+                                "object-cover transition-opacity",
+                                playingId === voice.id ? "opacity-40" : "group-hover/avatar:opacity-40"
+                              )} 
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <User className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className={cn(
+                            "absolute inset-0 flex items-center justify-center transition-opacity bg-black/20",
+                            playingId === voice.id ? "opacity-100" : "opacity-0 group-hover/avatar:opacity-100"
+                          )}>
+                            {playingId === voice.id ? (
+                              <Pause className="h-6 w-6 text-white fill-current" />
+                            ) : (
+                              <Play className="h-6 w-6 text-white fill-current ml-1" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-white text-base truncate">{voice.voiceName}</h4>
+                          <p className="text-xs text-muted-foreground truncate">{voice.language}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="border-white/10 text-[10px] uppercase font-bold tracking-widest bg-black/20 h-fit">
                         {voice.style || 'Premium'}
                       </Badge>
                     </div>
-
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center shrink-0">
-                        {voice.avatarUrl ? (
-                          <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
-                        ) : (
-                          <User className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-white text-base truncate">{voice.voiceName}</h4>
-                        <p className="text-xs text-muted-foreground truncate">{voice.language}</p>
-                      </div>
-                    </div>
                     
-                    {playingId === voice.id && (
-                      <div className="mt-2 flex items-end gap-0.5 h-8">
-                        {[...Array(20)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            className={cn("w-1 rounded-full", colorClass.replace('bg-', 'bg-opacity-80 bg-'))}
-                            style={{ backgroundColor: 'currentColor' }}
-                            animate={{ height: ['20%', '80%', '20%'] }}
-                            transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.05 }}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    <div className="h-12 flex flex-col justify-center">
+                      {playingId === voice.id ? (
+                        <div className="flex items-end gap-0.5 h-8">
+                          {[...Array(30)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className={cn("w-1 rounded-full", colorClass.replace('bg-', 'bg-opacity-80 bg-'))}
+                              style={{ backgroundColor: 'currentColor' }}
+                              animate={{ height: ['20%', '100%', '20%'] }}
+                              transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.03 }}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-0.5 h-1 bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full w-full bg-white/5" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+                      <span>48kHz / 24-bit</span>
+                      <span className="uppercase">{voice.gender}</span>
+                    </div>
                   </motion.div>
                 );
               })
