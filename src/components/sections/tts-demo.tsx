@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, limit } from 'firebase/firestore';
@@ -74,7 +74,7 @@ export default function TtsDemoSection() {
       const audioPath = getStoragePathFromUrl(selectedVoice.audioUrl);
       if (!audioPath) throw new Error('Invalid voice sample path');
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL + 'v1/text-to-speech/';
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech').replace(/\/$/, '') + '/';
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,124 +101,127 @@ export default function TtsDemoSection() {
   return (
     <section id="tts-demo" className="py-24 relative">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Try Saanchi AI Studio
+              Saanchi AI Voice Studio
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Select a professional speaker and generate high-fidelity audio in seconds.
+              Enter your text, select a professional speaker, and listen to the magic.
             </p>
           </div>
 
           <Card className="bg-card/40 backdrop-blur-xl border-white/5 shadow-2xl overflow-hidden">
-            <CardContent className="p-0">
-              <div className="grid grid-cols-1 lg:grid-cols-12">
-                {/* Left: Input & Controls */}
-                <div className="lg:col-span-7 p-6 sm:p-8 space-y-6 border-b lg:border-b-0 lg:border-r border-white/5">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Your Text</label>
-                    <Textarea 
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      placeholder="Enter text to speak..."
-                      className="min-h-[200px] resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-lg leading-relaxed"
-                    />
+            <CardContent className="p-6 sm:p-10 space-y-10">
+              {/* Top: Text Input */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] block">Input Text</label>
+                <Textarea 
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="What would you like Saanchi AI to say?"
+                  className="min-h-[180px] resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-lg leading-relaxed shadow-inner"
+                />
+              </div>
+
+              {/* Middle: Speaker Selection Grid */}
+              <div className="space-y-4">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] block">Select Speaker</label>
+                
+                {voicesLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="h-20 w-full bg-white/5 animate-pulse rounded-2xl border border-white/5" />
+                    ))}
                   </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {voices?.map((voice) => (
+                      <button
+                        key={voice.id}
+                        onClick={() => setSelectedVoiceId(voice.id)}
+                        className={cn(
+                          "h-20 flex items-center gap-4 px-4 rounded-2xl transition-all border text-left group",
+                          selectedVoiceId === voice.id 
+                            ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" 
+                            : "bg-white/5 border-white/5 hover:border-white/20"
+                        )}
+                      >
+                        <div className="relative h-12 w-12 rounded-full overflow-hidden border border-white/10 shrink-0">
+                          {voice.avatarUrl ? (
+                            <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+                          ) : (
+                            <div className="h-full w-full bg-white/10 flex items-center justify-center">
+                              <User className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={cn(
+                            "font-bold text-sm truncate",
+                            selectedVoiceId === voice.id ? "text-primary" : "text-white"
+                          )}>
+                            {voice.voiceName}
+                          </h4>
+                          <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider">{voice.language} • {voice.style}</p>
+                        </div>
+                        {selectedVoiceId === voice.id && (
+                          <div className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                  <div className="flex flex-wrap items-center gap-4">
-                    <Button 
-                      size="lg" 
-                      onClick={handleGenerate}
-                      disabled={isGenerating || !text}
-                      className="h-14 px-8 rounded-2xl bg-primary hover:bg-primary/90 font-bold text-lg shadow-lg shadow-primary/20"
-                    >
-                      {isGenerating ? <Loader2 className="mr-2 animate-spin" /> : <Zap className="mr-2" />}
-                      {isGenerating ? 'Generating...' : 'Generate Audio'}
-                    </Button>
+              {/* Bottom: Actions Centered */}
+              <div className="flex flex-col items-center justify-center pt-4 border-t border-white/5 gap-6">
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <Button 
+                    size="lg" 
+                    onClick={handleGenerate}
+                    disabled={isGenerating || !text || !selectedVoiceId}
+                    className="h-16 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-bold text-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                  >
+                    {isGenerating ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Zap className="mr-3 h-6 w-6" />}
+                    {isGenerating ? 'Generating...' : 'Generate Audio'}
+                  </Button>
 
-                    <AnimatePresence>
-                      {audioUrl && (
-                        <motion.div 
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center gap-2"
+                  <AnimatePresence>
+                    {audioUrl && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-3"
+                      >
+                        <Button 
+                          variant="secondary" 
+                          size="icon" 
+                          onClick={handleTogglePlay}
+                          className="h-16 w-16 rounded-2xl bg-white text-black hover:bg-gray-100 shadow-xl transition-all hover:scale-105"
                         >
-                          <Button 
-                            variant="secondary" 
-                            size="icon" 
-                            onClick={handleTogglePlay}
-                            className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-gray-100"
-                          >
-                            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            asChild
-                            className="h-14 w-14 rounded-2xl border-white/10 hover:bg-white/5"
-                          >
-                            <a href={audioUrl} download="saanchi-ai-generation.wav">
-                              <Download className="h-6 w-6" />
-                            </a>
-                          </Button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-
-                {/* Right: Speaker Selection */}
-                <div className="lg:col-span-5 p-6 sm:p-8 bg-black/20">
-                  <div className="space-y-4">
-                    <label className="text-sm font-medium text-muted-foreground uppercase tracking-widest block mb-4">Choose Speaker</label>
-                    
-                    {voicesLoading ? (
-                      <div className="space-y-3">
-                        {[1, 2, 3, 4, 5].map(i => (
-                          <div key={i} className="h-20 w-full bg-white/5 animate-pulse rounded-2xl" />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {voices?.map((voice) => (
-                          <button
-                            key={voice.id}
-                            onClick={() => setSelectedVoiceId(voice.id)}
-                            className={cn(
-                              "w-full h-20 flex items-center gap-4 px-4 rounded-2xl transition-all border text-left group",
-                              selectedVoiceId === voice.id 
-                                ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" 
-                                : "bg-white/5 border-white/5 hover:border-white/20"
-                            )}
-                          >
-                            <div className="relative h-12 w-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                              {voice.avatarUrl ? (
-                                <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
-                              ) : (
-                                <div className="h-full w-full bg-white/10 flex items-center justify-center">
-                                  <User className="h-6 w-6 text-muted-foreground" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className={cn(
-                                "font-bold text-sm truncate",
-                                selectedVoiceId === voice.id ? "text-primary" : "text-white"
-                              )}>
-                                {voice.voiceName}
-                              </h4>
-                              <p className="text-xs text-muted-foreground truncate">{voice.language} • {voice.style}</p>
-                            </div>
-                            {selectedVoiceId === voice.id && (
-                              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
+                          {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          asChild
+                          className="h-16 w-16 rounded-2xl border-white/10 hover:bg-white/5 transition-all hover:scale-105"
+                        >
+                          <a href={audioUrl} download="saanchi-ai-voice.wav">
+                            <Download className="h-8 w-8" />
+                          </a>
+                        </Button>
+                      </motion.div>
                     )}
-                  </div>
+                  </AnimatePresence>
                 </div>
+                
+                {audioUrl && (
+                  <p className="text-sm text-primary font-medium animate-pulse">
+                    ✨ Your AI voice is ready to play!
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
