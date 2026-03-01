@@ -12,6 +12,9 @@ import {
   Settings,
   LogOut,
   Menu,
+  Zap,
+  Code2,
+  ChevronRight,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -24,6 +27,7 @@ import {
   SidebarFooter,
   SidebarInset,
   SidebarMenuSkeleton,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/logo';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
@@ -39,9 +43,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSidebar } from '@/components/ui/sidebar';
 import { useUserRole } from '@/hooks/use-user-role';
 import { doc } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 const planLimits: Record<string, number> = {
   free: 10000,
@@ -49,6 +54,12 @@ const planLimits: Record<string, number> = {
   pro: 2000000,
   business: 10000000,
 };
+
+const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <div className={cn("px-4 mb-2 mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60", className)}>
+    {children}
+  </div>
+);
 
 const DashboardHeader = ({ title }: { title: string }) => {
   const { isMobile, toggleSidebar } = useSidebar();
@@ -82,13 +93,13 @@ const DashboardHeader = ({ title }: { title: string }) => {
   const creditsUsed = Math.max(0, limit - creditsRemaining);
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b bg-background px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b bg-background/80 backdrop-blur-md px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       {isMobile && (
         <Button variant="ghost" size="icon" onClick={toggleSidebar}>
           <Menu className="h-6 w-6" />
         </Button>
       )}
-      <h1 className="flex-1 text-xl font-semibold">{title}</h1>
+      <h1 className="flex-1 text-xl font-semibold tracking-tight">{title}</h1>
       <div className="flex items-center gap-4">
         {!isUserLoading && user && (
           <div className="hidden flex-col items-end sm:flex">
@@ -99,7 +110,7 @@ const DashboardHeader = ({ title }: { title: string }) => {
           </div>
         )}
 
-        <Button asChild className="hidden bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700 sm:block">
+        <Button asChild className="hidden bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700 sm:block rounded-xl shadow-lg shadow-primary/20">
           <Link href="/dashboard/subscription">Upgrade</Link>
         </Button>
 
@@ -160,144 +171,165 @@ const DashboardHeader = ({ title }: { title: string }) => {
 const DashboardSidebar = () => {
   const pathname = usePathname();
   const { user, isUserLoading, auth } = useFirebase();
-  const router = useRouter();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
-  const handleLogout = async () => {
-    if (auth) {
-      await logout(auth);
-      router.push('/login');
-    }
-  };
+  const mainNav = useMemo(() => [
+    { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+    { href: '/dashboard/my-generations', label: 'History', icon: History },
+  ], []);
 
-  const navItems = useMemo(
-    () => [
-      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      {
-        href: '/dashboard/text-to-speech',
-        label: 'Text to Speech',
-        icon: MessageSquare,
-      },
-      { href: '/dashboard/voice-library', label: 'Voice Library', icon: Library },
-      { href: '/dashboard/my-generations', label: 'My Generations', icon: History },
-    ],
-    []
-  );
+  const studioNav = useMemo(() => [
+    { href: '/dashboard/text-to-speech', label: 'Text to Speech', icon: MessageSquare },
+    { href: '/dashboard/voice-library', label: 'Voice Library', icon: Library },
+  ], []);
 
-  const settingsItems = useMemo(
-    () => [
-      { href: '/dashboard/subscription', label: 'Subscription', icon: CreditCard },
-      { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-    ],
-    []
-  );
+  const footerNav = useMemo(() => [
+    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+    { href: '#', label: 'API Docs', icon: Code2 },
+  ], []);
 
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('');
+    return name.split(' ').map((n) => n[0]).join('');
+  };
+
+  const handleLogout = async () => {
+    if (auth) await logout(auth);
   };
 
   return (
-    <Sidebar
-      variant="sidebar"
-      collapsible="icon"
-      className="border-r border-sidebar-border"
-    >
-      <SidebarContent>
-        <SidebarHeader className="h-16 justify-center p-4">
-          <Link href="/" aria-label="Home">
-            <Logo className="h-7" />
-          </Link>
-        </SidebarHeader>
-        <SidebarMenu className="flex-1 px-2">
-          {isUserLoading
-            ? Array.from({ length: 4 }).map((_, i) => (
-                <SidebarMenuSkeleton key={i} showIcon />
-              ))
-            : navItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.href}
-                    tooltip={{ children: item.label }}
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+    <Sidebar variant="sidebar" collapsible="icon" className="border-r border-white/5 bg-background">
+      <SidebarHeader className="h-16 justify-center px-6">
+        <Link href="/" aria-label="Home" className="flex items-center gap-2">
+          <Logo className="h-7" />
+        </Link>
+      </SidebarHeader>
+      
+      <SidebarContent className="px-3 pb-4 scrollbar-hide">
+        {!isCollapsed && <SectionLabel>Dashboard</SectionLabel>}
+        <SidebarMenu>
+          {mainNav.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === item.href}
+                tooltip={item.label}
+                className={cn(
+                  "relative rounded-xl h-10 px-3 transition-all duration-200",
+                  pathname === item.href 
+                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
+                    : "hover:bg-white/5 text-muted-foreground hover:text-white"
+                )}
+              >
+                <Link href={item.href}>
+                  <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
 
-        <SidebarFooter className="px-2">
-          {isUserLoading
-            ? Array.from({ length: 2 }).map((_, i) => (
-                <SidebarMenuSkeleton key={i} showIcon />
-              ))
-            : settingsItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.href}
-                    tooltip={{ children: item.label }}
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+        {!isCollapsed && <SectionLabel>Studio</SectionLabel>}
+        <SidebarMenu>
+          {studioNav.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === item.href}
+                tooltip={item.label}
+                className={cn(
+                  "relative rounded-xl h-10 px-3 transition-all duration-200",
+                  pathname === item.href 
+                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
+                    : "hover:bg-white/5 text-muted-foreground hover:text-white"
+                )}
+              >
+                <Link href={item.href}>
+                  <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
+                  <span>{item.label}</span>
+                  {item.label === "Voice Library" && !isCollapsed && (
+                    <span className="ml-auto rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] font-black uppercase text-white/60 ring-1 ring-white/10">
+                      New
+                    </span>
+                  )}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
 
-          {isUserLoading ? (
-            <div className="flex items-center gap-2 p-2">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <Skeleton className="h-5 w-24" />
-            </div>
-          ) : user ? (
-            <div className="p-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex h-auto w-full items-center justify-start gap-2 p-2"
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={user.photoURL || ''}
-                        alt={user.displayName || 'User'}
-                      />
-                      <AvatarFallback>
-                        {user.displayName ? getInitials(user.displayName) : 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col items-start text-left">
-                      <span className="truncate text-sm font-medium">
-                        {user.displayName || user.email}
-                      </span>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="top" align="start" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link href="/dashboard/settings" className="w-full">
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : null}
-        </SidebarFooter>
+        {!isCollapsed && <SectionLabel>Resources</SectionLabel>}
+        <SidebarMenu>
+          {footerNav.map((item) => (
+            <SidebarMenuItem key={item.label}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.label}
+                className="rounded-xl h-10 px-3 hover:bg-white/5 text-muted-foreground hover:text-white transition-all"
+              >
+                <Link href={item.href}>
+                  <item.icon className="shrink-0" />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
+
+      <SidebarFooter className="p-4 pt-0">
+        {!isCollapsed && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600/20 to-indigo-600/20 border border-primary/20 p-4 shadow-xl"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="h-4 w-4 text-primary fill-primary animate-pulse" />
+              <span className="text-xs font-black uppercase tracking-widest text-white">Go Pro</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
+              Unlock ultra-realistic voices and 2M monthly characters.
+            </p>
+            <Button asChild size="sm" className="w-full h-8 bg-primary hover:bg-primary/90 text-[11px] font-bold rounded-lg shadow-lg shadow-primary/20">
+              <Link href="/dashboard/subscription">Upgrade Now</Link>
+            </Button>
+          </motion.div>
+        )}
+
+        <div className="flex flex-col gap-1">
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-12 w-full justify-start gap-3 rounded-xl px-2 hover:bg-white/5 group">
+                  <Avatar className="h-8 w-8 ring-2 ring-white/5 group-hover:ring-primary/20 transition-all">
+                    <AvatarImage src={user.photoURL || ''} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{getInitials(user.displayName || 'U')}</AvatarFallback>
+                  </Avatar>
+                  {!isCollapsed && (
+                    <div className="flex flex-col items-start text-left overflow-hidden">
+                      <span className="text-sm font-bold text-white truncate w-full">{user.displayName || 'User'}</span>
+                      <span className="text-[10px] text-muted-foreground truncate w-full">{user.email}</span>
+                    </div>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="end" className="w-56 rounded-xl border-white/10 bg-black/90 backdrop-blur-xl">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-white/5" />
+                <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                  <Link href="/dashboard/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="rounded-lg cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 };
@@ -312,7 +344,6 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Strict Role-based access control for /dashboard
   useEffect(() => {
     if (!isUserLoading && !isRoleLoading) {
       if (!user) {
@@ -323,7 +354,6 @@ export default function DashboardLayout({
     }
   }, [user, isUserLoading, role, isRoleLoading, router]);
 
-  // Show loading screen while verifying identity and role
   if (isUserLoading || isRoleLoading) {
     return (
       <div className="dark flex min-h-screen items-center justify-center bg-background">
@@ -332,35 +362,35 @@ export default function DashboardLayout({
     );
   }
 
-  // Double check protection
   if (!user || role === 'admin') return null;
 
   const getTitle = () => {
     switch (pathname) {
-      case '/dashboard':
-        return 'Dashboard';
-      case '/dashboard/text-to-speech':
-        return 'Text to Speech';
-      case '/dashboard/voice-library':
-        return 'Voice Library';
-      case '/dashboard/my-generations':
-        return 'My Generations';
-      case '/dashboard/subscription':
-        return 'Subscription';
-      case '/dashboard/settings':
-        return 'Settings';
-      default:
-        return 'Dashboard';
+      case '/dashboard': return 'Dashboard Overview';
+      case '/dashboard/text-to-speech': return 'Text to Speech Studio';
+      case '/dashboard/voice-library': return 'Voice Library';
+      case '/dashboard/my-generations': return 'Generation History';
+      case '/dashboard/subscription': return 'Plan & Billing';
+      case '/dashboard/settings': return 'Account Settings';
+      default: return 'Dashboard';
     }
   };
 
   return (
-    <div className="dark">
+    <div className="dark font-body antialiased">
       <SidebarProvider>
         <DashboardSidebar />
-        <SidebarInset>
+        <SidebarInset className="bg-background/50">
           <DashboardHeader title={getTitle()} />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+          <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              {children}
+            </motion.div>
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </div>
