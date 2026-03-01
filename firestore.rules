@@ -22,7 +22,8 @@ service cloud.firestore {
     }
 
     match /voices/{voiceId} {
-      allow read: if isSignedIn();
+      // Allow public read access so unauthenticated users can see demo voices on the landing page
+      allow read: if true;
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
