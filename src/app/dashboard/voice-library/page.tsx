@@ -180,13 +180,13 @@ export default function VoiceLibraryPage() {
     <div className="space-y-12">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Voice Library</h1>
+          <h1 className="text-3xl font-bold tracking-tight">AI Voice Library</h1>
           <p className="mt-2 text-muted-foreground">
             Discover and sample from our extensive collection of premium AI voices.
           </p>
         </div>
         <Button asChild size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold hover:from-purple-700 hover:to-indigo-700">
-          <Link href="/author">
+          <Link href="/dashboard/voice-designer">
             <PlusCircle className="mr-2" />
             Create Custom Voice
           </Link>
