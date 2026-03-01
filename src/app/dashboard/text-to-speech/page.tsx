@@ -7,24 +7,15 @@ import {
   Zap, 
   Download, 
   Play, 
-  ChevronDown, 
   User, 
-  Settings2,
-  Volume2,
-  Share2
+  Volume2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { getAuth } from 'firebase/auth';
 import { toast } from '@/hooks/use-toast';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import AudioOutputCard from '@/components/tts/audio-output-card';
 
@@ -189,33 +180,21 @@ export default function TextToSpeechPage() {
         {/* Top Action Bar */}
         <div className="flex items-center justify-between p-6 md:p-8 border-b border-white/5 bg-white/5">
           <div className="flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-all border border-white/10 group shadow-lg">
-                  <Avatar className="h-9 w-9 ring-2 ring-primary/20">
-                    <AvatarImage src={selectedVoiceObject?.avatarUrl} className="object-cover" />
-                    <AvatarFallback className="bg-primary/10"><User className="h-5 w-5 text-primary" /></AvatarFallback>
-                  </Avatar>
-                  <div className="text-left">
-                    <p className="text-sm font-bold leading-tight group-hover:text-primary transition-colors">
-                      {selectedVoiceObject?.voiceName || 'Select Voice'}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
-                      {selectedVoiceObject?.language || 'Studio Voice'}
-                    </p>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-black/90 border-white/10 backdrop-blur-xl" align="start">
-                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary cursor-pointer py-3">
-                  <Settings2 className="mr-2 h-4 w-4" /> Voice Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary cursor-pointer py-3">
-                  <Share2 className="mr-2 h-4 w-4" /> Share Profile
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Simple static profile section without dropdown */}
+            <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 shadow-lg">
+              <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                <AvatarImage src={selectedVoiceObject?.avatarUrl} className="object-cover" />
+                <AvatarFallback className="bg-primary/10"><User className="h-5 w-5 text-primary" /></AvatarFallback>
+              </Avatar>
+              <div className="text-left">
+                <p className="text-sm font-bold leading-tight">
+                  {selectedVoiceObject?.voiceName || 'Select Voice'}
+                </p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+                  {selectedVoiceObject?.language || 'Studio Voice'}
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -231,11 +210,11 @@ export default function TextToSpeechPage() {
                   download={`${generatedAudio.voice}.wav`}
                   className="flex items-center justify-center gap-2"
                 >
-                  <Download className="h-4 w-4" /> Download
+                  <Download className="h-4 w-4 shrink-0" /> <span className="inline-block">Download</span>
                 </a>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  <Download className="h-4 w-4" /> Download
+                  <Download className="h-4 w-4 shrink-0" /> <span className="inline-block">Download</span>
                 </span>
               )}
             </Button>
