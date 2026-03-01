@@ -226,11 +226,17 @@ export default function TextToSpeechPage() {
               asChild={!!generatedAudio}
             >
               {generatedAudio ? (
-                <a href={generatedAudio.url} download={`${generatedAudio.voice}.wav`}>
-                  <Download className="mr-2 h-4 w-4" /> Download
+                <a 
+                  href={generatedAudio.url} 
+                  download={`${generatedAudio.voice}.wav`}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Download className="h-4 w-4" /> Download
                 </a>
               ) : (
-                <span><Download className="mr-2 h-4 w-4" /> Download</span>
+                <span className="flex items-center justify-center gap-2">
+                  <Download className="h-4 w-4" /> Download
+                </span>
               )}
             </Button>
             <Button 
