@@ -140,44 +140,44 @@ export default function TtsDemoSection() {
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] block">Select Speaker</label>
                 
                 {voicesLoading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3, 4, 5].map(i => (
                       <div key={i} className="h-20 w-full bg-white/5 animate-pulse rounded-2xl border border-white/5" />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                     {voices?.map((voice) => (
                       <button
                         key={voice.id}
                         onClick={() => setSelectedVoiceId(voice.id)}
                         className={cn(
-                          "h-20 flex items-center gap-4 px-4 rounded-2xl transition-all border text-left group",
+                          "h-20 flex items-center gap-3 sm:gap-4 px-3 sm:px-4 rounded-2xl transition-all border text-left group",
                           selectedVoiceId === voice.id 
                             ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" 
                             : "bg-white/5 border-white/5 hover:border-white/20"
                         )}
                       >
-                        <div className="relative h-12 w-12 rounded-full overflow-hidden border border-white/10 shrink-0">
+                        <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden border border-white/10 shrink-0">
                           {voice.avatarUrl ? (
                             <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
                           ) : (
                             <div className="h-full w-full bg-white/10 flex items-center justify-center">
-                              <User className="h-6 w-6 text-muted-foreground" />
+                              <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className={cn(
-                            "font-bold text-sm truncate",
+                            "font-bold text-xs sm:text-sm truncate",
                             selectedVoiceId === voice.id ? "text-primary" : "text-white"
                           )}>
                             {voice.voiceName}
                           </h4>
-                          <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider">{voice.language} • {voice.style}</p>
+                          <p className="text-[8px] sm:text-[10px] text-muted-foreground truncate uppercase tracking-wider">{voice.language}</p>
                         </div>
                         {selectedVoiceId === voice.id && (
-                          <div className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
+                          <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shrink-0" />
                         )}
                       </button>
                     ))}
@@ -192,9 +192,9 @@ export default function TtsDemoSection() {
                     size="lg" 
                     onClick={handleGenerate}
                     disabled={isGenerating || !text || !selectedVoiceId || text.length > MAX_CHARS}
-                    className="h-16 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-bold text-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                    className="h-14 sm:h-16 px-8 sm:px-10 rounded-2xl bg-primary hover:bg-primary/90 font-bold text-lg sm:text-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
-                    {isGenerating ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Zap className="mr-3 h-6 w-6" />}
+                    {isGenerating ? <Loader2 className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : <Zap className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />}
                     {isGenerating ? 'Generating...' : 'Generate Audio'}
                   </Button>
 
@@ -209,18 +209,18 @@ export default function TtsDemoSection() {
                           variant="secondary" 
                           size="icon" 
                           onClick={handleTogglePlay}
-                          className="h-16 w-16 rounded-2xl bg-white text-black hover:bg-gray-100 shadow-xl transition-all hover:scale-105"
+                          className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-white text-black hover:bg-gray-100 shadow-xl transition-all hover:scale-105"
                         >
-                          {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8 ml-1" />}
+                          {isPlaying ? <Pause className="h-6 w-6 sm:h-8 sm:w-8" /> : <Play className="h-6 w-6 sm:h-8 sm:w-8 ml-1" />}
                         </Button>
                         <Button 
                           variant="outline" 
                           size="icon" 
                           asChild
-                          className="h-16 w-16 rounded-2xl border-white/10 hover:bg-white/5 transition-all hover:scale-105"
+                          className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl border-white/10 hover:bg-white/5 transition-all hover:scale-105"
                         >
                           <a href={audioUrl} download="saanchi-ai-voice.wav">
-                            <Download className="h-8 w-8" />
+                            <Download className="h-6 w-6 sm:h-8 sm:w-8" />
                           </a>
                         </Button>
                       </motion.div>
