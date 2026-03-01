@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -25,10 +25,45 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-const PREVIEW_TEXT = "This is a preview of the unique voice you're designing. Adjust the parameters below to find the perfect sound.";
+const MAX_CHARACTERS = 1000;
+
+// Component for the tag-supporting text area (same as TTS page)
+const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onChange: (val: string) => void, maxLength: number }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const text = e.currentTarget.innerText;
+    if (text.length <= maxLength) {
+      onChange(text);
+    } else {
+      // Prevent overflow
+      e.currentTarget.innerText = text.slice(0, maxLength);
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <div
+        ref={editorRef}
+        contentEditable
+        onInput={handleInput}
+        suppressContentEditableWarning
+        className="w-full min-h-[200px] p-0 text-[20px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
+        style={{ fontFamily: "'Roboto', sans-serif" }}
+        data-placeholder="Type or paste your preview text here..."
+      />
+      {value.length === 0 && (
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[20px] italic font-medium" style={{ fontFamily: "'Roboto', sans-serif" }}>
+          What would you like the designed voice to say?
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function VoiceDesignerPage() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [text, setText] = useState("This is a preview of the unique voice you're designing. Adjust the parameters below to find the perfect sound.");
   const [params, setParams] = useState({
     gender: 'female',
     age: 'young',
@@ -36,7 +71,11 @@ export default function VoiceDesignerPage() {
     accentStrength: 50,
   });
 
+  const characterCount = text.length;
+
   const handleGenerate = () => {
+    if (!text || isGenerating) return;
+    
     setIsGenerating(true);
     setTimeout(() => {
       setIsGenerating(false);
@@ -71,7 +110,7 @@ export default function VoiceDesignerPage() {
           <div className="flex items-center gap-3">
             <Button 
               onClick={handleGenerate}
-              disabled={isGenerating}
+              disabled={isGenerating || !text}
               className="rounded-full h-12 px-10 bg-primary hover:bg-primary/90 font-black text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               {isGenerating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Play className="mr-2 h-5 w-5 fill-current" />}
@@ -82,17 +121,22 @@ export default function VoiceDesignerPage() {
 
         {/* Designer Workspace */}
         <div className="p-10 md:p-14 space-y-12">
-          {/* Preview Area */}
-          <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 relative group overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-30 group-hover:opacity-100 transition-opacity">
-              <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sample Preview</div>
+          {/* Editor Area (Replaced static preview) */}
+          <div className="p-10 rounded-[2rem] bg-white/5 border border-white/10 relative group overflow-hidden">
+            <ModernTextEditor 
+              value={text} 
+              onChange={setText} 
+              maxLength={MAX_CHARACTERS} 
+            />
+            
+            <div className="flex justify-end pt-6 border-t border-white/5 mt-6">
+              <div className={cn(
+                "text-[10px] font-mono font-black tracking-[0.2em] px-3 py-1 rounded-full bg-white/5 border border-white/5",
+                characterCount >= MAX_CHARACTERS ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-muted-foreground/50"
+              )}>
+                {characterCount.toLocaleString()} / {MAX_CHARACTERS.toLocaleString()}
+              </div>
             </div>
-            <p 
-              className="text-[20px] leading-relaxed text-white/90 font-medium italic text-center"
-              style={{ fontFamily: "'Roboto', sans-serif" }}
-            >
-              "{PREVIEW_TEXT}"
-            </p>
           </div>
 
           {/* Controls Grid */}
