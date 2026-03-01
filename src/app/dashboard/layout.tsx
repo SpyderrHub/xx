@@ -57,7 +57,7 @@ const planLimits: Record<string, number> = {
 };
 
 const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={cn("px-4 mb-2 mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60", className)}>
+  <div className={cn("px-4 mb-2 mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40", className)}>
     {children}
   </div>
 );
@@ -223,7 +223,7 @@ const DashboardSidebar = () => {
                   "relative rounded-xl h-10 px-3 transition-all duration-200",
                   pathname === item.href 
                     ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
-                    : "hover:bg-white/5 text-muted-foreground hover:text-white"
+                    : "hover:bg-white/5 text-white/70 hover:text-white"
                 )}
               >
                 <Link href={item.href}>
@@ -247,7 +247,7 @@ const DashboardSidebar = () => {
                   "relative rounded-xl h-10 px-3 transition-all duration-200",
                   pathname === item.href 
                     ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
-                    : "hover:bg-white/5 text-muted-foreground hover:text-white"
+                    : "hover:bg-white/5 text-white/70 hover:text-white"
                 )}
               >
                 <Link href={item.href}>
@@ -271,7 +271,7 @@ const DashboardSidebar = () => {
               <SidebarMenuButton
                 asChild
                 tooltip={item.label}
-                className="rounded-xl h-10 px-3 hover:bg-white/5 text-muted-foreground hover:text-white transition-all"
+                className="rounded-xl h-10 px-3 hover:bg-white/5 text-white/70 hover:text-white transition-all"
               >
                 <Link href={item.href}>
                   <item.icon className="shrink-0" />
