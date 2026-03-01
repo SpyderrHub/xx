@@ -239,7 +239,7 @@ export default function TtsDemoSection() {
           
           <audio 
             ref={audioRef} 
-            src={audioUrl || ''} 
+            src={audioUrl || undefined} 
             onEnded={() => setIsPlaying(false)}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}

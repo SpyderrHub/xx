@@ -19,7 +19,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import Logo from '@/components/logo';
 import { useFirebase } from '@/firebase';
 import { signUpWithEmail } from '@/lib/auth';
 
@@ -87,8 +86,8 @@ export function SignUpForm() {
     setIsLoading(true);
     try {
       await signUpWithEmail(
-        auth,
-        firestore,
+        auth!,
+        firestore!,
         values.fullName,
         values.email,
         values.password
@@ -126,21 +125,15 @@ export function SignUpForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-md"
+      className="w-full"
     >
-      <div className="lg:hidden mb-8 text-center">
-        <Link href="/" aria-label="Home">
-          <Logo className="h-7 mx-auto" />
-        </Link>
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-black/20 p-8 shadow-2xl backdrop-blur-lg">
-        <div className="mb-6 text-center">
+      <div className="rounded-3xl border border-white/10 bg-black/40 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+        <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold tracking-tight text-white">
-            Create your account
+            Create account
           </h2>
-          <p className="mt-2 text-sm text-gray-300">
-            Start your journey with lifelike AI voices.
+          <p className="mt-2 text-sm text-gray-400">
+            Start generating studio-quality voices.
           </p>
         </div>
 
@@ -151,12 +144,12 @@ export function SignUpForm() {
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Full Name</FormLabel>
+                  <FormLabel className="text-white/80">Full Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="John Doe"
                       {...field}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                      className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
                     />
                   </FormControl>
                   <FormMessage />
@@ -168,13 +161,13 @@ export function SignUpForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Email Address</FormLabel>
+                  <FormLabel className="text-white/80">Email Address</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="you@example.com"
                       {...field}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                      className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
                     />
                   </FormControl>
                   <FormMessage />
@@ -186,14 +179,14 @@ export function SignUpForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Password</FormLabel>
+                  <FormLabel className="text-white/80">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={passwordVisible ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...field}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                        className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
                       />
                       <PasswordVisibilityToggle
                         visible={passwordVisible}
@@ -210,7 +203,7 @@ export function SignUpForm() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">
+                  <FormLabel className="text-white/80">
                     Confirm Password
                   </FormLabel>
                   <FormControl>
@@ -219,7 +212,7 @@ export function SignUpForm() {
                         type={confirmPasswordVisible ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...field}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
+                        className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
                       />
                       <PasswordVisibilityToggle
                         visible={confirmPasswordVisible}
@@ -234,67 +227,66 @@ export function SignUpForm() {
               )}
             />
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="pt-2">
               <Button
                 type="submit"
-                className="w-full font-bold h-12 text-base bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                className="w-full font-bold h-14 text-lg bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 transition-all shadow-lg shadow-primary/20 rounded-xl"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  'Create free account'
-                )}
+                  <Loader2 className="animate-spin mr-2" />
+                ) : null}
+                {isLoading ? 'Creating account...' : 'Get Started Free'}
               </Button>
             </motion.div>
           </form>
         </Form>
-        <div className="relative my-6">
+        <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-white/20"></span>
+            <span className="w-full border-t border-white/10"></span>
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-gray-800/50 px-2 text-gray-400 backdrop-blur-sm">
-              Or continue with
+            <span className="bg-[#0a0a0a] px-4 text-gray-500 font-bold tracking-widest">
+              Or join with
             </span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Button
             variant="outline"
-            className="bg-white/5 border-white/20 hover:bg-white/10 text-white"
+            className="h-12 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl"
           >
             <GoogleIcon className="mr-2" />
             Google
           </Button>
           <Button
             variant="outline"
-            className="bg-white/5 border-white/20 hover:bg-white/10 text-white"
+            className="h-12 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl"
           >
-            <Github className="mr-2 h-4 w-4" />
+            <Github className="mr-2 h-5 w-5" />
             GitHub
           </Button>
         </div>
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-8 text-center text-xs text-gray-500 leading-relaxed">
           By signing up, you agree to our{' '}
-          <Link href="/terms" className="underline hover:text-white">
+          <Link href="/terms" className="underline hover:text-white transition-colors">
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" className="underline hover:text-white">
+          <Link href="/privacy" className="underline hover:text-white transition-colors">
             Privacy Policy
           </Link>
           .
         </p>
       </div>
 
-      <p className="mt-8 text-center text-sm text-gray-300">
+      <p className="mt-10 text-center text-sm text-gray-400">
         Already have an account?{' '}
         <Link
           href="/login"
-          className="font-medium text-primary hover:underline"
+          className="font-bold text-primary hover:underline transition-all"
         >
-          Log in
+          Sign in
         </Link>
       </p>
     </motion.div>

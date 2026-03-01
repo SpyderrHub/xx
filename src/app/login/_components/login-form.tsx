@@ -21,7 +21,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import Logo from '@/components/logo';
 import { useFirebase } from '@/firebase';
 import { signInWithEmail } from '@/lib/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -65,19 +64,10 @@ export function LoginForm() {
   const router = useRouter();
   const { auth, firestore } = useFirebase();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      rememberMe: false,
-    },
-  });
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const userCredential = await signInWithEmail(auth, values.email, values.password);
+      const userCredential = await signInWithEmail(auth!, values.email, values.password);
       
       if (firestore) {
         const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
@@ -97,6 +87,15 @@ export function LoginForm() {
       setIsLoading(false);
     }
   }
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      rememberMe: false,
+    },
+  });
 
   const PasswordVisibilityToggle = ({
     visible,
@@ -123,38 +122,32 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-md"
+      className="w-full"
     >
-      <div className="mb-8 text-center lg:hidden">
-        <Link href="/" aria-label="Home">
-          <Logo className="mx-auto h-7" />
-        </Link>
-      </div>
-
-      <div className="rounded-2xl border border-white/10 bg-black/20 p-8 shadow-2xl backdrop-blur-lg">
-        <div className="mb-6 text-center">
+      <div className="rounded-3xl border border-white/10 bg-black/40 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+        <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold tracking-tight text-white">
             Welcome back
           </h2>
-          <p className="mt-2 text-sm text-gray-300">
+          <p className="mt-2 text-sm text-gray-400">
             Log in to continue to Saanchi AI.
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Email Address</FormLabel>
+                  <FormLabel className="text-white/80">Email Address</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="you@example.com"
                       {...field}
-                      className="border-white/10 bg-white/5 text-white placeholder:text-gray-500"
+                      className="h-12 border-white/10 bg-white/5 text-white placeholder:text-gray-600 rounded-xl"
                     />
                   </FormControl>
                   <FormMessage />
@@ -166,14 +159,14 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Password</FormLabel>
+                  <FormLabel className="text-white/80">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={passwordVisible ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...field}
-                        className="border-white/10 bg-white/5 text-white placeholder:text-gray-500"
+                        className="h-12 border-white/10 bg-white/5 text-white placeholder:text-gray-600 rounded-xl"
                       />
                       <PasswordVisibilityToggle
                         visible={passwordVisible}
@@ -202,7 +195,7 @@ export function LoginForm() {
                     </FormControl>
                     <Label
                       htmlFor="remember-me"
-                      className="cursor-pointer font-normal text-gray-300"
+                      className="cursor-pointer font-normal text-gray-400"
                     >
                       Remember me
                     </Label>
@@ -211,33 +204,32 @@ export function LoginForm() {
               />
               <Link
                 href="/forgot-password"
-                className="font-medium text-primary hover:underline"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 Forgot password?
               </Link>
             </div>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
               <Button
                 type="submit"
-                className="h-12 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-base font-bold hover:from-purple-700 hover:to-indigo-700"
+                className="h-14 w-full bg-gradient-to-r from-primary to-indigo-600 text-lg font-bold hover:from-primary/90 hover:to-indigo-700 transition-all shadow-lg shadow-primary/20 rounded-xl"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  'Log in to your account'
-                )}
+                  <Loader2 className="animate-spin mr-2" />
+                ) : null}
+                {isLoading ? 'Logging in...' : 'Sign In'}
               </Button>
             </motion.div>
           </form>
         </Form>
-        <div className="relative my-6">
+        <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-white/20"></span>
+            <span className="w-full border-t border-white/10"></span>
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-gray-800/50 px-2 text-gray-400 backdrop-blur-sm">
+            <span className="bg-[#0a0a0a] px-4 text-gray-500 font-bold tracking-widest">
               Or continue with
             </span>
           </div>
@@ -245,28 +237,28 @@ export function LoginForm() {
         <div className="grid grid-cols-2 gap-4">
           <Button
             variant="outline"
-            className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+            className="h-12 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl"
           >
             <GoogleIcon className="mr-2" />
             Google
           </Button>
           <Button
             variant="outline"
-            className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+            className="h-12 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl"
           >
-            <Github className="mr-2 h-4 w-4" />
+            <Github className="mr-2 h-5 w-5" />
             GitHub
           </Button>
         </div>
       </div>
 
-      <p className="mt-8 text-center text-sm text-gray-300">
+      <p className="mt-8 text-center text-sm text-gray-400">
         Don't have an account?{' '}
         <Link
           href="/sign-up"
-          className="font-medium text-primary hover:underline"
+          className="font-bold text-primary hover:underline transition-all"
         >
-          Sign up for free
+          Create account
         </Link>
       </p>
     </motion.div>
