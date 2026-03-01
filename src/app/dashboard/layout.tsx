@@ -14,6 +14,8 @@ import {
   Menu,
   Zap,
   Code2,
+  Mic2,
+  Sparkles,
   ChevronRight,
 } from 'lucide-react';
 import {
@@ -26,7 +28,6 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
-  SidebarMenuSkeleton,
   useSidebar,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/logo';
@@ -106,11 +107,11 @@ const DashboardHeader = ({ title }: { title: string }) => {
             <span className="text-sm font-medium">
               {creditsUsed.toLocaleString()} / {limit.toLocaleString()}
             </span>
-            <span className="text-xs text-muted-foreground">Credits Used</span>
+            <span className="text-xs text-muted-foreground">Characters Used</span>
           </div>
         )}
 
-        <Button asChild className="hidden bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white hover:from-purple-700 hover:to-indigo-700 sm:block rounded-xl shadow-lg shadow-primary/20">
+        <Button asChild className="hidden bg-gradient-to-r from-primary to-indigo-600 font-bold text-white hover:opacity-90 sm:block rounded-xl shadow-lg shadow-primary/20">
           <Link href="/dashboard/subscription">Upgrade</Link>
         </Button>
 
@@ -170,7 +171,7 @@ const DashboardHeader = ({ title }: { title: string }) => {
 
 const DashboardSidebar = () => {
   const pathname = usePathname();
-  const { user, isUserLoading, auth } = useFirebase();
+  const { user, auth } = useFirebase();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
@@ -181,6 +182,8 @@ const DashboardSidebar = () => {
 
   const studioNav = useMemo(() => [
     { href: '/dashboard/text-to-speech', label: 'Text to Speech', icon: MessageSquare },
+    { href: '/dashboard/voice-cloning', label: 'Voice Cloning', icon: Mic2 },
+    { href: '/dashboard/voice-designer', label: 'Voice Designer', icon: Sparkles },
     { href: '/dashboard/voice-library', label: 'Voice Library', icon: Library },
   ], []);
 
@@ -248,9 +251,9 @@ const DashboardSidebar = () => {
                 <Link href={item.href}>
                   <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
-                  {item.label === "Voice Library" && !isCollapsed && (
-                    <span className="ml-auto rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] font-black uppercase text-white/60 ring-1 ring-white/10">
-                      New
+                  {item.label === "Voice Designer" && !isCollapsed && (
+                    <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
+                      Pro
                     </span>
                   )}
                 </Link>
@@ -283,14 +286,14 @@ const DashboardSidebar = () => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600/20 to-indigo-600/20 border border-primary/20 p-4 shadow-xl"
+            className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-indigo-600/20 border border-primary/20 p-4 shadow-xl"
           >
             <div className="flex items-center gap-2 mb-2">
               <Zap className="h-4 w-4 text-primary fill-primary animate-pulse" />
               <span className="text-xs font-black uppercase tracking-widest text-white">Go Pro</span>
             </div>
             <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-              Unlock ultra-realistic voices and 2M monthly characters.
+              Unlock ultra-realistic cloning and 2M monthly characters.
             </p>
             <Button asChild size="sm" className="w-full h-8 bg-primary hover:bg-primary/90 text-[11px] font-bold rounded-lg shadow-lg shadow-primary/20">
               <Link href="/dashboard/subscription">Upgrade Now</Link>
@@ -365,15 +368,15 @@ export default function DashboardLayout({
   if (!user || role === 'admin') return null;
 
   const getTitle = () => {
-    switch (pathname) {
-      case '/dashboard': return 'Dashboard Overview';
-      case '/dashboard/text-to-speech': return 'Text to Speech Studio';
-      case '/dashboard/voice-library': return 'Voice Library';
-      case '/dashboard/my-generations': return 'Generation History';
-      case '/dashboard/subscription': return 'Plan & Billing';
-      case '/dashboard/settings': return 'Account Settings';
-      default: return 'Dashboard';
-    }
+    if (pathname === '/dashboard') return 'Dashboard Overview';
+    if (pathname === '/dashboard/text-to-speech') return 'Text to Speech Studio';
+    if (pathname === '/dashboard/voice-cloning') return 'Instant Voice Cloning';
+    if (pathname === '/dashboard/voice-designer') return 'AI Voice Designer';
+    if (pathname === '/dashboard/voice-library') return 'Voice Library';
+    if (pathname === '/dashboard/my-generations') return 'Generation History';
+    if (pathname === '/dashboard/subscription') return 'Plan & Billing';
+    if (pathname === '/dashboard/settings') return 'Account Settings';
+    return 'Dashboard';
   };
 
   return (
