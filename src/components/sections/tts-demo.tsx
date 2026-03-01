@@ -12,6 +12,8 @@ import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
+const MAX_CHARS = 200;
+
 export default function TtsDemoSection() {
   const [text, setText] = useState('Experience the power of Saanchi AI voices. Simply type your text and choose a speaker to begin.');
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
@@ -61,7 +63,7 @@ export default function TtsDemoSection() {
   };
 
   const handleGenerate = async () => {
-    if (!text || !selectedVoiceId || isGenerating) return;
+    if (!text || !selectedVoiceId || isGenerating || text.length > MAX_CHARS) return;
 
     const selectedVoice = voices?.find(v => v.id === selectedVoiceId);
     if (!selectedVoice) return;
@@ -115,12 +117,21 @@ export default function TtsDemoSection() {
             <CardContent className="p-6 sm:p-10 space-y-10">
               {/* Top: Text Input */}
               <div className="space-y-3">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] block">Input Text</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] block">Input Text</label>
+                  <span className={cn(
+                    "text-xs font-mono transition-colors",
+                    text.length >= MAX_CHARS ? "text-red-500" : "text-muted-foreground"
+                  )}>
+                    {text.length} / {MAX_CHARS}
+                  </span>
+                </div>
                 <Textarea 
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
+                  onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
                   placeholder="What would you like Saanchi AI to say?"
                   className="min-h-[180px] resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-lg leading-relaxed shadow-inner"
+                  maxLength={MAX_CHARS}
                 />
               </div>
 
@@ -180,7 +191,7 @@ export default function TtsDemoSection() {
                   <Button 
                     size="lg" 
                     onClick={handleGenerate}
-                    disabled={isGenerating || !text || !selectedVoiceId}
+                    disabled={isGenerating || !text || !selectedVoiceId || text.length > MAX_CHARS}
                     className="h-16 px-10 rounded-2xl bg-primary hover:bg-primary/90 font-bold text-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
                     {isGenerating ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Zap className="mr-3 h-6 w-6" />}
