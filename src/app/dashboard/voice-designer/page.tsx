@@ -12,7 +12,8 @@ import {
   User, 
   Volume2, 
   Zap,
-  Globe2
+  Globe2,
+  CheckCircle2
 } from 'lucide-react';
 import { 
   Select, 
