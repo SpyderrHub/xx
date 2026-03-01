@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -59,12 +58,12 @@ const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onCha
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full min-h-[320px] p-0 text-[12px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
+        className="w-full min-h-[320px] p-0 text-[20px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
         style={{ fontFamily: "'Roboto', sans-serif" }}
         data-placeholder="Type or paste your text here..."
       />
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[12px] italic font-medium" style={{ fontFamily: "'Roboto', sans-serif" }}>
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[20px] italic font-medium" style={{ fontFamily: "'Roboto', sans-serif" }}>
           What would you like to say? Try adding [laughs softly]...
         </div>
       )}
