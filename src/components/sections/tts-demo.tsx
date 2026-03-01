@@ -101,7 +101,7 @@ export default function TtsDemoSection() {
   };
 
   return (
-    <section id="tts-demo" className="py-24 relative">
+    <section id="tts-demo" className="pb-24 pt-0 relative">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">

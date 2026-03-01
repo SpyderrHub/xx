@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
@@ -17,7 +16,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative overflow-hidden pt-20 pb-32 lg:pt-32 lg:pb-48">
+    <section className="relative overflow-hidden pt-20 pb-8 lg:pt-32 lg:pb-12">
       {/* Background Neural Glow */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full opacity-50" />
@@ -50,7 +49,7 @@ const HeroSection = () => {
                 <Link href="/sign-up">Start Free Trial</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 rounded-xl px-8 text-lg border-white/10 bg-white/5 backdrop-blur-sm">
-                <Link href="#voice-demo">
+                <Link href="#tts-demo">
                   <Play className="mr-2 h-5 w-5 fill-current" />
                   Listen Demo Voices
                 </Link>
