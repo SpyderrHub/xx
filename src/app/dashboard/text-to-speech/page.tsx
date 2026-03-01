@@ -50,11 +50,6 @@ const getStoragePathFromUrl = (url: string): string | null => {
 const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onChange: (val: string) => void, maxLength: number }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
-  // Simple tag highlighting logic: wrap [text] in a styled span
-  const highlightTags = (text: string) => {
-    return text.replace(/\[([^\]]+)\]/g, '<span class="text-primary font-bold bg-primary/10 px-1 rounded">[$1]</span>');
-  };
-
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const text = e.currentTarget.innerText;
     if (text.length <= maxLength) {
@@ -72,12 +67,12 @@ const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onCha
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full min-h-[300px] p-0 text-xl leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50"
-        data-placeholder="Type or paste your text here... Use tags like [laughs softly] for expression."
+        className="w-full min-h-[320px] p-0 text-xl md:text-2xl leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
+        data-placeholder="Type or paste your text here..."
       />
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-xl italic">
-          What would you like to say? Try adding [whispers softly]...
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-xl md:text-2xl italic font-medium">
+          What would you like to say? Try adding [laughs softly]...
         </div>
       )}
     </div>
@@ -184,39 +179,39 @@ export default function TextToSpeechPage() {
   }, [canGenerate, isGenerating, text, selectedVoiceId, selectedVoiceObject, characterCount]);
 
   return (
-    <div className="max-w-[900px] mx-auto space-y-10 pb-20">
+    <div className="max-w-[950px] mx-auto space-y-10 pb-20 px-4 md:px-0">
       {/* Main SaaS Card */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card/40 backdrop-blur-xl border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden"
+        className="bg-card/40 backdrop-blur-[40px] border border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10"
       >
         {/* Top Action Bar */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5">
+        <div className="flex items-center justify-between p-6 md:p-8 border-b border-white/5 bg-white/5">
           <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/5 group">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={selectedVoiceObject?.avatarUrl} />
-                    <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                <button className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-all border border-white/10 group shadow-lg">
+                  <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                    <AvatarImage src={selectedVoiceObject?.avatarUrl} className="object-cover" />
+                    <AvatarFallback className="bg-primary/10"><User className="h-5 w-5 text-primary" /></AvatarFallback>
                   </Avatar>
                   <div className="text-left">
                     <p className="text-sm font-bold leading-tight group-hover:text-primary transition-colors">
                       {selectedVoiceObject?.voiceName || 'Select Voice'}
                     </p>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
                       {selectedVoiceObject?.language || 'Studio Voice'}
                     </p>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-black/90 border-white/10" align="start">
-                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary">
+              <DropdownMenuContent className="w-56 bg-black/90 border-white/10 backdrop-blur-xl" align="start">
+                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary cursor-pointer py-3">
                   <Settings2 className="mr-2 h-4 w-4" /> Voice Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary">
+                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary cursor-pointer py-3">
                   <Share2 className="mr-2 h-4 w-4" /> Share Profile
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -226,7 +221,7 @@ export default function TextToSpeechPage() {
           <div className="flex items-center gap-3">
             <Button 
               variant="outline" 
-              className="rounded-full h-12 px-6 border-white/10 bg-white/5 hover:bg-white/10"
+              className="rounded-full h-12 px-6 border-white/10 bg-white/5 hover:bg-white/10 hidden sm:flex font-bold"
               disabled={!generatedAudio}
               asChild={!!generatedAudio}
             >
@@ -241,7 +236,7 @@ export default function TextToSpeechPage() {
             <Button 
               onClick={handleGenerate}
               disabled={!canGenerate || isGenerating}
-              className="rounded-full h-12 px-8 bg-primary hover:bg-primary/90 font-bold text-lg shadow-lg shadow-primary/20"
+              className="rounded-full h-12 px-10 bg-primary hover:bg-primary/90 font-black text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               {isGenerating ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -254,24 +249,24 @@ export default function TextToSpeechPage() {
         </div>
 
         {/* Text Input Area */}
-        <div className="p-10 space-y-6">
+        <div className="p-10 md:p-14 space-y-8">
           <ModernTextEditor 
             value={text} 
             onChange={setText} 
             maxLength={MAX_CHARACTERS} 
           />
-          <div className="flex justify-between items-center pt-6 border-t border-white/5">
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-white">
-                <Volume2 className="h-3 w-3 mr-1" /> Pronunciation
+          <div className="flex justify-between items-center pt-8 border-t border-white/5">
+            <div className="flex gap-4">
+              <Button variant="ghost" size="sm" className="text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest">
+                <Volume2 className="h-3.5 w-3.5 mr-2 text-primary" /> Pronunciation
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-white">
-                <Zap className="h-3 w-3 mr-1" /> Speed
+              <Button variant="ghost" size="sm" className="text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest">
+                <Zap className="h-3.5 w-3.5 mr-2 text-primary" /> Speed
               </Button>
             </div>
             <div className={cn(
-              "text-xs font-mono tracking-widest",
-              characterCount >= MAX_CHARACTERS ? "text-red-500" : "text-muted-foreground/50"
+              "text-xs font-mono font-black tracking-[0.2em] px-3 py-1 rounded-full bg-white/5 border border-white/5",
+              characterCount >= MAX_CHARACTERS ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-muted-foreground/50"
             )}>
               {characterCount.toLocaleString()} / {MAX_CHARACTERS.toLocaleString()}
             </div>
@@ -283,9 +278,10 @@ export default function TextToSpeechPage() {
       <AnimatePresence>
         {generatedAudio && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="ring-1 ring-primary/20 rounded-2xl overflow-hidden"
           >
             <AudioOutputCard
               audioUrl={generatedAudio.url}
@@ -298,47 +294,53 @@ export default function TextToSpeechPage() {
       </AnimatePresence>
 
       {/* Speaker Section (Below Main Card) */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between px-2">
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Select Speaker</h3>
-          <Button variant="link" className="text-xs text-primary h-auto p-0" asChild>
+          <div className="flex items-center gap-3">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/80">Select Speaker</h3>
+          </div>
+          <Button variant="link" className="text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors h-auto p-0" asChild>
             <a href="/dashboard/voice-library">Browse Library</a>
           </Button>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+        <div className="flex gap-5 overflow-x-auto pb-6 scrollbar-hide snap-x">
           {voicesLoading ? (
             [1, 2, 3, 4].map(i => (
-              <div key={i} className="min-w-[220px] h-[70px] rounded-2xl bg-white/5 animate-pulse" />
+              <div key={i} className="min-w-[220px] h-[75px] rounded-2xl bg-white/5 animate-pulse border border-white/5" />
             ))
           ) : detailedVoices.map((voice) => (
             <button
               key={voice.id}
               onClick={() => setSelectedVoiceId(voice.id)}
               className={cn(
-                "min-w-[220px] h-[70px] flex items-center gap-3 px-4 rounded-2xl border transition-all text-left relative overflow-hidden group",
+                "min-w-[240px] h-[75px] flex items-center gap-4 px-5 rounded-2xl border transition-all text-left relative overflow-hidden group snap-start",
                 selectedVoiceId === voice.id 
-                  ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" 
-                  : "bg-card/50 border-white/5 hover:border-white/20"
+                  ? "bg-primary/10 border-primary shadow-[0_0_30px_rgba(168,85,247,0.15)] ring-1 ring-primary/20" 
+                  : "bg-card/50 border-white/5 hover:border-white/20 hover:bg-white/5"
               )}
             >
-              <Avatar className="h-10 w-10 border border-white/10 shrink-0">
+              <Avatar className="h-11 w-11 border-2 border-white/10 shrink-0 shadow-lg group-hover:scale-105 transition-transform">
                 <AvatarImage src={voice.avatarUrl} className="object-cover" />
-                <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                <AvatarFallback className="bg-white/5"><User className="h-5 w-5 text-muted-foreground" /></AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className={cn(
-                  "font-bold text-sm truncate",
-                  selectedVoiceId === voice.id ? "text-primary" : "text-white"
+                  "font-bold text-sm truncate transition-colors",
+                  selectedVoiceId === voice.id ? "text-primary" : "text-white group-hover:text-primary/80"
                 )}>
                   {voice.voiceName}
                 </p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate font-black mt-0.5 opacity-60">
                   {voice.style || 'Narrator'}
                 </p>
               </div>
               {selectedVoiceId === voice.id && (
-                <div className="absolute right-0 top-0 bottom-0 w-1 bg-primary" />
+                <motion.div 
+                  layoutId="active-indicator"
+                  className="absolute right-0 top-0 bottom-0 w-1.5 bg-primary shadow-[0_0_15px_rgba(168,85,247,0.5)]" 
+                />
               )}
             </button>
           ))}
