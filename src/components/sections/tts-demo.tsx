@@ -101,7 +101,7 @@ export default function TtsDemoSection() {
   };
 
   return (
-    <section id="tts-demo" className="pb-24 pt-12 relative">
+    <section id="tts-demo" className="pb-32 pt-12 relative">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
@@ -130,7 +130,7 @@ export default function TtsDemoSection() {
                   value={text}
                   onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
                   placeholder="What would you like Saanchi AI to say?"
-                  className="min-h-[180px] resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-lg leading-relaxed shadow-inner"
+                  className="h-44 resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-lg leading-relaxed shadow-inner"
                   maxLength={MAX_CHARS}
                 />
               </div>
