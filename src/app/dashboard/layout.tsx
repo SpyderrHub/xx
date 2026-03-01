@@ -16,6 +16,7 @@ import {
   Mic2,
   Sparkles,
   Ear,
+  Music,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -182,6 +183,7 @@ const DashboardSidebar = () => {
   const studioNav = useMemo(() => [
     { href: '/dashboard/text-to-speech', label: 'AI Text to Speech', icon: MessageSquare },
     { href: '/dashboard/speech-to-text', label: 'AI Speech to Text', icon: Ear },
+    { href: '/dashboard/music-generator', label: 'AI Music Generator', icon: Music },
     { href: '/dashboard/voice-cloning', label: 'AI Voice Cloning', icon: Mic2 },
     { href: '/dashboard/voice-designer', label: 'AI Voice Designer', icon: Sparkles },
     { href: '/dashboard/voice-library', label: 'AI Voice Library', icon: Library },
@@ -251,7 +253,7 @@ const DashboardSidebar = () => {
                 <Link href={item.href}>
                   <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
-                  {item.label === "AI Voice Designer" && !isCollapsed && (
+                  {(item.label === "AI Voice Designer" || item.label === "AI Music Generator") && !isCollapsed && (
                     <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
                       Pro
                     </span>
@@ -371,6 +373,7 @@ export default function DashboardLayout({
     if (pathname === '/dashboard') return 'Dashboard Overview';
     if (pathname === '/dashboard/text-to-speech') return 'AI Text to Speech Studio';
     if (pathname === '/dashboard/speech-to-text') return 'AI Speech to Text Studio';
+    if (pathname === '/dashboard/music-generator') return 'AI Music Generator Studio';
     if (pathname === '/dashboard/voice-cloning') return 'AI Voice Cloning Studio';
     if (pathname === '/dashboard/voice-designer') return 'AI Voice Designer Studio';
     if (pathname === '/dashboard/voice-library') return 'AI Voice Library';
