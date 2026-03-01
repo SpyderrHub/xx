@@ -8,7 +8,6 @@ import {
   MessageSquare,
   Library,
   History,
-  CreditCard,
   Settings,
   LogOut,
   Menu,
@@ -16,7 +15,6 @@ import {
   Code2,
   Mic2,
   Sparkles,
-  ChevronRight,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -152,7 +150,7 @@ const DashboardHeader = ({ title }: { title: string }) => {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/subscription">
-                  <CreditCard className="mr-2 h-4 w-4" />
+                  <Settings className="mr-2 h-4 w-4" />
                   <span>Subscription</span>
                 </Link>
               </DropdownMenuItem>
@@ -181,10 +179,10 @@ const DashboardSidebar = () => {
   ], []);
 
   const studioNav = useMemo(() => [
-    { href: '/dashboard/text-to-speech', label: 'Text to Speech', icon: MessageSquare },
-    { href: '/dashboard/voice-cloning', label: 'Voice Cloning', icon: Mic2 },
-    { href: '/dashboard/voice-designer', label: 'Voice Designer', icon: Sparkles },
-    { href: '/dashboard/voice-library', label: 'Voice Library', icon: Library },
+    { href: '/dashboard/text-to-speech', label: 'AI Text to Speech', icon: MessageSquare },
+    { href: '/dashboard/voice-cloning', label: 'AI Voice Cloning', icon: Mic2 },
+    { href: '/dashboard/voice-designer', label: 'AI Voice Designer', icon: Sparkles },
+    { href: '/dashboard/voice-library', label: 'AI Voice Library', icon: Library },
   ], []);
 
   const footerNav = useMemo(() => [
@@ -251,7 +249,7 @@ const DashboardSidebar = () => {
                 <Link href={item.href}>
                   <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
-                  {item.label === "Voice Designer" && !isCollapsed && (
+                  {item.label === "AI Voice Designer" && !isCollapsed && (
                     <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
                       Pro
                     </span>
@@ -369,10 +367,10 @@ export default function DashboardLayout({
 
   const getTitle = () => {
     if (pathname === '/dashboard') return 'Dashboard Overview';
-    if (pathname === '/dashboard/text-to-speech') return 'Text to Speech Studio';
-    if (pathname === '/dashboard/voice-cloning') return 'Instant Voice Cloning';
-    if (pathname === '/dashboard/voice-designer') return 'AI Voice Designer';
-    if (pathname === '/dashboard/voice-library') return 'Voice Library';
+    if (pathname === '/dashboard/text-to-speech') return 'AI Text to Speech Studio';
+    if (pathname === '/dashboard/voice-cloning') return 'AI Voice Cloning Studio';
+    if (pathname === '/dashboard/voice-designer') return 'AI Voice Designer Studio';
+    if (pathname === '/dashboard/voice-library') return 'AI Voice Library';
     if (pathname === '/dashboard/my-generations') return 'Generation History';
     if (pathname === '/dashboard/subscription') return 'Plan & Billing';
     if (pathname === '/dashboard/settings') return 'Account Settings';
