@@ -7,6 +7,7 @@ import LanguagesSection from '@/components/sections/languages';
 import PlatformsSection from '@/components/sections/platforms';
 import VoiceQualitySection from '@/components/sections/voice-quality';
 import FinalCTASection from '@/components/sections/final-cta';
+import TtsDemoSection from '@/components/sections/tts-demo';
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <Header />
       <main className="flex-1 overflow-x-hidden">
         <HeroSection />
+        <TtsDemoSection />
         <VoiceQualitySection />
         <PlatformsSection />
         <FeaturesSection />
