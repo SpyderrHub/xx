@@ -15,6 +15,7 @@ import {
   Code2,
   Mic2,
   Sparkles,
+  Ear,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -180,6 +181,7 @@ const DashboardSidebar = () => {
 
   const studioNav = useMemo(() => [
     { href: '/dashboard/text-to-speech', label: 'AI Text to Speech', icon: MessageSquare },
+    { href: '/dashboard/speech-to-text', label: 'AI Speech to Text', icon: Ear },
     { href: '/dashboard/voice-cloning', label: 'AI Voice Cloning', icon: Mic2 },
     { href: '/dashboard/voice-designer', label: 'AI Voice Designer', icon: Sparkles },
     { href: '/dashboard/voice-library', label: 'AI Voice Library', icon: Library },
@@ -368,6 +370,7 @@ export default function DashboardLayout({
   const getTitle = () => {
     if (pathname === '/dashboard') return 'Dashboard Overview';
     if (pathname === '/dashboard/text-to-speech') return 'AI Text to Speech Studio';
+    if (pathname === '/dashboard/speech-to-text') return 'AI Speech to Text Studio';
     if (pathname === '/dashboard/voice-cloning') return 'AI Voice Cloning Studio';
     if (pathname === '/dashboard/voice-designer') return 'AI Voice Designer Studio';
     if (pathname === '/dashboard/voice-library') return 'AI Voice Library';
