@@ -171,7 +171,7 @@ export default function TextToSpeechPage() {
   }, [canGenerate, isGenerating, text, selectedVoiceId, selectedVoiceObject, characterCount]);
 
   return (
-    <div className="max-w-[950px] mx-auto space-y-10 pb-20 px-4 md:px-0">
+    <div className="max-w-[900px] mx-auto space-y-10 pb-20 px-4 md:px-0">
       {/* Main SaaS Card */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
