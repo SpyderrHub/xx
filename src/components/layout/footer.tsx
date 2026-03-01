@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { Github, Linkedin, Twitter, Mail, MapPin, Phone } from 'lucide-react';
 import Logo from '@/components/logo';
@@ -42,8 +41,6 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-bold mb-6">Developers</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
-              <li><Link href="#api" className="hover:text-primary transition-colors">API Reference</Link></li>
-              <li><Link href="#docs" className="hover:text-primary transition-colors">Documentation</Link></li>
               <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
               <li><Link href="/status" className="hover:text-primary transition-colors">System Status</Link></li>
             </ul>

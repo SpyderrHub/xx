@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -36,8 +35,6 @@ const Header = () => {
             <Link href="/#features" className="text-muted-foreground transition-colors hover:text-primary">Product</Link>
             <Link href="/dashboard/voice-library" className="text-muted-foreground transition-colors hover:text-primary">Voices</Link>
             <Link href="/#pricing" className="text-muted-foreground transition-colors hover:text-primary">Pricing</Link>
-            <Link href="/#api" className="text-muted-foreground transition-colors hover:text-primary">API</Link>
-            <Link href="/#docs" className="text-muted-foreground transition-colors hover:text-primary">Docs</Link>
           </nav>
         </div>
         

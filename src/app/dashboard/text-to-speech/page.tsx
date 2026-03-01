@@ -179,7 +179,9 @@ export default function TextToSpeechPage() {
       };
 
       // Use the environment variable for the API URL, falling back to the default if not provided
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL + 'v1/text-to-speech/';
+      // const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech';
+
 
       const res = await fetch(
         apiUrl,
