@@ -8,15 +8,12 @@ import {
   Mic2,
   Sparkles,
   Library,
-  Wand2,
   ChevronRight,
   ArrowRight,
   Loader2,
   Play,
   Pause,
-  Music,
-  Video,
-  Bot
+  Music
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,10 +26,10 @@ import { cn } from '@/lib/utils';
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
   { title: 'Speech to Text', icon: <Ear className="h-6 w-6 text-blue-400" />, href: '/dashboard/speech-to-text' },
-  { title: 'Image & Video', icon: <Video className="h-6 w-6 text-pink-400" />, href: '#' },
-  { title: 'AI Assistants', icon: <Bot className="h-6 w-6 text-amber-400" />, href: '#' },
-  { title: 'Music Gen', icon: <Music className="h-6 w-6 text-emerald-400" />, href: '/dashboard/music-generator' },
-  { title: 'Dubbing', icon: <Wand2 className="h-6 w-6 text-indigo-400" />, href: '#' },
+  { title: 'Voice Cloning', icon: <Mic2 className="h-6 w-6 text-pink-400" />, href: '/dashboard/voice-cloning' },
+  { title: 'Voice Designer', icon: <Sparkles className="h-6 w-6 text-amber-400" />, href: '/dashboard/voice-designer' },
+  { title: 'Music Generator', icon: <Music className="h-6 w-6 text-emerald-400" />, href: '/dashboard/music-generator' },
+  { title: 'Voice Library', icon: <Library className="h-6 w-6 text-indigo-400" />, href: '/dashboard/voice-library' },
 ];
 
 const studioCards = [
