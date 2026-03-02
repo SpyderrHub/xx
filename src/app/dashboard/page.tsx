@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   MessageSquare,
@@ -12,6 +13,8 @@ import {
   ArrowRight,
   PlusCircle,
   Loader2,
+  Play,
+  Pause,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { motion } from 'framer-motion';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
@@ -52,6 +56,8 @@ const studioCards = [
 
 export default function DashboardPage() {
   const { user, firestore } = useFirebase();
+  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Fetch the latest 5 voices from Firestore
   const voicesQuery = useMemoFirebase(() => {
@@ -64,6 +70,36 @@ export default function DashboardPage() {
   }, [firestore]);
 
   const { data: latestVoices, isLoading: isVoicesLoading } = useCollection(voicesQuery);
+
+  const togglePlay = useCallback((e: React.MouseEvent, voice: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!voice.audioUrl) return;
+
+    if (playingVoiceId === voice.id) {
+      audioRef.current?.pause();
+      setPlayingVoiceId(null);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      audioRef.current = new Audio(voice.audioUrl);
+      audioRef.current.onended = () => setPlayingVoiceId(null);
+      audioRef.current.play().catch(err => console.error("Playback error:", err));
+      setPlayingVoiceId(voice.id);
+    }
+  }, [playingVoiceId]);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto space-y-12">
@@ -127,22 +163,41 @@ export default function DashboardPage() {
                   transition={{ delay: 0.3 + i * 0.05 }}
                 >
                   <Link href="/dashboard/voice-library">
-                    <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group">
+                    <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group relative">
                       <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-primary/30 transition-all">
                         <AvatarImage src={voice.avatarUrl} className="object-cover" />
                         <AvatarFallback className="bg-white/5 text-xs">{voice.voiceName[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-white/90">{voice.voiceName}</span>
+                          <span className={cn(
+                            "font-bold transition-colors",
+                            playingVoiceId === voice.id ? "text-primary" : "text-white/90"
+                          )}>
+                            {voice.voiceName}
+                          </span>
                           {voice.style && (
                             <span className="text-[9px] uppercase font-black tracking-widest text-white/30">{voice.style}</span>
                           )}
                         </div>
                         <p className="text-xs text-white/40 truncate">{voice.description || voice.language}</p>
                       </div>
-                      <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <PlusCircle className="h-5 w-5 text-primary" />
+                      <Button 
+                        variant="secondary" 
+                        size="icon" 
+                        onClick={(e) => togglePlay(e, voice)}
+                        className={cn(
+                          "h-10 w-10 rounded-full transition-all duration-300",
+                          playingVoiceId === voice.id 
+                            ? "bg-primary text-white scale-110 shadow-lg shadow-primary/20 opacity-100" 
+                            : "bg-white/5 text-white/40 group-hover:text-primary group-hover:bg-white/10 group-hover:opacity-100 opacity-0"
+                        )}
+                      >
+                        {playingVoiceId === voice.id ? (
+                          <Pause className="h-5 w-5 fill-current" />
+                        ) : (
+                          <Play className="h-5 w-5 fill-current ml-0.5" />
+                        )}
                       </Button>
                     </div>
                   </Link>
