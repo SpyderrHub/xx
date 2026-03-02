@@ -3,142 +3,182 @@
 
 import Link from 'next/link';
 import {
-  ArrowRight,
-  ChevronRight,
   MessageSquare,
-  Users,
-  Wallet,
-  Zap,
+  Ear,
+  Mic2,
+  Sparkles,
+  Library,
+  Wand2,
+  ChevronRight,
+  ArrowRight,
+  PlusCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/components/ui/carousel';
-import StatsCard from '@/components/dashboard/stats-card';
-import RecentGenerationsTable from '@/components/dashboard/recent-table';
-import VoiceCard from '@/components/dashboard/voice-card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { useFirebase } from '@/firebase';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
-const stats = [
-  {
-    name: 'Characters Generated',
-    value: '1,250,320',
-    icon: <MessageSquare className="h-4 w-4" />,
-  },
-  {
-    name: 'Credits Remaining',
-    value: '4,320',
-    icon: <Wallet className="h-4 w-4" />,
-  },
-  { name: 'Voices Used', value: '12', icon: <Users className="h-4 w-4" /> },
-  {
-    name: 'API Requests',
-    value: '8,765',
-    icon: <Zap className="h-4 w-4" />,
-  },
+const featureCards = [
+  { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
+  { title: 'Speech to Text', icon: <Ear className="h-6 w-6 text-blue-400" />, href: '/dashboard/speech-to-text' },
+  { title: 'Voice Cloning', icon: <Mic2 className="h-6 w-6 text-pink-400" />, href: '/dashboard/voice-cloning' },
+  { title: 'Voice Designer', icon: <Sparkles className="h-6 w-6 text-amber-400" />, href: '/dashboard/voice-designer' },
+  { title: 'Voice Library', icon: <Library className="h-6 w-6 text-emerald-400" />, href: '/dashboard/voice-library' },
+  { title: 'Audio Tools', icon: <Wand2 className="h-6 w-6 text-indigo-400" />, href: '#' },
 ];
 
-const voiceLibrary = [
-  { name: 'Aria', language: 'English, US', avatarUrl: 'https://picsum.photos/seed/aria/400/250' },
-  { name: 'Javier', language: 'Spanish', avatarUrl: 'https://picsum.photos/seed/javier/400/250' },
-  { name: 'Chloé', language: 'French', avatarUrl: 'https://picsum.photos/seed/chloe/400/250' },
-  { name: 'Kenji', language: 'Japanese', avatarUrl: 'https://picsum.photos/seed/kenji/400/250' },
-  { name: 'Isabella', language: 'English, UK', avatarUrl: 'https://picsum.photos/seed/isabella/400/250' },
-  { name: 'Marco', language: 'Italian', avatarUrl: 'https://picsum.photos/seed/marco/400/250' },
-  { name: 'Lena', language: 'German', avatarUrl: 'https://picsum.photos/seed/lena/400/250' },
+const libraryVoices = [
+  { name: 'Aria', desc: 'Versatile, expressive narrator', tags: ['warm', 'friendly'], avatar: 'https://picsum.photos/seed/aria/100/100' },
+  { name: 'Javier', desc: 'Deep, authoritative voice', tags: ['calm', 'authoritative'], avatar: 'https://picsum.photos/seed/javier/100/100' },
+  { name: 'Chloé', desc: 'Sophisticated French accent', tags: ['calm', 'soft'], avatar: 'https://picsum.photos/seed/chloe/100/100' },
+  { name: 'Kenji', desc: 'Energetic, youthful persona', tags: ['energetic', 'friendly'], avatar: 'https://picsum.photos/seed/kenji/100/100' },
+  { name: 'Isabella', desc: 'Professional UK news style', tags: ['authoritative', 'clear'], avatar: 'https://picsum.photos/seed/isabella/100/100' },
+];
+
+const studioCards = [
+  { 
+    title: 'Voice Designer', 
+    desc: 'Design a new voice from text prompt', 
+    icon: <Sparkles className="h-5 w-5 text-amber-400" />,
+    href: '/dashboard/voice-designer'
+  },
+  { 
+    title: 'Clone Your Voice', 
+    desc: 'Create a realistic clone of your voice', 
+    icon: <Mic2 className="h-5 w-5 text-pink-400" />,
+    href: '/dashboard/voice-cloning'
+  },
+  { 
+    title: 'Voice Library', 
+    desc: 'Browse and manage voices', 
+    icon: <Library className="h-5 w-5 text-emerald-400" />,
+    href: '/dashboard/voice-library'
+  },
 ];
 
 export default function DashboardPage() {
+  const { user } = useFirebase();
+
   return (
-    <div className="space-y-8">
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <StatsCard
-            key={stat.name}
-            title={stat.name}
-            value={stat.value}
-            icon={stat.icon}
-          />
+    <div className="max-w-6xl mx-auto space-y-12">
+      {/* Top Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-1"
+      >
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">My workspace</p>
+        <h1 className="text-3xl font-bold tracking-tight">Good evening, {user?.displayName?.split(' ')[0] || 'User'}</h1>
+      </motion.div>
+
+      {/* Feature Cards Grid (6 cards in 2 rows) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {featureCards.map((card, i) => (
+          <motion.div
+            key={card.title}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.05 }}
+          >
+            <Link href={card.href}>
+              <Card className="h-full border-white/5 bg-white/5 hover:bg-white/10 transition-all group cursor-pointer border-none shadow-none">
+                <CardContent className="p-8 flex flex-col items-center justify-center text-center gap-4">
+                  <div className="p-3 rounded-2xl bg-white/5 group-hover:scale-110 transition-transform">
+                    {card.icon}
+                  </div>
+                  <span className="text-sm font-bold text-white/90 group-hover:text-white">{card.title}</span>
+                </CardContent>
+              </Card>
+            </Link>
+          </motion.div>
         ))}
       </div>
 
-      {/* Grid for Quick Action and Recent Generations */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="h-full bg-card/80 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Recent Generations</CardTitle>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/dashboard/my-generations">
-                  View all <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <RecentGenerationsTable />
-            </CardContent>
-          </Card>
-        </div>
-        <div className="lg:col-span-1">
-          <Card className="flex h-full flex-col justify-between bg-gradient-to-br from-purple-600/50 to-indigo-600/50 p-6">
-            <div>
-              <MessageSquare className="h-8 w-8" />
-              <h3 className="mt-4 text-xl font-bold">
-                Create your first voice over
-              </h3>
-              <p className="mt-2 text-sm text-purple-200">
-                Use our powerful Text to Speech tool to generate audio from text
-                in seconds.
-              </p>
-            </div>
-            <Button
-              asChild
-              className="mt-6 w-full justify-between bg-white/90 text-indigo-700 hover:bg-white"
-            >
-              <Link href="/dashboard/text-to-speech">
-                <span>Go to Text to Speech</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </Card>
-        </div>
-      </div>
+      {/* Bottom Section (2 Columns) */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 pt-4">
+        
+        {/* Left Column: Latest from the library */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold tracking-tight">Latest from the library</h2>
+          </div>
+          
+          <div className="space-y-2">
+            {libraryVoices.map((voice, i) => (
+              <motion.div
+                key={voice.name}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.05 }}
+              >
+                <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group">
+                  <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-primary/30 transition-all">
+                    <AvatarImage src={voice.avatar} className="object-cover" />
+                    <AvatarFallback className="bg-white/5 text-xs">{voice.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white/90">{voice.name}</span>
+                      <div className="flex gap-1">
+                        {voice.tags.map(tag => (
+                          <span key={tag} className="text-[9px] uppercase font-black tracking-widest text-white/30">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-white/40 truncate">{voice.desc}</p>
+                  </div>
+                  <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PlusCircle className="h-5 w-5 text-primary" />
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
-      {/* Voice Library Preview */}
-      <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Explore the Voice Library</h3>
-          <Button asChild variant="ghost" size="sm">
+          <Button variant="ghost" className="w-full text-xs font-bold uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-xl h-12" asChild>
             <Link href="/dashboard/voice-library">
-              View all <ChevronRight className="ml-1 h-4 w-4" />
+              Explore Library
+              <ChevronRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
-        <Carousel
-          opts={{
-            align: 'start',
-            loop: false,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-4">
-            {voiceLibrary.map((voice) => (
-              <CarouselItem
-                key={voice.name}
-                className="pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
+
+        {/* Right Column: Create or clone a voice */}
+        <div className="lg:col-span-2 space-y-6">
+          <h2 className="text-xl font-bold tracking-tight text-center lg:text-left">Create or clone a voice</h2>
+          
+          <div className="space-y-4">
+            {studioCards.map((card, i) => (
+              <motion.div
+                key={card.title}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + i * 0.05 }}
               >
-                <VoiceCard name={voice.name} language={voice.language} avatarUrl={voice.avatarUrl} />
-              </CarouselItem>
+                <Link href={card.href}>
+                  <Card className="border-white/5 bg-white/5 hover:bg-white/10 transition-all group cursor-pointer border-none shadow-none rounded-2xl overflow-hidden">
+                    <CardContent className="p-6 flex items-start gap-4">
+                      <div className="p-2.5 rounded-xl bg-white/5 shrink-0 group-hover:text-white transition-colors">
+                        {card.icon}
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-bold text-white/90 group-hover:text-white">{card.title}</h3>
+                        <p className="text-xs text-white/40 leading-relaxed">{card.desc}</p>
+                      </div>
+                      <div className="ml-auto opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                        <ArrowRight className="h-4 w-4 text-white/40" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
             ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden lg:flex" />
-          <CarouselNext className="hidden lg:flex" />
-        </Carousel>
+          </div>
+        </div>
+
       </div>
     </div>
   );
