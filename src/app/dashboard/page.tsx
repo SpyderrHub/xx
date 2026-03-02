@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   MessageSquare,
   Ear,
@@ -18,8 +17,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useFirebase } from '@/firebase';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
@@ -61,48 +58,19 @@ const studioCards = [
 
 export default function DashboardPage() {
   const { user } = useFirebase();
-  const welcomeIllustration = PlaceHolderImages.find(img => img.id === 'dashboard-welcome');
 
   return (
     <div className="max-w-6xl mx-auto space-y-12">
-      {/* Welcome Banner Section */}
+      {/* Clean Greeting Header */}
       <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-white/10 p-8 md:p-12"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="px-2"
       >
-        <div className="relative z-10 max-w-xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3">Workspace Overview</p>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">
-            Good evening, {user?.displayName?.split(' ')[0] || 'User'}!
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-8 max-w-md">
-            Welcome back to your AI studio. Your tools are ready for your next project. Explore new voices or clone your own in seconds.
-          </p>
-          <div className="flex gap-4">
-            <Button asChild className="rounded-xl font-bold h-12 px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-              <Link href="/dashboard/text-to-speech">
-                Start Generating
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-        
-        {/* Banner Illustration */}
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-8 hidden lg:block opacity-60 pointer-events-none">
-          {welcomeIllustration && (
-            <div className="relative w-[450px] h-[300px]">
-              <Image 
-                src={welcomeIllustration.imageUrl} 
-                alt="Dashboard Illustration" 
-                fill 
-                className="object-contain" 
-                data-ai-hint={welcomeIllustration.imageHint}
-              />
-            </div>
-          )}
-        </div>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">My Workspace</p>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+          Welcome, {user?.displayName?.split(' ')[0] || 'User'}
+        </h1>
       </motion.div>
 
       {/* Feature Square Cards Grid */}
