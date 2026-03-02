@@ -1,7 +1,7 @@
-
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   MessageSquare,
   Ear,
@@ -16,10 +16,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { useFirebase } from '@/firebase';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
@@ -61,35 +61,68 @@ const studioCards = [
 
 export default function DashboardPage() {
   const { user } = useFirebase();
+  const welcomeIllustration = PlaceHolderImages.find(img => img.id === 'dashboard-welcome');
 
   return (
     <div className="max-w-6xl mx-auto space-y-12">
-      {/* Top Section */}
+      {/* Welcome Banner Section */}
       <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-1"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-white/10 p-8 md:p-12"
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">My workspace</p>
-        <h1 className="text-3xl font-bold tracking-tight">Good evening, {user?.displayName?.split(' ')[0] || 'User'}</h1>
+        <div className="relative z-10 max-w-xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3">Workspace Overview</p>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">
+            Good evening, {user?.displayName?.split(' ')[0] || 'User'}!
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-8 max-w-md">
+            Welcome back to your AI studio. Your tools are ready for your next project. Explore new voices or clone your own in seconds.
+          </p>
+          <div className="flex gap-4">
+            <Button asChild className="rounded-xl font-bold h-12 px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+              <Link href="/dashboard/text-to-speech">
+                Start Generating
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+        
+        {/* Banner Illustration */}
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-8 hidden lg:block opacity-60 pointer-events-none">
+          {welcomeIllustration && (
+            <div className="relative w-[450px] h-[300px]">
+              <Image 
+                src={welcomeIllustration.imageUrl} 
+                alt="Dashboard Illustration" 
+                fill 
+                className="object-contain" 
+                data-ai-hint={welcomeIllustration.imageHint}
+              />
+            </div>
+          )}
+        </div>
       </motion.div>
 
-      {/* Feature Cards Grid (6 cards in 2 rows) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {/* Feature Square Cards Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {featureCards.map((card, i) => (
           <motion.div
             key={card.title}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
             <Link href={card.href}>
-              <Card className="h-full border-white/5 bg-white/5 hover:bg-white/10 transition-all group cursor-pointer border-none shadow-none">
-                <CardContent className="p-8 flex flex-col items-center justify-center text-center gap-4">
-                  <div className="p-3 rounded-2xl bg-white/5 group-hover:scale-110 transition-transform">
+              <Card className="h-full aspect-square border-white/5 bg-white/5 hover:bg-white/10 transition-all group cursor-pointer border-none shadow-none rounded-[2rem]">
+                <CardContent className="p-0 h-full flex flex-col items-center justify-center text-center gap-4">
+                  <div className="p-4 rounded-2xl bg-white/5 group-hover:scale-110 transition-transform duration-300">
                     {card.icon}
                   </div>
-                  <span className="text-sm font-bold text-white/90 group-hover:text-white">{card.title}</span>
+                  <span className="text-xs md:text-sm font-bold text-white/90 group-hover:text-white px-2">
+                    {card.title}
+                  </span>
                 </CardContent>
               </Card>
             </Link>

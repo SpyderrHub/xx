@@ -59,6 +59,12 @@
       "description": "Japan Flag",
       "imageUrl": "https://flagcdn.com/w160/jp.png",
       "imageHint": "japan flag"
+    },
+    {
+      "id": "dashboard-welcome",
+      "description": "Abstract 3D Illustration for Dashboard",
+      "imageUrl": "https://images.unsplash.com/photo-1750365919878-2735d30fa3d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhaSUyMGlsbHVzdHJhdGlvbnxlbnwwfHx8fDE3NzI0NjM5OTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ai illustration"
     }
   ]
 }
