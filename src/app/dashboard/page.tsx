@@ -11,10 +11,12 @@ import {
   Wand2,
   ChevronRight,
   ArrowRight,
-  PlusCircle,
   Loader2,
   Play,
   Pause,
+  Music,
+  Video,
+  Bot
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,10 +29,10 @@ import { cn } from '@/lib/utils';
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
   { title: 'Speech to Text', icon: <Ear className="h-6 w-6 text-blue-400" />, href: '/dashboard/speech-to-text' },
-  { title: 'Voice Cloning', icon: <Mic2 className="h-6 w-6 text-pink-400" />, href: '/dashboard/voice-cloning' },
-  { title: 'Voice Designer', icon: <Sparkles className="h-6 w-6 text-amber-400" />, href: '/dashboard/voice-designer' },
-  { title: 'Voice Library', icon: <Library className="h-6 w-6 text-emerald-400" />, href: '/dashboard/voice-library' },
-  { title: 'Audio Tools', icon: <Wand2 className="h-6 w-6 text-indigo-400" />, href: '#' },
+  { title: 'Image & Video', icon: <Video className="h-6 w-6 text-pink-400" />, href: '#' },
+  { title: 'AI Assistants', icon: <Bot className="h-6 w-6 text-amber-400" />, href: '#' },
+  { title: 'Music Gen', icon: <Music className="h-6 w-6 text-emerald-400" />, href: '/dashboard/music-generator' },
+  { title: 'Dubbing', icon: <Wand2 className="h-6 w-6 text-indigo-400" />, href: '#' },
 ];
 
 const studioCards = [
@@ -125,7 +127,7 @@ export default function DashboardPage() {
             transition={{ delay: i * 0.05 }}
           >
             <Link href={card.href}>
-              <Card className="h-full aspect-square border-white/5 bg-white/5 hover:bg-white/10 transition-all group cursor-pointer border-none shadow-none rounded-[2rem]">
+              <Card className="h-full aspect-square border-none bg-white/[0.03] backdrop-blur-sm hover:bg-white/10 transition-all group cursor-pointer shadow-none rounded-[2rem] overflow-hidden">
                 <CardContent className="p-0 h-full flex flex-col items-center justify-center text-center gap-4">
                   <div className="p-4 rounded-2xl bg-white/5 group-hover:scale-110 transition-transform duration-300">
                     {card.icon}
@@ -149,7 +151,7 @@ export default function DashboardPage() {
             <h2 className="text-xl font-bold tracking-tight">Latest from the library</h2>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             {isVoicesLoading ? (
               <div className="flex h-40 items-center justify-center">
                 <Loader2 className="h-6 w-6 animate-spin text-primary/50" />
@@ -163,7 +165,7 @@ export default function DashboardPage() {
                   transition={{ delay: 0.3 + i * 0.05 }}
                 >
                   <Link href="/dashboard/voice-library">
-                    <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group relative">
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer group relative shadow-sm">
                       <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-primary/30 transition-all">
                         <AvatarImage src={voice.avatarUrl} className="object-cover" />
                         <AvatarFallback className="bg-white/5 text-xs">{voice.voiceName[0]}</AvatarFallback>
@@ -187,10 +189,10 @@ export default function DashboardPage() {
                         size="icon" 
                         onClick={(e) => togglePlay(e, voice)}
                         className={cn(
-                          "h-10 w-10 rounded-full transition-all duration-300",
+                          "h-10 w-10 rounded-full transition-all duration-300 relative z-10",
                           playingVoiceId === voice.id 
-                            ? "bg-primary text-white scale-110 shadow-lg shadow-primary/20 opacity-100" 
-                            : "bg-white/5 text-white/40 group-hover:text-primary group-hover:bg-white/10 group-hover:opacity-100 opacity-0"
+                            ? "bg-primary text-white scale-110 shadow-lg shadow-primary/20" 
+                            : "bg-white/10 text-white/60 hover:text-primary hover:bg-white/20"
                         )}
                       >
                         {playingVoiceId === voice.id ? (
