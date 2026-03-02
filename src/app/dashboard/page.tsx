@@ -11,12 +11,14 @@ import {
   ChevronRight,
   ArrowRight,
   PlusCircle,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { motion } from 'framer-motion';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
@@ -25,14 +27,6 @@ const featureCards = [
   { title: 'Voice Designer', icon: <Sparkles className="h-6 w-6 text-amber-400" />, href: '/dashboard/voice-designer' },
   { title: 'Voice Library', icon: <Library className="h-6 w-6 text-emerald-400" />, href: '/dashboard/voice-library' },
   { title: 'Audio Tools', icon: <Wand2 className="h-6 w-6 text-indigo-400" />, href: '#' },
-];
-
-const libraryVoices = [
-  { name: 'Aria', desc: 'Versatile, expressive narrator', tags: ['warm', 'friendly'], avatar: 'https://picsum.photos/seed/aria/100/100' },
-  { name: 'Javier', desc: 'Deep, authoritative voice', tags: ['calm', 'authoritative'], avatar: 'https://picsum.photos/seed/javier/100/100' },
-  { name: 'Chloé', desc: 'Sophisticated French accent', tags: ['calm', 'soft'], avatar: 'https://picsum.photos/seed/chloe/100/100' },
-  { name: 'Kenji', desc: 'Energetic, youthful persona', tags: ['energetic', 'friendly'], avatar: 'https://picsum.photos/seed/kenji/100/100' },
-  { name: 'Isabella', desc: 'Professional UK news style', tags: ['authoritative', 'clear'], avatar: 'https://picsum.photos/seed/isabella/100/100' },
 ];
 
 const studioCards = [
@@ -57,7 +51,19 @@ const studioCards = [
 ];
 
 export default function DashboardPage() {
-  const { user } = useFirebase();
+  const { user, firestore } = useFirebase();
+
+  // Fetch the latest 5 voices from Firestore
+  const voicesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'voices'),
+      orderBy('createdAt', 'desc'),
+      limit(5)
+    );
+  }, [firestore]);
+
+  const { data: latestVoices, isLoading: isVoicesLoading } = useCollection(voicesQuery);
 
   return (
     <div className="max-w-6xl mx-auto space-y-12">
@@ -108,35 +114,45 @@ export default function DashboardPage() {
           </div>
           
           <div className="space-y-2">
-            {libraryVoices.map((voice, i) => (
-              <motion.div
-                key={voice.name}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.05 }}
-              >
-                <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group">
-                  <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-primary/30 transition-all">
-                    <AvatarImage src={voice.avatar} className="object-cover" />
-                    <AvatarFallback className="bg-white/5 text-xs">{voice.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-white/90">{voice.name}</span>
-                      <div className="flex gap-1">
-                        {voice.tags.map(tag => (
-                          <span key={tag} className="text-[9px] uppercase font-black tracking-widest text-white/30">{tag}</span>
-                        ))}
+            {isVoicesLoading ? (
+              <div className="flex h-40 items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary/50" />
+              </div>
+            ) : latestVoices && latestVoices.length > 0 ? (
+              latestVoices.map((voice, i) => (
+                <motion.div
+                  key={voice.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.05 }}
+                >
+                  <Link href="/dashboard/voice-library">
+                    <div className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group">
+                      <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-primary/30 transition-all">
+                        <AvatarImage src={voice.avatarUrl} className="object-cover" />
+                        <AvatarFallback className="bg-white/5 text-xs">{voice.voiceName[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white/90">{voice.voiceName}</span>
+                          {voice.style && (
+                            <span className="text-[9px] uppercase font-black tracking-widest text-white/30">{voice.style}</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-white/40 truncate">{voice.description || voice.language}</p>
                       </div>
+                      <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <PlusCircle className="h-5 w-5 text-primary" />
+                      </Button>
                     </div>
-                    <p className="text-xs text-white/40 truncate">{voice.desc}</p>
-                  </div>
-                  <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <PlusCircle className="h-5 w-5 text-primary" />
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              ))
+            ) : (
+              <div className="p-8 text-center rounded-3xl bg-white/5 border border-dashed border-white/10">
+                <p className="text-sm text-white/20 italic">No voices found in the library.</p>
+              </div>
+            )}
           </div>
 
           <Button variant="ghost" className="w-full text-xs font-bold uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-xl h-12" asChild>
