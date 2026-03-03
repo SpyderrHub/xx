@@ -49,13 +49,13 @@ const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onCha
   };
 
   return (
-    <div className="relative group">
+    <div className="relative group w-full">
       <div
         ref={editorRef}
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full min-h-[350px] md:min-h-[420px] p-0 text-[18px] md:text-[24px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
+        className="w-full min-h-[300px] md:min-h-[420px] p-0 text-[18px] md:text-[24px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
         style={{ fontFamily: "'Inter', sans-serif" }}
         data-placeholder="Type or paste your text here..."
       />
@@ -171,11 +171,11 @@ export default function TextToSpeechPage() {
   }, [canGenerate, isGenerating, text, selectedVoiceId, selectedVoiceObject, characterCount]);
 
   return (
-    <div className="max-w-[1100px] mx-auto space-y-6 md:space-y-10 pb-20 px-4 md:px-0">
+    <div className="w-full max-w-[1100px] mx-auto space-y-6 md:space-y-10 pb-20 px-0 sm:px-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card/40 backdrop-blur-[40px] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10"
+        className="bg-card/40 backdrop-blur-[40px] border border-white/5 rounded-none sm:rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10"
       >
         <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 border-b border-white/5 bg-white/5 gap-4">
           <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 shadow-lg w-full sm:w-auto">
@@ -221,8 +221,8 @@ export default function TextToSpeechPage() {
           </div>
         </div>
 
-        <div className="p-6 md:p-14 space-y-4">
-          <div className="relative group">
+        <div className="p-4 sm:p-6 md:p-14 space-y-4">
+          <div className="relative group w-full">
             <ModernTextEditor 
               value={text} 
               onChange={setText} 
@@ -254,7 +254,7 @@ export default function TextToSpeechPage() {
             initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="ring-1 ring-primary/20 rounded-xl md:rounded-2xl overflow-hidden"
+            className="ring-1 ring-primary/20 rounded-none sm:rounded-xl md:rounded-2xl overflow-hidden"
           >
             <AudioOutputCard
               audioUrl={generatedAudio.url}
@@ -266,7 +266,7 @@ export default function TextToSpeechPage() {
         )}
       </AnimatePresence>
 
-      <div className="space-y-4 md:space-y-6">
+      <div className="space-y-4 md:space-y-6 px-4 sm:px-0">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
