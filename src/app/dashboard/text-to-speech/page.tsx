@@ -56,11 +56,11 @@ const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onCha
         onInput={handleInput}
         suppressContentEditableWarning
         className="w-full min-h-[280px] md:min-h-[320px] p-0 text-[18px] md:text-[20px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
-        style={{ fontFamily: "'Roboto', sans-serif" }}
+        style={{ fontFamily: "'Inter', sans-serif" }}
         data-placeholder="Type or paste your text here..."
       />
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[18px] md:text-[20px] italic font-medium" style={{ fontFamily: "'Roboto', sans-serif" }}>
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[18px] md:text-[20px] italic font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
           What would you like to say? Try adding [laughs softly]...
         </div>
       )}
@@ -210,18 +210,20 @@ export default function TextToSpeechPage() {
               disabled={!canGenerate || isGenerating}
               className="flex-[1.5] sm:flex-none rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
-              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Play className="mr-2 h-4 w-4 md:h-5 md:w-5 fill-current" />}
-              {isGenerating ? 'Generating...' : 'Play'}
+              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Zap className="mr-2 h-4 w-4 md:h-5 md:w-5 fill-current" />}
+              {isGenerating ? 'Generating...' : 'Generate'}
             </Button>
           </div>
         </div>
 
         <div className="p-6 md:p-14 space-y-6 md:space-y-8">
-          <ModernTextEditor 
-            value={text} 
-            onChange={setText} 
-            maxLength={MAX_CHARACTERS} 
-          />
+          <div className="p-6 md:p-10 rounded-[2rem] bg-white/5 border border-white/10 relative group overflow-hidden">
+            <ModernTextEditor 
+              value={text} 
+              onChange={setText} 
+              maxLength={MAX_CHARACTERS} 
+            />
+          </div>
           <div className="flex flex-col sm:flex-row justify-between items-center pt-6 md:pt-8 border-t border-white/5 gap-4">
             <div className="flex gap-2 md:gap-4 w-full sm:w-auto justify-center">
               <Button variant="ghost" size="sm" className="text-[10px] md:text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest px-2">
