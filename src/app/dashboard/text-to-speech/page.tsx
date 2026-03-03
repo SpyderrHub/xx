@@ -138,15 +138,21 @@ export default function TextToSpeechPage() {
         language_id: selectedVoiceObject.language?.toLowerCase().includes('hindi') ? 'hi' : 'en',
       };
 
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech').replace(/\/$/, '') + '/';
-
-      const res = await fetch(apiUrl, {
+      // Use internal proxy to bypass CORS and blocked ports
+      const res = await fetch('/api/tts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify(requestBody),
       });
 
-      if (!res.ok) throw new Error('API Error');
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Failed to generate audio');
+      }
+      
       const data = await res.json();
 
       if (data.audio_url) {

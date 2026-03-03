@@ -76,8 +76,8 @@ export default function TtsDemoSection() {
       const audioPath = getStoragePathFromUrl(selectedVoice.audioUrl);
       if (!audioPath) throw new Error('Invalid voice sample path');
 
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech').replace(/\/$/, '') + '/';
-      const res = await fetch(apiUrl, {
+      // Use internal proxy to bypass CORS and blocked ports
+      const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -87,14 +87,18 @@ export default function TtsDemoSection() {
         }),
       });
 
-      if (!res.ok) throw new Error('API Error');
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Failed to generate audio');
+      }
+
       const data = await res.json();
       if (data.audio_url) {
         setAudioUrl(data.audio_url);
         toast({ title: 'Success', description: 'Audio generated!' });
       }
     } catch (error: any) {
-      toast({ title: 'Error', description: 'Failed to generate audio. Please check your configuration.', variant: 'destructive' });
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
       setIsGenerating(false);
     }
