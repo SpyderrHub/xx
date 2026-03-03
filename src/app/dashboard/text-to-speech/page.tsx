@@ -55,12 +55,12 @@ const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onCha
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full min-h-[320px] md:min-h-[380px] p-0 text-[18px] md:text-[22px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
+        className="w-full min-h-[350px] md:min-h-[420px] p-0 text-[18px] md:text-[24px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
         style={{ fontFamily: "'Inter', sans-serif" }}
         data-placeholder="Type or paste your text here..."
       />
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[18px] md:text-[22px] italic font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[18px] md:text-[24px] italic font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
           What would you like to say? Try adding [laughs softly]...
         </div>
       )}
@@ -177,7 +177,7 @@ export default function TextToSpeechPage() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-card/40 backdrop-blur-[40px] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10"
       >
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-6 border-b border-white/5 bg-white/5 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 border-b border-white/5 bg-white/5 gap-4">
           <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 shadow-lg w-full sm:w-auto">
             <Avatar className="h-8 w-8 md:h-9 md:w-9 ring-2 ring-primary/20">
               <AvatarImage src={selectedVoiceObject?.avatarUrl} className="object-cover" />
@@ -221,8 +221,8 @@ export default function TextToSpeechPage() {
           </div>
         </div>
 
-        <div className="p-4 md:p-8 space-y-4">
-          <div className="p-6 md:p-8 rounded-[1.5rem] bg-white/[0.02] border border-white/5 relative group overflow-hidden">
+        <div className="p-6 md:p-14 space-y-4">
+          <div className="relative group">
             <ModernTextEditor 
               value={text} 
               onChange={setText} 
