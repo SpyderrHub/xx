@@ -6,7 +6,6 @@ import {
   Loader2, 
   Zap, 
   Download, 
-  Play, 
   User, 
   Volume2
 } from 'lucide-react';
@@ -94,7 +93,7 @@ export default function TextToSpeechPage() {
 
       setVoicesLoading(true);
       try {
-        const voiceIds = myVoicesList.map((v) => v.id);
+        const voiceIds = myVoicesList.map((v) => v.voiceId || v.id);
         const q = query(collection(firestore, 'voices'), where('__name__', 'in', voiceIds));
         const snapshot = await getDocs(q);
         const results: any[] = [];
@@ -108,7 +107,7 @@ export default function TextToSpeechPage() {
       }
     };
     fetchVoiceDetails();
-  }, [myVoicesList, firestore]);
+  }, [myVoicesList, firestore, selectedVoiceId]);
 
   const selectedVoiceObject = useMemo(() => 
     detailedVoices.find(v => v.id === selectedVoiceId), 
@@ -138,6 +137,7 @@ export default function TextToSpeechPage() {
         language_id: selectedVoiceObject.language?.toLowerCase().includes('hindi') ? 'hi' : 'en',
       };
 
+      // Uses the internal API proxy which respects NEXT_PUBLIC_API_URL
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 

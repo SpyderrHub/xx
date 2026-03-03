@@ -3,20 +3,24 @@ import { NextResponse, type NextRequest } from 'next/server';
 /**
  * Proxy route for the TTS API to bypass browser CORS and SSL restrictions
  * associated with raw IP addresses and non-standard ports.
+ * Uses NEXT_PUBLIC_API_URL from environment variables.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const authHeader = request.headers.get('authorization');
     
-    // The target synthesis engine endpoint
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech').replace(/\/$/, '') + '/';
+    // Get URL from env or fallback to provided IP
+    const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech';
+    
+    // Ensure clean URL formatting
+    const apiUrl = baseApiUrl.replace(/\/$/, '') + '/';
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     
-    // Pass along authorization if provided
+    // Pass along authorization if provided (usually Firebase ID Token)
     if (authHeader) {
       headers['Authorization'] = authHeader;
     }
