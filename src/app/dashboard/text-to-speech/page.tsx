@@ -138,11 +138,7 @@ export default function TextToSpeechPage() {
         language_id: selectedVoiceObject.language?.toLowerCase().includes('hindi') ? 'hi' : 'en',
       };
 
-      // Construct API URL from environment variable directly
-      const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech';
-      const apiUrl = baseApiUrl.replace(/\/$/, '') + '/';
-
-      const res = await fetch(apiUrl, {
+      const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json', 
