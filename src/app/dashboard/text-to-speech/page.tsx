@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -137,8 +138,11 @@ export default function TextToSpeechPage() {
         language_id: selectedVoiceObject.language?.toLowerCase().includes('hindi') ? 'hi' : 'en',
       };
 
-      // Uses the internal API proxy which respects NEXT_PUBLIC_API_URL
-      const res = await fetch('/api/tts', {
+      // Construct API URL from environment variable directly
+      const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech';
+      const apiUrl = baseApiUrl.replace(/\/$/, '') + '/';
+
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json', 

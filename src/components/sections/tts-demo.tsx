@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -76,8 +77,11 @@ export default function TtsDemoSection() {
       const audioPath = getStoragePathFromUrl(selectedVoice.audioUrl);
       if (!audioPath) throw new Error('Invalid voice sample path');
 
-      // Use internal proxy to bypass CORS and blocked ports
-      const res = await fetch('/api/tts', {
+      // Use environment variable directly from the client side
+      const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech';
+      const apiUrl = baseApiUrl.replace(/\/$/, '') + '/';
+
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
