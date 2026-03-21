@@ -6,6 +6,10 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
     match /users/{userId} {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && request.auth.uid == userId;
@@ -26,6 +30,13 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /documentation/{docId} {
+      // Public read access for the documentation
+      allow read: if true;
+      // Only admins can manage documentation pages
+      allow write: if isAdmin();
     }
   }
 }

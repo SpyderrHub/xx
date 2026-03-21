@@ -2,95 +2,27 @@
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user in the system, storing their profile information and associated data.",
       "properties": {
-        "uid": {
-          "type": "string",
-          "description": "Unique identifier for the user entity. This is the Firebase User ID."
-        },
-        "name": {
-          "type": "string",
-          "description": "The user's full name."
-        },
-        "email": {
-          "type": "string",
-          "description": "The user's email address.",
-          "format": "email"
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the user account was created. Stored as a stringified date-time value.",
-          "format": "date-time"
-        },
-        "plan": {
-          "type": "string",
-          "description": "The user's current pricing plan (e.g., 'free', 'basic', 'premium')."
-        },
-        "credits": {
-          "type": "number",
-          "description": "The number of credits the user has available for using AI services."
-        },
-        "role": {
-          "type": "string",
-          "description": "The user's role in the system (e.g., 'user', 'admin'). 'admin' refers to Voice Authors."
-        },
-        "subscriptionId": {
-          "type": "string",
-          "description": "The user's Razorpay subscription or order ID."
-        },
-        "paymentStatus": {
-          "type": "string",
-          "description": "The status of the user's subscription (e.g., 'active', 'cancelled', 'expired')."
-        },
-        "currentPeriodStart": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Start of the current billing cycle."
-        },
-        "currentPeriodEnd": {
-          "type": "string",
-          "format": "date-time",
-          "description": "End of the current billing cycle."
-        },
-        "billingCycle": {
-          "type": "string",
-          "description": "The billing cycle of the subscription ('monthly' or 'yearly')."
-        }
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "plan": { "type": "string" },
+        "credits": { "type": "number" },
+        "role": { "type": "string" },
+        "subscriptionId": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "currentPeriodStart": { "type": "string", "format": "date-time" },
+        "currentPeriodEnd": { "type": "string", "format": "date-time" },
+        "billingCycle": { "type": "string" }
       },
-      "required": [
-        "uid",
-        "name",
-        "email",
-        "createdAt",
-        "plan",
-        "credits",
-        "role"
-      ]
-    },
-    "Subscription": {
-      "title": "Subscription",
-      "type": "object",
-      "description": "A record of a payment and plan activation.",
-      "properties": {
-        "userId": { "type": "string" },
-        "planId": { "type": "string" },
-        "paymentId": { "type": "string" },
-        "orderId": { "type": "string" },
-        "amount": { "type": "number" },
-        "status": { "type": "string" },
-        "startDate": { "type": "string", "format": "date-time" },
-        "expiryDate": { "type": "string", "format": "date-time" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["userId", "planId", "paymentId", "status", "createdAt"]
+      "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role"]
     },
     "Voice": {
       "title": "Voice",
       "type": "object",
-      "description": "Represents a voice sample uploaded by an author.",
       "properties": {
         "userId": { "type": "string" },
         "voiceName": { "type": "string" },
@@ -98,75 +30,41 @@
         "description": { "type": "string" },
         "language": { "type": "string" },
         "gender": { "type": "string" },
-        "accent": { "type": "string" },
         "style": { "type": "string" },
-        "ageRange": { "type": "string" },
         "audioUrl": { "type": "string" },
-        "audioDuration": { "type": "number" },
-        "audioFormat": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending_review", "approved", "rejected"] },
+        "status": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "voiceName", "language", "gender", "status", "createdAt", "description"]
+      "required": ["userId", "voiceName", "language", "gender", "status", "createdAt"]
     },
-    "MyVoice": {
-      "title": "MyVoice",
+    "DocumentationPage": {
+      "title": "DocumentationPage",
       "type": "object",
-      "description": "A voice added to a user's personal library.",
       "properties": {
-        "voiceId": { "type": "string" },
-        "addedAt": { "type": "string", "format": "date-time" }
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "content": { "type": "string" },
+        "order": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["voiceId", "addedAt"]
+      "required": ["title", "slug", "content", "order", "updatedAt"]
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["password", "anonymous"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "subcollections": [
-            {
-              "path": "myVoices/{voiceId}",
-              "definition": {
-                "entityName": "MyVoice",
-                "schema": {
-                  "$ref": "#/backend/entities/MyVoice"
-                }
-              }
-            }
-          ]
-        }
-      },
-      {
-        "path": "/subscriptions/{subscriptionId}",
-        "definition": {
-          "entityName": "Subscription",
-          "schema": {
-            "$ref": "#/backend/entities/Subscription"
-          }
-        }
-      },
-      {
-        "path": "/voices/{voiceId}",
-        "definition": {
-          "entityName": "Voice",
-          "schema": {
-            "$ref": "#/backend/entities/Voice"
-          },
-          "description": "Stores voice profiles visible in the library."
-        }
-      }
-    ]
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles and subscription data."
+    },
+    "/voices/{voiceId}": {
+      "schema": { "$ref": "#/entities/Voice" },
+      "description": "Public voice profiles for the library."
+    },
+    "/documentation/{docId}": {
+      "schema": { "$ref": "#/entities/DocumentationPage" },
+      "description": "Publicly readable documentation pages."
+    }
   }
 }
