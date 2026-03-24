@@ -18,10 +18,16 @@ import {
   Clock,
   Sparkles
 } from 'lucide-react';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { getAuth } from 'firebase/auth';
 import { toast } from '@/hooks/use-toast';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +55,9 @@ const StudioEditor = ({ value, onChange, maxLength }: { value: string, onChange:
         className="w-full min-h-[400px] p-0 text-[18px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/30 font-medium text-white/90 selection:bg-primary/30"
         style={{ fontFamily: "'Inter', sans-serif" }}
         data-placeholder="Start typing your story..."
-      />
+      >
+        {value}
+      </div>
       {value.length === 0 && (
         <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[18px] font-medium italic">
           What should I say? Try "[laughs] Welcome to the future..."
@@ -124,7 +132,7 @@ export default function TextToSpeechPage() {
   
   const [settings, setParams] = useState({ stability: 75, clarity: 85, speed: 1.0 });
 
-  const { user, firestore } = useFirebase();
+  const { firestore } = useFirebase();
   const [voices, setVoices] = useState<any[]>([]);
 
   useEffect(() => {
@@ -166,7 +174,7 @@ export default function TextToSpeechPage() {
 
   return (
     <div className="min-h-screen pb-32">
-      {/* Top Studio Controls - Adjusted top offset to sit below dashboard header */}
+      {/* Top Studio Controls */}
       <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-4 mb-12">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -197,13 +205,36 @@ export default function TextToSpeechPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
+            <div className="text-right hidden xl:block mr-2">
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">{text.length} / {MAX_CHARACTERS}</p>
             </div>
+
+            <Select value={selectedVoiceId || ''} onValueChange={setSelectedVoiceId}>
+              <SelectTrigger className="w-[160px] md:w-[200px] h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
+                <SelectValue placeholder="Select Speaker" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
+                {voices.map((v) => (
+                  <SelectItem key={v.id} value={v.id} className="cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-6 w-6 ring-1 ring-white/10 shrink-0">
+                        <AvatarImage src={v.avatarUrl} className="object-cover" />
+                        <AvatarFallback className="text-[8px] bg-primary/10">{v.voiceName[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="text-left min-w-0">
+                        <p className="text-xs font-bold truncate">{v.voiceName}</p>
+                        <p className="text-[8px] text-muted-foreground uppercase font-black">{v.language}</p>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Button 
               onClick={handleGenerate}
-              disabled={isGenerating || !text}
-              className="h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
+              disabled={isGenerating || !text || !selectedVoiceId}
+              className="h-12 px-6 md:px-8 rounded-xl bg-primary btn-glow font-black text-sm"
             >
               {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
               {isGenerating ? 'Synthesizing...' : 'Generate'}
@@ -216,34 +247,6 @@ export default function TextToSpeechPage() {
       <main className="container mx-auto px-6 py-12">
         <StudioEditor value={text} onChange={setText} maxLength={MAX_CHARACTERS} />
       </main>
-
-      {/* Voice Selection Drawer - Lowered z-index to stay under navbar if collision occurs */}
-      <div className="fixed left-6 bottom-32 z-30 hidden xl:block">
-        <div className="glass-card rounded-[2rem] p-4 w-64 max-h-[400px] overflow-y-auto scrollbar-hide border-white/5 bg-black/60">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 px-2">Select Speaker</h3>
-          <div className="space-y-2">
-            {voices.map((v) => (
-              <button
-                key={v.id}
-                onClick={() => setSelectedVoiceId(v.id)}
-                className={cn(
-                  "w-full flex items-center gap-3 p-3 rounded-2xl transition-all border",
-                  selectedVoiceId === v.id ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" : "bg-white/5 border-transparent hover:bg-white/10"
-                )}
-              >
-                <Avatar className="h-8 w-8 ring-2 ring-white/10">
-                  <AvatarImage src={v.avatarUrl} className="object-cover" />
-                  <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
-                </Avatar>
-                <div className="text-left min-w-0">
-                  <p className={cn("text-xs font-bold truncate", selectedVoiceId === v.id ? "text-primary" : "text-white")}>{v.voiceName}</p>
-                  <p className="text-[8px] text-muted-foreground uppercase font-black">{v.language}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Audio Player Footer */}
       <AudioPlayerFooter 
