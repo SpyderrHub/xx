@@ -46,12 +46,12 @@ const StudioEditor = ({ value, onChange, maxLength }: { value: string, onChange:
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full min-h-[400px] p-0 text-[11px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/30 font-medium text-white/90 selection:bg-primary/30"
+        className="w-full min-h-[400px] p-0 text-[18px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/30 font-medium text-white/90 selection:bg-primary/30"
         style={{ fontFamily: "'Inter', sans-serif" }}
         data-placeholder="Start typing your story..."
       />
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[11px] font-medium italic">
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[18px] font-medium italic">
           What should I say? Try "[laughs] Welcome to the future..."
         </div>
       )}
