@@ -1,6 +1,5 @@
-
 import Link from 'next/link';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,110 +13,97 @@ import { cn } from '@/lib/utils';
 
 const plans = [
   {
+    name: 'Free',
+    price: '$0',
+    period: '/ mo',
+    description: 'For hobbyists testing the waters.',
+    features: ['10,000 Characters', '3 Premium Voices', 'Standard Support'],
+    cta: 'Start Free',
+    highlight: false,
+  },
+  {
     name: 'Starter',
-    price: '₹0',
-    period: '/ month',
-    description: 'For personal projects and exploration.',
-    features: [
-      '10,000 characters/month',
-      'Access to standard voices',
-      '1 project',
-      'Community support',
-    ],
-    cta: 'Start for Free',
-    isHighlighted: false,
+    price: '$12',
+    period: '/ mo',
+    description: 'Perfect for small batch projects.',
+    features: ['500,000 Characters', 'All Premium Voices', 'API Access', 'Email Support'],
+    cta: 'Get Started',
+    highlight: false,
   },
   {
     name: 'Pro',
-    price: '₹699',
-    period: '/ month',
-    description: 'For professionals and growing businesses.',
-    features: [
-      '500,000 characters/month',
-      'Access to premium voices',
-      'Voice Cloning Tool',
-      'Unlimited projects',
-      'API Access',
-      'Email support',
-    ],
-    cta: 'Get Started with Pro',
-    isHighlighted: true,
+    price: '$49',
+    period: '/ mo',
+    description: 'Built for scale and automation.',
+    features: ['2,500,000 Characters', 'Unlimited Parallelism', 'Voice Cloning', 'Priority API Support'],
+    cta: 'Go Pro Now',
+    highlight: true,
   },
   {
-    name: 'Business',
+    name: 'Enterprise',
     price: 'Custom',
     period: '',
-    description: 'For large-scale applications and teams.',
-    features: [
-      'Unlimited characters',
-      'Custom voice creation',
-      'Dedicated infrastructure',
-      'Team collaboration',
-      'Enterprise SSO',
-      'Dedicated support',
-    ],
+    description: 'Dedicated resources for large teams.',
+    features: ['Unlimited Usage', 'Custom Neural Voices', 'Dedicated Infrastructure', 'SLA Guarantee'],
     cta: 'Contact Sales',
-    isHighlighted: false,
+    highlight: false,
   },
 ];
 
 const PricingSection = () => {
   return (
-    <section id="pricing" className="bg-secondary py-16 sm:py-24">
+    <section id="pricing" className="py-24 bg-black/20">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
-            Choose Your Plan
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl mb-6">
+            Predictable Pricing
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Simple, transparent pricing that scales with you. Get started for
-            free today.
+          <p className="text-lg text-muted-foreground">
+            No enterprise taxes. Just pure synthesis at scale.
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {plans.map((plan) => (
             <Card
               key={plan.name}
               className={cn(
-                'flex flex-col rounded-2xl shadow-lg transition-transform hover:scale-105',
-                plan.isHighlighted && 'border-2 border-primary'
+                'glass-card border-white/5 bg-white/[0.02] flex flex-col rounded-[2rem] transition-all hover:scale-105',
+                plan.highlight && 'border-primary/50 bg-primary/[0.03] ring-2 ring-primary/20'
               )}
             >
               <CardHeader className="p-8">
-                <CardTitle className="font-headline text-2xl">
-                  {plan.name}
-                </CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="flex items-baseline pt-4">
-                  <span className="text-4xl font-bold tracking-tight">
-                    {plan.price}
-                  </span>
-                  {plan.period && (
-                    <span className="text-muted-foreground">
-                      {plan.period}
-                    </span>
-                  )}
+                {plan.highlight && (
+                  <div className="bg-primary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4">
+                    Best Value
+                  </div>
+                )}
+                <CardTitle className="text-2xl font-black text-white">{plan.name}</CardTitle>
+                <CardDescription className="text-muted-foreground text-xs pt-2">{plan.description}</CardDescription>
+                <div className="flex items-baseline pt-6">
+                  <span className="text-4xl font-black text-white">{plan.price}</span>
+                  <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 p-8 pt-0">
-                <ul className="space-y-4">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3">
-                      <CheckCircle className="h-5 w-5 shrink-0 text-green-500" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+              <CardContent className="flex-1 p-8 pt-0 space-y-4">
+                {plan.features.map((feature) => (
+                  <div key={feature} className="flex items-center gap-3">
+                    <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-sm text-white/70">{feature}</span>
+                  </div>
+                ))}
               </CardContent>
               <CardFooter className="p-8 pt-0">
                 <Button
                   asChild
                   size="lg"
-                  className="w-full"
-                  variant={plan.isHighlighted ? 'default' : 'outline'}
+                  variant={plan.highlight ? 'default' : 'outline'}
+                  className={cn(
+                    "w-full h-12 rounded-xl font-black text-sm",
+                    plan.highlight ? "bg-primary btn-glow" : "border-white/10 bg-white/5 hover:bg-white/10"
+                  )}
                 >
-                  <Link href={plan.name === 'Business' ? 'mailto:sales@saanchi.ai' : '/sign-up'}>{plan.cta}</Link>
+                  <Link href="/sign-up">{plan.cta}</Link>
                 </Button>
               </CardFooter>
             </Card>

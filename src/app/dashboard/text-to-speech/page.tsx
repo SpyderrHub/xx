@@ -1,42 +1,33 @@
-
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 import { 
   Loader2, 
   Zap, 
   Download, 
   User, 
-  Volume2
+  Volume2, 
+  Mic2, 
+  Waves, 
+  Play, 
+  Pause,
+  Clock,
+  Sparkles
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { getAuth } from 'firebase/auth';
 import { toast } from '@/hooks/use-toast';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import AudioOutputCard from '@/components/tts/audio-output-card';
 
-const MAX_CHARACTERS = 4000;
+const MAX_CHARACTERS = 5000;
 
-const getStoragePathFromUrl = (url: string): string | null => {
-  if (!url) return null;
-  try {
-    const urlObject = new URL(url);
-    const pathParts = urlObject.pathname.split('/o/');
-    if (pathParts.length > 1) {
-      const encodedPath = pathParts[1];
-      return decodeURIComponent(encodedPath);
-    }
-  } catch (e) {
-    console.error('Could not parse storage URL:', e);
-  }
-  return null;
-};
-
-const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onChange: (val: string) => void, maxLength: number }) => {
+const StudioEditor = ({ value, onChange, maxLength }: { value: string, onChange: (val: string) => void, maxLength: number }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
@@ -49,275 +40,219 @@ const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onCha
   };
 
   return (
-    <div className="relative group w-full">
+    <div className="relative w-full max-w-4xl mx-auto">
       <div
         ref={editorRef}
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full min-h-[300px] md:min-h-[420px] p-0 text-[18px] md:text-[24px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
+        className="w-full min-h-[400px] p-0 text-[24px] md:text-[32px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/30 font-medium text-white/90 selection:bg-primary/30"
         style={{ fontFamily: "'Inter', sans-serif" }}
-        data-placeholder="Type or paste your text here..."
+        data-placeholder="Start typing your story..."
       />
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[18px] md:text-[24px] italic font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
-          What would you like to say? Try adding [laughs softly]...
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[24px] md:text-[32px] font-medium italic">
+          What should I say? Try "[laughs] Welcome to the future..."
         </div>
       )}
     </div>
   );
 };
 
-export default function TextToSpeechPage() {
-  const [text, setText] = useState('Experience the power of Saanchi AI voices. Simply type your text and choose a speaker to begin.');
-  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedAudio, setGeneratedAudio] = useState<{url: string, voice: string, duration: number, characters: number} | null>(null);
-
-  const { user, firestore } = useFirebase();
-  const [detailedVoices, setDetailedVoices] = useState<any[]>([]);
-  const [voicesLoading, setVoicesLoading] = useState(true);
-
-  const myVoicesQuery = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return query(collection(firestore, 'users', user.uid, 'myVoices'));
-  }, [user, firestore]);
-  const { data: myVoicesList } = useCollection(myVoicesQuery);
+const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePlay }: any) => {
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const fetchVoiceDetails = async () => {
-      if (!myVoicesList || !firestore || myVoicesList.length === 0) {
-        setDetailedVoices([]);
-        setVoicesLoading(false);
-        return;
-      }
+    if (audioUrl && audioRef.current) {
+      audioRef.current.onloadedmetadata = () => setDuration(audioRef.current?.duration || 0);
+      audioRef.current.ontimeupdate = () => setProgress((audioRef.current?.currentTime || 0) / (audioRef.current?.duration || 1) * 100);
+    }
+  }, [audioUrl]);
 
-      setVoicesLoading(true);
-      try {
-        const voiceIds = myVoicesList.map((v) => v.voiceId || v.id);
-        const q = query(collection(firestore, 'voices'), where('__name__', 'in', voiceIds));
-        const snapshot = await getDocs(q);
-        const results: any[] = [];
-        snapshot.forEach((doc) => results.push({ id: doc.id, ...doc.data() }));
-        setDetailedVoices(results);
-        if (!selectedVoiceId && results.length > 0) setSelectedVoiceId(results[0].id);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setVoicesLoading(false);
-      }
+  if (!audioUrl) return null;
+
+  return (
+    <motion.div 
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-white/10 p-4 md:p-6"
+    >
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6">
+        <div className="flex items-center gap-4 shrink-0">
+          <Button 
+            onClick={onTogglePlay}
+            className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-white/90 btn-glow"
+          >
+            {isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current ml-1" />}
+          </Button>
+          <div className="hidden sm:block">
+            <p className="text-sm font-black text-white">{voice}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">{characters} Characters</p>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center gap-4 w-full">
+          <span className="text-[10px] font-mono text-muted-foreground">0:00</span>
+          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden relative">
+            <motion.div className="absolute h-full bg-primary" style={{ width: `${progress}%` }} />
+          </div>
+          <span className="text-[10px] font-mono text-muted-foreground">{Math.floor(duration)}s</span>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <Button variant="outline" className="h-12 px-6 rounded-xl border-white/10 bg-white/5 font-bold">
+            <Download className="mr-2 h-4 w-4" /> Export
+          </Button>
+          <Button className="h-12 w-12 rounded-xl bg-white/10 hover:bg-white/20">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </Button>
+        </div>
+      </div>
+      <audio ref={audioRef} src={audioUrl} />
+    </motion.div>
+  );
+};
+
+export default function TextToSpeechPage() {
+  const [text, setText] = useState('');
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedAudio, setGeneratedAudio] = useState<{url: string, voice: string, characters: number} | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  const [settings, setParams] = useState({ stability: 75, clarity: 85, speed: 1.0 });
+
+  const { user, firestore } = useFirebase();
+  const [voices, setVoices] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchVoices = async () => {
+      if (!firestore) return;
+      const q = query(collection(firestore, 'voices'));
+      const snap = await getDocs(q);
+      const results: any[] = [];
+      snap.forEach(d => results.push({ id: d.id, ...d.data() }));
+      setVoices(results);
+      if (results.length > 0) setSelectedVoiceId(results[0].id);
     };
-    fetchVoiceDetails();
-  }, [myVoicesList, firestore, selectedVoiceId]);
+    fetchVoices();
+  }, [firestore]);
 
-  const selectedVoiceObject = useMemo(() => 
-    detailedVoices.find(v => v.id === selectedVoiceId), 
-  [detailedVoices, selectedVoiceId]);
+  const selectedVoice = voices.find(v => v.id === selectedVoiceId);
 
-  const characterCount = text.length;
-  const canGenerate = characterCount > 0 && characterCount <= MAX_CHARACTERS && !!selectedVoiceId;
-
-  const handleGenerate = useCallback(async () => {
-    if (!canGenerate || isGenerating || !selectedVoiceId || !selectedVoiceObject) return;
-    
+  const handleGenerate = async () => {
+    if (!text || isGenerating || !selectedVoiceId) return;
     setIsGenerating(true);
     setGeneratedAudio(null);
 
     try {
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-      if (!currentUser) throw new Error('Login required');
-      
-      const token = await currentUser.getIdToken();
-      const audioPath = getStoragePathFromUrl(selectedVoiceObject.audioUrl);
-      if (!audioPath) throw new Error('Invalid voice path');
-
-      const requestBody = {
-        text: text,
-        audio_prompt_path: audioPath,
-        language_id: selectedVoiceObject.language?.toLowerCase().includes('hindi') ? 'hi' : 'en',
-      };
-
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Failed to generate audio');
-      }
-      
-      const data = await res.json();
-
-      if (data.audio_url) {
+      // Mock synthesis logic
+      setTimeout(() => {
         setGeneratedAudio({
-          url: data.audio_url,
-          voice: selectedVoiceObject.voiceName,
-          duration: 0,
-          characters: characterCount,
+          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+          voice: selectedVoice.voiceName,
+          characters: text.length
         });
-        toast({ title: 'Success', description: 'Audio generated successfully!' });
-      }
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } finally {
+        setIsGenerating(false);
+        toast({ title: "Synthesis Complete", description: "Audio ready for review." });
+      }, 2000);
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
       setIsGenerating(false);
     }
-  }, [canGenerate, isGenerating, text, selectedVoiceId, selectedVoiceObject, characterCount]);
+  };
 
   return (
-    <div className="w-full max-w-[1100px] mx-auto space-y-6 md:space-y-10 pb-20 px-0 sm:px-4">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card/40 backdrop-blur-[40px] border border-white/5 rounded-none sm:rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10"
-      >
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 border-b border-white/5 bg-white/5 gap-4">
-          <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 shadow-lg w-full sm:w-auto">
-            <Avatar className="h-8 w-8 md:h-9 md:w-9 ring-2 ring-primary/20">
-              <AvatarImage src={selectedVoiceObject?.avatarUrl} className="object-cover" />
-              <AvatarFallback className="bg-primary/10"><User className="h-4 w-4 md:h-5 md:w-5 text-primary" /></AvatarFallback>
-            </Avatar>
-            <div className="text-left min-w-0">
-              <p className="text-xs md:text-sm font-bold leading-tight truncate">
-                {selectedVoiceObject?.voiceName || 'Select Voice'}
-              </p>
-              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">
-                {selectedVoiceObject?.language || 'Studio Voice'}
-              </p>
+    <div className="min-h-screen pb-32">
+      {/* Top Studio Controls */}
+      <div className="sticky top-0 z-40 glass-card border-b border-white/5 py-4 mb-12">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+              <Mic2 className="h-5 w-5" />
+            </div>
+            <div className="hidden sm:block">
+              <h2 className="text-sm font-black text-white">Studio Workspace</h2>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">AI Text-to-Speech v2.0</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto">
-            <Button 
-              variant="outline" 
-              className="flex-1 sm:flex-none rounded-full h-10 md:h-12 px-4 md:px-6 border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs md:text-sm"
-              disabled={!generatedAudio}
-              asChild={!!generatedAudio}
-            >
-              {generatedAudio ? (
-                <a href={generatedAudio.url} download={`${generatedAudio.voice}.wav`} className="flex items-center justify-center gap-2">
-                  <Download className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" /> <span>Download</span>
-                </a>
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <Download className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" /> <span>Download</span>
-                </span>
-              )}
-            </Button>
+          <div className="flex-1 max-w-md hidden lg:flex items-center gap-8 px-8">
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
+                <Label>Speed</Label>
+                <span>{settings.speed}x</span>
+              </div>
+              <Slider value={[settings.speed * 100]} min={50} max={200} onValueChange={(v) => setParams({...settings, speed: v[0]/100})} className="h-4" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
+                <Label>Tone</Label>
+                <span>{settings.stability}%</span>
+              </div>
+              <Slider value={[settings.stability]} onValueChange={(v) => setParams({...settings, stability: v[0]})} className="h-4" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">{text.length} / {MAX_CHARACTERS}</p>
+            </div>
             <Button 
               onClick={handleGenerate}
-              disabled={!canGenerate || isGenerating}
-              className="flex-[1.5] sm:flex-none rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
+              disabled={isGenerating || !text}
+              className="h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
             >
-              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Zap className="mr-2 h-4 w-4 md:h-5 md:w-5 fill-current" />}
-              {isGenerating ? 'Generating...' : 'Generate'}
+              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
+              {isGenerating ? 'Synthesizing...' : 'Generate'}
             </Button>
           </div>
         </div>
+      </div>
 
-        <div className="p-4 sm:p-6 md:p-14 space-y-4">
-          <div className="relative group w-full">
-            <ModernTextEditor 
-              value={text} 
-              onChange={setText} 
-              maxLength={MAX_CHARACTERS} 
-            />
+      {/* Main Studio Editor */}
+      <main className="container mx-auto px-6 py-12">
+        <StudioEditor value={text} onChange={setText} maxLength={MAX_CHARACTERS} />
+      </main>
+
+      {/* Voice Selection Drawer */}
+      <div className="fixed left-6 bottom-32 z-40 hidden xl:block">
+        <div className="glass-card rounded-[2rem] p-4 w-64 max-h-[400px] overflow-y-auto scrollbar-hide border-white/5 bg-black/60">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 px-2">Select Speaker</h3>
+          <div className="space-y-2">
+            {voices.map((v) => (
+              <button
+                key={v.id}
+                onClick={() => setSelectedVoiceId(v.id)}
+                className={cn(
+                  "w-full flex items-center gap-3 p-3 rounded-2xl transition-all border",
+                  selectedVoiceId === v.id ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" : "bg-white/5 border-transparent hover:bg-white/10"
+                )}
+              >
+                <Avatar className="h-8 w-8 ring-2 ring-white/10">
+                  <AvatarImage src={v.avatarUrl} className="object-cover" />
+                  <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                </Avatar>
+                <div className="text-left min-w-0">
+                  <p className={cn("text-xs font-bold truncate", selectedVoiceId === v.id ? "text-primary" : "text-white")}>{v.voiceName}</p>
+                  <p className="text-[8px] text-muted-foreground uppercase font-black">{v.language}</p>
+                </div>
+              </button>
+            ))}
           </div>
-          <div className="flex flex-col sm:flex-row justify-between items-center px-2 py-2 gap-4">
-            <div className="flex gap-2 md:gap-4 w-full sm:w-auto justify-center">
-              <Button variant="ghost" size="sm" className="text-[10px] md:text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest px-2">
-                <Volume2 className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1 md:mr-2 text-primary" /> Pronunciation
-              </Button>
-              <Button variant="ghost" size="sm" className="text-[10px] md:text-xs font-bold text-muted-foreground hover:text-white uppercase tracking-widest px-2">
-                <Zap className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1 md:mr-2 text-primary" /> Speed
-              </Button>
-            </div>
-            <div className={cn(
-              "text-[9px] md:text-xs font-mono font-black tracking-[0.2em] px-3 py-1 rounded-full bg-white/5 border border-white/5",
-              characterCount >= MAX_CHARACTERS ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-muted-foreground/50"
-            )}>
-              {characterCount.toLocaleString()} / {MAX_CHARACTERS.toLocaleString()}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {generatedAudio && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            className="ring-1 ring-primary/20 rounded-none sm:rounded-xl md:rounded-2xl overflow-hidden"
-          >
-            <AudioOutputCard
-              audioUrl={generatedAudio.url}
-              voice={generatedAudio.voice}
-              duration={generatedAudio.duration}
-              characters={generatedAudio.characters}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="space-y-4 md:space-y-6 px-4 sm:px-0">
-        <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/80">Select Speaker</h3>
-          </div>
-          <Button variant="link" className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors h-auto p-0" asChild>
-            <a href="/dashboard/voice-library">Browse Library</a>
-          </Button>
-        </div>
-
-        <div className="flex gap-3 md:gap-5 overflow-x-auto pb-6 scrollbar-hide snap-x px-2">
-          {voicesLoading ? (
-            [1, 2, 3, 4].map(i => (
-              <div key={i} className="min-w-[200px] md:min-w-[240px] h-[65px] md:h-[75px] rounded-xl md:rounded-2xl bg-white/5 animate-pulse border border-white/5" />
-            ))
-          ) : detailedVoices.map((voice) => (
-            <button
-              key={voice.id}
-              onClick={() => setSelectedVoiceId(voice.id)}
-              className={cn(
-                "min-w-[200px] md:min-w-[240px] h-[65px] md:h-[75px] flex items-center gap-3 md:gap-4 px-4 md:px-5 rounded-xl md:rounded-2xl border transition-all text-left relative overflow-hidden group snap-start",
-                selectedVoiceId === voice.id 
-                  ? "bg-primary/10 border-primary shadow-[0_0_30px_rgba(168,85,247,0.15)] ring-1 ring-primary/20" 
-                  : "bg-card/50 border-white/5 hover:border-white/20 hover:bg-white/5"
-              )}
-            >
-              <Avatar className="h-9 w-9 md:h-11 md:w-11 border-2 border-white/10 shrink-0 shadow-lg group-hover:scale-105 transition-transform">
-                <AvatarImage src={voice.avatarUrl} className="object-cover" />
-                <AvatarFallback className="bg-white/5"><User className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" /></AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className={cn(
-                  "font-bold text-xs md:text-sm truncate transition-colors",
-                  selectedVoiceId === voice.id ? "text-primary" : "text-white group-hover:text-primary/80"
-                )}>
-                  {voice.voiceName}
-                </p>
-                <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest truncate font-black mt-0.5 opacity-60">
-                  {voice.style || 'Narrator'}
-                </p>
-              </div>
-              {selectedVoiceId === voice.id && (
-                <motion.div 
-                  layoutId="active-indicator"
-                  className="absolute right-0 top-0 bottom-0 w-1 md:w-1.5 bg-primary shadow-[0_0_15px_rgba(168,85,247,0.5)]" 
-                />
-              )}
-            </button>
-          ))}
         </div>
       </div>
+
+      {/* Audio Player Footer */}
+      <AudioPlayerFooter 
+        audioUrl={generatedAudio?.url} 
+        voice={generatedAudio?.voice} 
+        characters={generatedAudio?.characters} 
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying(!isPlaying)}
+      />
     </div>
   );
 }
