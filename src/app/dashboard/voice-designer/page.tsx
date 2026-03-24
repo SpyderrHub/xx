@@ -18,13 +18,6 @@ import {
   Globe2,
   Settings2
 } from 'lucide-react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -113,20 +106,18 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
 
 export default function VoiceDesignerPage() {
   const [prompt, setPrompt] = useState('');
-  const [previewText, setPreviewText] = useState('This is how my new designed voice sounds. You can customize my tone and style using the prompt above.');
+  const [referenceText, setReferenceText] = useState('This is how my new designed voice sounds. You can customize my tone and style using the prompt above.');
   const [isDesigning, setIsDesigning] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
-  const [params, setParams] = useState({
-    gender: 'female',
-    age: 'young',
-    accent: 'british',
-    strength: 75
+  const [settings, setSettings] = useState({
+    stability: 75,
+    clarity: 85
   });
 
   const handleGenerate = () => {
-    if (!prompt || !previewText || isDesigning) return;
+    if (!prompt || !referenceText || isDesigning) return;
     
     setIsDesigning(true);
     setGeneratedAudio(null);
@@ -157,20 +148,27 @@ export default function VoiceDesignerPage() {
             </div>
           </div>
 
-          <div className="flex-1 max-w-xs hidden lg:flex items-center gap-4 px-8">
+          <div className="flex-1 max-w-md hidden lg:flex items-center gap-8 px-8">
             <div className="flex-1 space-y-2">
               <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-                <Label>Accent Strength</Label>
-                <span>{params.strength}%</span>
+                <Label>Stability</Label>
+                <span>{settings.stability}%</span>
               </div>
-              <Slider value={[params.strength]} onValueChange={(v) => setParams({...params, strength: v[0]})} className="h-4" />
+              <Slider value={[settings.stability]} onValueChange={(v) => setSettings({...settings, stability: v[0]})} className="h-4" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
+                <Label>Clarity</Label>
+                <span>{settings.clarity}%</span>
+              </div>
+              <Slider value={[settings.clarity]} onValueChange={(v) => setSettings({...settings, clarity: v[0]})} className="h-4" />
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <Button 
               onClick={handleGenerate}
-              disabled={isDesigning || !prompt || !previewText}
+              disabled={isDesigning || !prompt || !referenceText}
               className="h-12 px-6 md:px-8 rounded-xl bg-primary btn-glow font-black text-sm"
             >
               {isDesigning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
@@ -180,59 +178,7 @@ export default function VoiceDesignerPage() {
         </div>
       </div>
 
-      <main className="container mx-auto px-6 max-w-5xl space-y-12">
-        {/* Advanced Parameter Selectors */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <User className="h-3 w-3" /> Base Gender
-            </Label>
-            <Select value={params.gender} onValueChange={(v) => setParams({...params, gender: v})}>
-              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl bg-black/95 backdrop-blur-xl border-white/10">
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="neutral">Neutral</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <Settings2 className="h-3 w-3" /> Target Age
-            </Label>
-            <Select value={params.age} onValueChange={(v) => setParams({...params, age: v})}>
-              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl bg-black/95 backdrop-blur-xl border-white/10">
-                <SelectItem value="young">Young (20s)</SelectItem>
-                <SelectItem value="middle">Middle Aged (40s)</SelectItem>
-                <SelectItem value="old">Old (60s+)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <Globe2 className="h-3 w-3" /> Regional Accent
-            </Label>
-            <Select value={params.accent} onValueChange={(v) => setParams({...params, accent: v})}>
-              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl bg-black/95 backdrop-blur-xl border-white/10">
-                <SelectItem value="british">British (RP)</SelectItem>
-                <SelectItem value="american">American (General)</SelectItem>
-                <SelectItem value="indian">Indian (Standard)</SelectItem>
-                <SelectItem value="australian">Australian</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
+      <main className="container mx-auto px-6 max-w-5xl space-y-12 pt-8">
         {/* Text Area Workspaces */}
         <div className="grid grid-cols-1 gap-10">
           <StudioTextArea 
@@ -244,9 +190,9 @@ export default function VoiceDesignerPage() {
           />
 
           <StudioTextArea 
-            label="Preview Text"
-            value={previewText}
-            onChange={setPreviewText}
+            label="Reference Text"
+            value={referenceText}
+            onChange={setReferenceText}
             maxLength={MAX_PREVIEW_CHARS}
             placeholder="Enter the text you want the designed voice to speak for the preview..."
           />
