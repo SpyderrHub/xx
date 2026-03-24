@@ -16,7 +16,8 @@ import {
   Play, 
   Pause,
   Clock,
-  Sparkles
+  Sparkles,
+  Share2
 } from 'lucide-react';
 import { 
   Select, 
@@ -60,6 +61,24 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
     }
   }, [audioUrl]);
 
+  const handleShare = async () => {
+    if (!audioUrl) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Saanchi AI Generation',
+          text: `Check out this AI-generated voice: ${voice}`,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({ title: "Link Copied", description: "Share link copied to clipboard." });
+      }
+    } catch (err) {
+      console.error('Sharing failed', err);
+    }
+  };
+
   if (!audioUrl) return null;
 
   return (
@@ -86,6 +105,9 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
+              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" onClick={handleShare}>
+                <Share2 className="h-4 w-4" />
+              </Button>
           </div>
         </div>
 
@@ -98,10 +120,13 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
         </div>
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
-          <Button variant="outline" className="h-12 px-6 rounded-xl border-white/10 bg-white/5 font-bold" asChild>
-            <a href={audioUrl} download="saanchi-ai-generation.mp3">
-              <Download className="mr-2 h-4 w-4" /> Export
+          <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
+            <a href={audioUrl} download="saanchi-ai-generation.mp3" title="Download Audio">
+              <Download className="h-5 w-5" />
             </a>
+          </Button>
+          <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" onClick={handleShare} title="Share link">
+            <Share2 className="h-5 w-5" />
           </Button>
           <Button className="h-12 w-12 rounded-xl bg-white/10 hover:bg-white/20">
             <Sparkles className="h-5 w-5 text-primary" />
