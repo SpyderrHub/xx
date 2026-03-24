@@ -1,19 +1,22 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 import { 
-  Sparkles, 
-  Play, 
   Loader2, 
+  Zap, 
+  Download, 
   User, 
   Volume2, 
-  Zap,
+  Mic2, 
+  Play, 
+  Pause,
+  Sparkles,
   Globe2,
-  CheckCircle2
+  Settings2
 } from 'lucide-react';
 import { 
   Select, 
@@ -25,221 +28,238 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-const MAX_CHARACTERS = 1000;
+const MAX_PROMPT_CHARS = 500;
+const MAX_PREVIEW_CHARS = 1000;
 
-const ModernTextEditor = ({ value, onChange, maxLength }: { value: string, onChange: (val: string) => void, maxLength: number }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const text = e.currentTarget.innerText;
-    if (text.length <= maxLength) {
-      onChange(text);
-    } else {
-      e.currentTarget.innerText = text.slice(0, maxLength);
-    }
-  };
-
+const StudioTextArea = ({ 
+  label, 
+  value, 
+  onChange, 
+  maxLength, 
+  placeholder 
+}: { 
+  label: string, 
+  value: string, 
+  onChange: (val: string) => void, 
+  maxLength: number,
+  placeholder: string
+}) => {
   return (
-    <div className="relative group">
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        suppressContentEditableWarning
-        className="w-full min-h-[160px] md:min-h-[200px] p-0 text-[18px] md:text-[20px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
-        style={{ fontFamily: "'Roboto', sans-serif" }}
-        data-placeholder="Type or paste your preview text here..."
+    <div className="space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{label}</label>
+        <span className="text-[10px] font-mono text-muted-foreground">{value.length} / {maxLength}</span>
+      </div>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
+        dir="ltr"
+        placeholder={placeholder}
+        className="w-full min-h-[200px] p-6 text-[18px] text-left leading-relaxed outline-none bg-white/[0.02] border border-white/5 rounded-[2rem] placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 resize-none focus:ring-1 focus:ring-primary/20 transition-all"
+        style={{ fontFamily: "'Inter', sans-serif" }}
       />
-      {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/30 text-[18px] md:text-[20px] italic font-medium" style={{ fontFamily: "'Roboto', sans-serif" }}>
-          What would you like the designed voice to say?
-        </div>
-      )}
     </div>
   );
 };
 
+const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) => {
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.ontimeupdate = () => setProgress((audioRef.current?.currentTime || 0) / (audioRef.current?.duration || 1) * 100);
+    }
+  }, [audioUrl]);
+
+  if (!audioUrl) return null;
+
+  return (
+    <motion.div 
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-white/10 p-4 md:p-6"
+    >
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6">
+        <div className="flex items-center gap-4 shrink-0">
+          <Button 
+            onClick={onTogglePlay}
+            className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-white/90 btn-glow"
+          >
+            {isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current ml-1" />}
+          </Button>
+          <div className="hidden sm:block">
+            <p className="text-sm font-black text-white">Designed Voice Preview</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Synthetic Generation</p>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center gap-4 w-full">
+          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden relative">
+            <motion.div className="absolute h-full bg-primary" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <Button variant="outline" className="h-12 px-6 rounded-xl border-white/10 bg-white/5 font-bold">
+            <Download className="mr-2 h-4 w-4" /> Save Voice
+          </Button>
+        </div>
+      </div>
+      <audio ref={audioRef} src={audioUrl} />
+    </motion.div>
+  );
+};
+
 export default function VoiceDesignerPage() {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [text, setText] = useState("This is a preview of the unique voice you're designing. Adjust the parameters below to find the perfect sound.");
+  const [prompt, setPrompt] = useState('');
+  const [previewText, setPreviewText] = useState('This is how my new designed voice sounds. You can customize my tone and style using the prompt above.');
+  const [isDesigning, setIsDesigning] = useState(false);
+  const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
   const [params, setParams] = useState({
     gender: 'female',
     age: 'young',
     accent: 'british',
-    accentStrength: 50,
+    strength: 75
   });
 
-  const characterCount = text.length;
-
   const handleGenerate = () => {
-    if (!text || isGenerating) return;
+    if (!prompt || !previewText || isDesigning) return;
     
-    setIsGenerating(true);
+    setIsDesigning(true);
+    setGeneratedAudio(null);
+
+    // Mock synthesis logic
     setTimeout(() => {
-      setIsGenerating(false);
+      setGeneratedAudio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+      setIsDesigning(false);
       toast({
-        title: "Sample Generated",
+        title: "Voice Designed",
         description: "Your unique custom voice is ready to preview.",
       });
-    }, 1500);
+    }, 2000);
   };
 
   return (
-    <div className="max-w-[900px] mx-auto space-y-6 md:space-y-10 pb-20 px-4 md:px-0">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card/40 backdrop-blur-[40px] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10"
-      >
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 border-b border-white/5 bg-white/5 gap-4">
-          <div className="flex items-center gap-3 px-4 py-2 md:px-5 md:py-2.5 rounded-full bg-white/5 border border-white/10 shadow-lg w-full sm:w-auto">
-            <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
-              <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+    <div className="min-h-screen pb-32">
+      {/* Top Studio Header */}
+      <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-4 mb-8">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+              <Sparkles className="h-5 w-5" />
             </div>
-            <div className="text-left">
-              <p className="text-xs md:text-sm font-bold leading-tight">AI Voice Designer</p>
-              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Generative Studio</p>
+            <div className="hidden sm:block">
+              <h2 className="text-sm font-black text-white">Voice Designer</h2>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Neural Engine v2.0</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto">
+          <div className="flex-1 max-w-xs hidden lg:flex items-center gap-4 px-8">
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
+                <Label>Accent Strength</Label>
+                <span>{params.strength}%</span>
+              </div>
+              <Slider value={[params.strength]} onValueChange={(v) => setParams({...params, strength: v[0]})} className="h-4" />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
             <Button 
               onClick={handleGenerate}
-              disabled={isGenerating || !text}
-              className="w-full sm:w-auto rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
+              disabled={isDesigning || !prompt || !previewText}
+              className="h-12 px-6 md:px-8 rounded-xl bg-primary btn-glow font-black text-sm"
             >
-              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Play className="mr-2 h-4 w-4 md:h-5 md:w-5 fill-current" />}
-              {isGenerating ? 'Designing...' : 'Generate Sample'}
+              {isDesigning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
+              {isDesigning ? 'Designing...' : 'Generate Voice'}
             </Button>
           </div>
         </div>
-
-        <div className="p-6 md:p-14 space-y-8 md:space-y-12">
-          <div className="p-6 md:p-10 rounded-xl md:rounded-[2rem] bg-white/5 border border-white/10 relative group overflow-hidden">
-            <ModernTextEditor 
-              value={text} 
-              onChange={setText} 
-              maxLength={MAX_CHARACTERS} 
-            />
-            
-            <div className="flex justify-end pt-4 md:pt-6 border-t border-white/5 mt-4 md:mt-6">
-              <div className={cn(
-                "text-[9px] md:text-[10px] font-mono font-black tracking-[0.2em] px-3 py-1 rounded-full bg-white/5 border border-white/5",
-                characterCount >= MAX_CHARACTERS ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-muted-foreground/50"
-              )}>
-                {characterCount.toLocaleString()} / {MAX_CHARACTERS.toLocaleString()}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            <div className="space-y-6 md:space-y-8">
-              <div className="space-y-3 md:space-y-4">
-                <Label className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">
-                  <User className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary" /> Base Gender
-                </Label>
-                <div className="grid grid-cols-3 gap-2 md:gap-3">
-                  {['Male', 'Female', 'Neutral'].map((gender) => (
-                    <button
-                      key={gender}
-                      onClick={() => setParams({...params, gender: gender.toLowerCase()})}
-                      className={cn(
-                        "h-10 md:h-12 rounded-lg md:rounded-xl border text-[10px] md:text-sm font-bold transition-all",
-                        params.gender === gender.toLowerCase() 
-                          ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" 
-                          : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10"
-                      )}
-                    >
-                      {gender}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3 md:space-y-4">
-                <Label className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">
-                  <Zap className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary" /> Target Age
-                </Label>
-                <Select value={params.age} onValueChange={(v) => setParams({...params, age: v})}>
-                  <SelectTrigger className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-sm md:text-base font-bold">
-                    <SelectValue placeholder="Select age" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl md:rounded-2xl border-white/10 bg-black/90 backdrop-blur-xl">
-                    <SelectItem value="young">Young (Early 20s)</SelectItem>
-                    <SelectItem value="middle">Middle Aged (40s)</SelectItem>
-                    <SelectItem value="old">Old (60s+)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-6 md:space-y-8">
-              <div className="space-y-3 md:space-y-4">
-                <Label className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">
-                  <Globe2 className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary" /> Regional Accent
-                </Label>
-                <Select value={params.accent} onValueChange={(v) => setParams({...params, accent: v})}>
-                  <SelectTrigger className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-sm md:text-base font-bold">
-                    <SelectValue placeholder="Select accent" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl md:rounded-2xl border-white/10 bg-black/90 backdrop-blur-xl">
-                    <SelectItem value="british">British (RP Style)</SelectItem>
-                    <SelectItem value="american">American (General)</SelectItem>
-                    <SelectItem value="indian">Indian (Standard)</SelectItem>
-                    <SelectItem value="australian">Australian</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-4 md:space-y-6">
-                <div className="flex justify-between items-center">
-                  <Label className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">
-                    <Volume2 className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary" /> Accent Strength
-                  </Label>
-                  <span className="text-[10px] md:text-xs font-mono font-bold text-primary">{params.accentStrength}%</span>
-                </div>
-                <Slider 
-                  value={[params.accentStrength]} 
-                  onValueChange={(v) => setParams({...params, accentStrength: v[0]})}
-                  max={100}
-                  step={1}
-                  className="py-2 md:py-4"
-                />
-                <div className="flex justify-between text-[8px] md:text-[10px] uppercase tracking-tighter text-muted-foreground/50 font-black">
-                  <span>Subtle</span>
-                  <span>Heavy</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-6 md:pt-10 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-            <div className="text-center md:text-left">
-              <p className="text-xs md:text-sm font-bold text-white">Save as permanent voice?</p>
-              <p className="text-[10px] md:text-xs text-muted-foreground">Generated voices can be added to your personal library.</p>
-            </div>
-            <Button variant="outline" className="w-full md:w-auto rounded-full h-10 md:h-12 px-6 md:px-8 border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs md:text-sm">
-              Add to My Library
-            </Button>
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-        {[
-          { title: "Infinite Variety", desc: "Craft unique combinations.", icon: Sparkles },
-          { title: "No Royalty", desc: "Synthetic voices are free.", icon: Zap },
-          { title: "Consistent", desc: "Reliable settings every time.", icon: CheckCircle2 },
-        ].map((feature, i) => (
-          <div key={i} className="p-4 md:p-6 rounded-xl md:rounded-[2rem] bg-white/5 border border-white/10 flex items-start gap-3 md:gap-4">
-            <feature.icon className="h-4 w-4 md:h-5 md:w-5 text-primary mt-1" />
-            <div>
-              <h5 className="text-[10px] md:text-sm font-black uppercase tracking-widest text-white">{feature.title}</h5>
-              <p className="text-[9px] md:text-xs text-muted-foreground mt-1">{feature.desc}</p>
-            </div>
-          </div>
-        ))}
       </div>
+
+      <main className="container mx-auto px-6 max-w-5xl space-y-12">
+        {/* Advanced Parameter Selectors */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <User className="h-3 w-3" /> Base Gender
+            </Label>
+            <Select value={params.gender} onValueChange={(v) => setParams({...params, gender: v})}>
+              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl bg-black/95 backdrop-blur-xl border-white/10">
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="neutral">Neutral</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Settings2 className="h-3 w-3" /> Target Age
+            </Label>
+            <Select value={params.age} onValueChange={(v) => setParams({...params, age: v})}>
+              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl bg-black/95 backdrop-blur-xl border-white/10">
+                <SelectItem value="young">Young (20s)</SelectItem>
+                <SelectItem value="middle">Middle Aged (40s)</SelectItem>
+                <SelectItem value="old">Old (60s+)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Globe2 className="h-3 w-3" /> Regional Accent
+            </Label>
+            <Select value={params.accent} onValueChange={(v) => setParams({...params, accent: v})}>
+              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl bg-black/95 backdrop-blur-xl border-white/10">
+                <SelectItem value="british">British (RP)</SelectItem>
+                <SelectItem value="american">American (General)</SelectItem>
+                <SelectItem value="indian">Indian (Standard)</SelectItem>
+                <SelectItem value="australian">Australian</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Text Area Workspaces */}
+        <div className="grid grid-cols-1 gap-10">
+          <StudioTextArea 
+            label="Voice Prompt"
+            value={prompt}
+            onChange={setPrompt}
+            maxLength={MAX_PROMPT_CHARS}
+            placeholder='Describe the voice... e.g. "A deep, raspy cinematic male voice with a calm, slow pace and a slight southern accent."'
+          />
+
+          <StudioTextArea 
+            label="Preview Text"
+            value={previewText}
+            onChange={setPreviewText}
+            maxLength={MAX_PREVIEW_CHARS}
+            placeholder="Enter the text you want the designed voice to speak for the preview..."
+          />
+        </div>
+      </main>
+
+      {/* Audio Player Footer */}
+      <AudioPlayerFooter 
+        audioUrl={generatedAudio} 
+        voice="Custom Designed Voice"
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying(!isPlaying)}
+      />
     </div>
   );
 }
