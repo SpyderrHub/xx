@@ -34,36 +34,16 @@ import { cn } from '@/lib/utils';
 const MAX_CHARACTERS = 5000;
 
 const StudioEditor = ({ value, onChange, maxLength }: { value: string, onChange: (val: string) => void, maxLength: number }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const text = e.currentTarget.innerText;
-    if (text.length <= maxLength) {
-      onChange(text);
-    } else {
-      e.currentTarget.innerText = text.slice(0, maxLength);
-    }
-  };
-
   return (
     <div className="relative w-full max-w-4xl mx-auto">
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        suppressContentEditableWarning
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         dir="ltr"
-        className="w-full min-h-[400px] p-0 text-[18px] text-left leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/30 font-medium text-white/90 selection:bg-primary/30"
+        placeholder='What should I say? Try "[laughs] Welcome to the future..."'
+        className="w-full min-h-[500px] p-0 text-[18px] text-left leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0 scrollbar-hide"
         style={{ fontFamily: "'Inter', sans-serif" }}
-        data-placeholder="Start typing your story..."
-      >
-        {value}
-      </div>
-      {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[18px] font-medium italic text-left">
-          What should I say? Try "[laughs] Welcome to the future..."
-        </div>
-      )}
+      />
     </div>
   );
 };
@@ -111,8 +91,10 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <Button variant="outline" className="h-12 px-6 rounded-xl border-white/10 bg-white/5 font-bold">
-            <Download className="mr-2 h-4 w-4" /> Export
+          <Button variant="outline" className="h-12 px-6 rounded-xl border-white/10 bg-white/5 font-bold" asChild>
+            <a href={audioUrl} download="saanchi-ai-generation.mp3">
+              <Download className="mr-2 h-4 w-4" /> Export
+            </a>
           </Button>
           <Button className="h-12 w-12 rounded-xl bg-white/10 hover:bg-white/20">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -157,7 +139,7 @@ export default function TextToSpeechPage() {
     setGeneratedAudio(null);
 
     try {
-      // Mock synthesis logic
+      // Mock synthesis logic - Replace with actual API call if backend is ready
       setTimeout(() => {
         setGeneratedAudio({
           url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
@@ -211,7 +193,7 @@ export default function TextToSpeechPage() {
             </div>
 
             <Select value={selectedVoiceId || ''} onValueChange={setSelectedVoiceId}>
-              <SelectTrigger className="w-[160px] md:w-[200px] h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold">
+              <SelectTrigger className="w-[160px] md:w-[200px] h-12 rounded-xl bg-white/5 border-white/10 text-xs font-bold focus:ring-0">
                 <SelectValue placeholder="Select Speaker" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
