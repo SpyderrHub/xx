@@ -64,13 +64,6 @@ const AudioPlayerFooter = ({ audioUrl, trackName, isPlaying, onTogglePlay }: any
     }
   }, [audioUrl]);
 
-  const handleSaveToLibrary = () => {
-    toast({
-      title: "Track Saved",
-      description: "This generated track has been added to your library.",
-    });
-  };
-
   if (!audioUrl) return null;
 
   return (
@@ -98,9 +91,6 @@ const AudioPlayerFooter = ({ audioUrl, trackName, isPlaying, onTogglePlay }: any
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
-              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" onClick={handleSaveToLibrary}>
-                <Library className="h-4 w-4" />
-              </Button>
           </div>
         </div>
 
@@ -115,15 +105,6 @@ const AudioPlayerFooter = ({ audioUrl, trackName, isPlaying, onTogglePlay }: any
             <a href={audioUrl} download="saanchi-ai-music.mp3" title="Download Track">
               <Download className="h-5 w-5" />
             </a>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" 
-            title="Save to Library"
-            onClick={handleSaveToLibrary}
-          >
-            <Library className="h-5 w-5" />
           </Button>
           <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-primary" />
