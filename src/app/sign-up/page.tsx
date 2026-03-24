@@ -38,7 +38,7 @@ const WaveformAnimation = () => (
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen w-full bg-gray-900 text-white flex flex-col items-center justify-center p-6 md:p-10 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[#0B0B0F] text-white flex flex-col items-center justify-center p-6 md:p-10 relative overflow-hidden">
       {/* Background Neural Glow */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-600/10 blur-[150px] rounded-full" />
@@ -62,7 +62,7 @@ export default function SignUpPage() {
 
         <SignUpForm />
 
-        <p className="mt-12 text-sm text-gray-500 font-medium">
+        <p className="mt-12 text-sm text-gray-500 font-medium text-center">
           © {new Date().getFullYear()} Saanchi AI. All rights reserved.
         </p>
       </div>

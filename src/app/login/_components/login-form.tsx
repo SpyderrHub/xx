@@ -35,8 +35,8 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 48 48"
-    width="24px"
-    height="24px"
+    width="20"
+    height="20"
     {...props}
   >
     <path
@@ -121,36 +121,38 @@ export function LoginForm() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
       className="w-full"
     >
-      <div className="rounded-3xl border border-white/10 bg-black/40 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
-        <div className="mb-8 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+      <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 md:p-12 shadow-2xl backdrop-blur-2xl relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+        
+        <div className="mb-10">
+          <h2 className="text-3xl font-black tracking-tight text-white mb-2">
             Welcome back
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
-            Log in to continue to Saanchi AI.
+          <p className="text-sm text-muted-foreground font-medium">
+            Continue your journey with Saanchi Studio.
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Email Address</FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="you@example.com"
                       {...field}
-                      className="h-12 border-white/10 bg-white/5 text-white placeholder:text-gray-600 rounded-xl"
+                      className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
@@ -159,14 +161,14 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Password</FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={passwordVisible ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...field}
-                        className="h-12 border-white/10 bg-white/5 text-white placeholder:text-gray-600 rounded-xl"
+                        className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
                       />
                       <PasswordVisibilityToggle
                         visible={passwordVisible}
@@ -174,12 +176,12 @@ export function LoginForm() {
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
 
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs">
               <FormField
                 control={form.control}
                 name="rememberMe"
@@ -190,12 +192,12 @@ export function LoginForm() {
                         id="remember-me"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-white/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                        className="h-5 w-5 rounded-lg border-white/10 bg-white/5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                     </FormControl>
                     <Label
                       htmlFor="remember-me"
-                      className="cursor-pointer font-normal text-gray-400"
+                      className="cursor-pointer font-bold text-muted-foreground hover:text-white transition-colors"
                     >
                       Remember me
                     </Label>
@@ -204,47 +206,49 @@ export function LoginForm() {
               />
               <Link
                 href="/forgot-password"
-                className="font-medium text-primary hover:text-primary/80 transition-colors"
+                className="font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
               >
-                Forgot password?
+                Forgot?
               </Link>
             </div>
 
-            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
               <Button
                 type="submit"
-                className="h-14 w-full bg-gradient-to-r from-primary to-indigo-600 text-lg font-bold hover:from-primary/90 hover:to-indigo-700 transition-all shadow-lg shadow-primary/20 rounded-xl"
+                className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <Loader2 className="animate-spin mr-2" />
                 ) : null}
-                {isLoading ? 'Logging in...' : 'Sign In'}
+                {isLoading ? 'Processing...' : 'Sign In'}
               </Button>
             </motion.div>
           </form>
         </Form>
-        <div className="relative my-8">
+
+        <div className="relative my-10">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-white/10"></span>
+            <span className="w-full border-t border-white/5"></span>
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-[#0a0a0a] px-4 text-gray-500 font-bold tracking-widest">
+          <div className="relative flex justify-center text-[10px] uppercase">
+            <span className="bg-[#0B0B0F] px-4 text-muted-foreground font-black tracking-[0.3em]">
               Or continue with
             </span>
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <Button
             variant="outline"
-            className="h-12 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl"
+            className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
           >
             <GoogleIcon className="mr-2" />
             Google
           </Button>
           <Button
             variant="outline"
-            className="h-12 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl"
+            className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
           >
             <Github className="mr-2 h-5 w-5" />
             GitHub
@@ -252,11 +256,11 @@ export function LoginForm() {
         </div>
       </div>
 
-      <p className="mt-8 text-center text-sm text-gray-400">
-        Don't have an account?{' '}
+      <p className="mt-8 text-center text-sm font-medium text-muted-foreground">
+        New to Saanchi?{' '}
         <Link
           href="/sign-up"
-          className="font-bold text-primary hover:underline transition-all"
+          className="font-black uppercase tracking-widest text-primary hover:underline transition-all ml-1"
         >
           Create account
         </Link>

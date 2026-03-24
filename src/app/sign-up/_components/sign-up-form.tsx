@@ -42,8 +42,8 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 48 48"
-    width="24px"
-    height="24px"
+    width="20"
+    height="20"
     {...props}
   >
     <path
@@ -124,35 +124,37 @@ export function SignUpForm() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
       className="w-full"
     >
-      <div className="rounded-3xl border border-white/10 bg-black/40 p-8 md:p-10 shadow-2xl backdrop-blur-xl">
-        <div className="mb-8 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-white">
+      <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 md:p-12 shadow-2xl backdrop-blur-2xl relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+        
+        <div className="mb-10 text-center md:text-left">
+          <h2 className="text-3xl font-black tracking-tight text-white mb-2">
             Create account
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
-            Start generating studio-quality voices.
+          <p className="text-sm text-muted-foreground font-medium">
+            Start generating studio-quality voices today.
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 relative z-10">
             <FormField
               control={form.control}
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Full Name</FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Full Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="John Doe"
                       {...field}
-                      className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
+                      className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
@@ -161,16 +163,16 @@ export function SignUpForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Email Address</FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="you@example.com"
                       {...field}
-                      className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
+                      className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
@@ -179,14 +181,14 @@ export function SignUpForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">Password</FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={passwordVisible ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...field}
-                        className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
+                        className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
                       />
                       <PasswordVisibilityToggle
                         visible={passwordVisible}
@@ -194,7 +196,7 @@ export function SignUpForm() {
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
@@ -203,34 +205,30 @@ export function SignUpForm() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white/80">
-                    Confirm Password
-                  </FormLabel>
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={confirmPasswordVisible ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...field}
-                        className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
+                        className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
                       />
                       <PasswordVisibilityToggle
                         visible={confirmPasswordVisible}
-                        onClick={() =>
-                          setConfirmPasswordVisible(!confirmPasswordVisible)
-                        }
+                        onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] font-bold" />
                 </FormItem>
               )}
             />
 
-            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="pt-2">
+            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
               <Button
                 type="submit"
-                className="w-full font-bold h-14 text-lg bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 transition-all shadow-lg shadow-primary/20 rounded-xl"
+                className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -241,33 +239,36 @@ export function SignUpForm() {
             </motion.div>
           </form>
         </Form>
-        <div className="relative my-8">
+
+        <div className="relative my-10">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-white/10"></span>
+            <span className="w-full border-t border-white/5"></span>
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-[#0a0a0a] px-4 text-gray-500 font-bold tracking-widest">
+          <div className="relative flex justify-center text-[10px] uppercase">
+            <span className="bg-[#0B0B0F] px-4 text-muted-foreground font-black tracking-[0.3em]">
               Or join with
             </span>
           </div>
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <Button
             variant="outline"
-            className="h-12 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl"
+            className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
           >
             <GoogleIcon className="mr-2" />
             Google
           </Button>
           <Button
             variant="outline"
-            className="h-12 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl"
+            className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
           >
             <Github className="mr-2 h-5 w-5" />
             GitHub
           </Button>
         </div>
-        <p className="mt-8 text-center text-xs text-gray-500 leading-relaxed">
+
+        <p className="mt-8 text-center text-xs text-muted-foreground leading-relaxed font-medium">
           By signing up, you agree to our{' '}
           <Link href="/terms" className="underline hover:text-white transition-colors">
             Terms of Service
@@ -280,11 +281,11 @@ export function SignUpForm() {
         </p>
       </div>
 
-      <p className="mt-10 text-center text-sm text-gray-400">
+      <p className="mt-10 text-center text-sm font-medium text-muted-foreground">
         Already have an account?{' '}
         <Link
           href="/login"
-          className="font-bold text-primary hover:underline transition-all"
+          className="font-black uppercase tracking-widest text-primary hover:underline transition-all ml-1"
         >
           Sign in
         </Link>

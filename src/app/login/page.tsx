@@ -38,7 +38,7 @@ const WaveformAnimation = () => (
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen w-full bg-gray-900 text-white flex flex-col items-center justify-center p-6 md:p-10 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-[#0B0B0F] text-white flex flex-col items-center justify-center p-6 md:p-10 relative overflow-hidden">
       {/* Background Neural Glow */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 blur-[120px] rounded-full" />
