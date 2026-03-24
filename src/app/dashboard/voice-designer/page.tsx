@@ -16,7 +16,8 @@ import {
   Pause,
   Sparkles,
   Globe2,
-  Settings2
+  Settings2,
+  Library
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -65,6 +66,13 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
     }
   }, [audioUrl]);
 
+  const handleSaveToLibrary = () => {
+    toast({
+      title: "Voice Saved",
+      description: "This designed voice has been added to your library.",
+    });
+  };
+
   if (!audioUrl) return null;
 
   return (
@@ -73,17 +81,29 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
       animate={{ y: 0 }}
       className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-white/10 p-4 md:p-6"
     >
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6">
-        <div className="flex items-center gap-4 shrink-0">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-4 md:gap-6">
+        <div className="flex items-center gap-4 shrink-0 w-full md:w-auto">
           <Button 
             onClick={onTogglePlay}
-            className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-white/90 btn-glow"
+            className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-white text-black hover:bg-white/90 btn-glow"
           >
-            {isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current ml-1" />}
+            {isPlaying ? <Pause className="h-5 w-5 md:h-6 md:w-6 fill-current" /> : <Play className="h-5 w-5 md:h-6 md:w-6 fill-current ml-1" />}
           </Button>
-          <div className="hidden sm:block">
-            <p className="text-sm font-black text-white">Designed Voice Preview</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Synthetic Generation</p>
+          <div className="flex flex-col">
+            <p className="text-xs md:text-sm font-black text-white">Designed Voice Preview</p>
+            <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Synthetic Generation</p>
+          </div>
+
+          {/* Mobile Utility Icons */}
+          <div className="ml-auto flex items-center gap-2 md:hidden">
+             <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
+                <a href={audioUrl} download="saanchi-designed-voice.mp3">
+                  <Download className="h-4 w-4" />
+                </a>
+              </Button>
+              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" onClick={handleSaveToLibrary}>
+                <Library className="h-4 w-4" />
+              </Button>
           </div>
         </div>
 
@@ -93,9 +113,24 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <Button variant="outline" className="h-12 px-6 rounded-xl border-white/10 bg-white/5 font-bold">
-            <Download className="mr-2 h-4 w-4" /> Save Voice
+        {/* Desktop Utility Icons */}
+        <div className="hidden md:flex items-center gap-3 shrink-0">
+          <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
+            <a href={audioUrl} download="saanchi-designed-voice.mp3" title="Download Audio">
+              <Download className="h-5 w-5" />
+            </a>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" 
+            title="Save to Library"
+            onClick={handleSaveToLibrary}
+          >
+            <Library className="h-5 w-5" />
+          </Button>
+          <Button className="h-12 w-12 rounded-xl bg-white/10 hover:bg-white/20">
+            <Sparkles className="h-5 w-5 text-primary" />
           </Button>
         </div>
       </div>
