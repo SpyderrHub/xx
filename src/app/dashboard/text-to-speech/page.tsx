@@ -46,12 +46,12 @@ const StudioEditor = ({ value, onChange, maxLength }: { value: string, onChange:
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full min-h-[400px] p-0 text-[24px] md:text-[32px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/30 font-medium text-white/90 selection:bg-primary/30"
+        className="w-full min-h-[400px] p-0 text-[11px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/30 font-medium text-white/90 selection:bg-primary/30"
         style={{ fontFamily: "'Inter', sans-serif" }}
         data-placeholder="Start typing your story..."
       />
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[24px] md:text-[32px] font-medium italic">
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[11px] font-medium italic">
           What should I say? Try "[laughs] Welcome to the future..."
         </div>
       )}
@@ -166,8 +166,8 @@ export default function TextToSpeechPage() {
 
   return (
     <div className="min-h-screen pb-32">
-      {/* Top Studio Controls */}
-      <div className="sticky top-0 z-40 glass-card border-b border-white/5 py-4 mb-12">
+      {/* Top Studio Controls - Adjusted top offset to sit below dashboard header */}
+      <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-4 mb-12">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
@@ -217,8 +217,8 @@ export default function TextToSpeechPage() {
         <StudioEditor value={text} onChange={setText} maxLength={MAX_CHARACTERS} />
       </main>
 
-      {/* Voice Selection Drawer */}
-      <div className="fixed left-6 bottom-32 z-40 hidden xl:block">
+      {/* Voice Selection Drawer - Lowered z-index to stay under navbar if collision occurs */}
+      <div className="fixed left-6 bottom-32 z-30 hidden xl:block">
         <div className="glass-card rounded-[2rem] p-4 w-64 max-h-[400px] overflow-y-auto scrollbar-hide border-white/5 bg-black/60">
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 px-2">Select Speaker</h3>
           <div className="space-y-2">
