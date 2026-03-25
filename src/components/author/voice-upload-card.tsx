@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Mic, Trash2, CheckCircle2, Loader2, Sparkles, X, Globe } from 'lucide-react';
+import { Upload, Mic, Trash2, CheckCircle2, Loader2, Sparkles, X, Globe, Plus, Palette } from 'lucide-react';
 import { AudioPreviewPlayer } from './audio-preview-player';
 import { AvatarUpload } from './avatar-upload';
 import { VoiceDescriptionTextarea } from './voice-description-textarea';
@@ -17,10 +17,12 @@ import { toast } from '@/hooks/use-toast';
 import { useVoiceUpload } from '@/hooks/use-voice-upload';
 import { UploadProgressModal } from './upload-progress-modal';
 
-const LANGUAGES = [
+const PREDEFINED_LANGUAGES = [
   "English, US", "English, UK", "English, India", "Spanish", "Hindi", "Bengali", "Telugu", 
   "Marathi", "Tamil", "Gujarati", "Kannada", "Malayalam", "Punjabi", "French", "German", "Japanese"
 ];
+
+const STYLES = ["Narration", "Conversational", "Emotional", "News Style", "Storytelling", "Friendly", "Whispering", "Authoritative", "Dramatic"];
 
 export function VoiceUploadCard() {
   const { uploadVoice, isUploading, progress } = useVoiceUpload();
@@ -29,6 +31,7 @@ export function VoiceUploadCard() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [customLanguage, setCustomLanguage] = useState('');
 
   const [formData, setFormData] = useState({
     voiceName: '',
@@ -36,7 +39,7 @@ export function VoiceUploadCard() {
     gender: 'Male',
     ageRange: '',
     accent: '',
-    style: 'Narration',
+    styles: [] as string[],
     description: ''
   });
 
@@ -47,6 +50,27 @@ export function VoiceUploadCard() {
         return { ...prev, languages: prev.languages.filter(l => l !== lang) };
       } else {
         return { ...prev, languages: [...prev.languages, lang] };
+      }
+    });
+  };
+
+  const handleAddCustomLanguage = () => {
+    if (!customLanguage.trim()) return;
+    if (formData.languages.includes(customLanguage.trim())) {
+      setCustomLanguage('');
+      return;
+    }
+    setFormData(prev => ({ ...prev, languages: [...prev.languages, customLanguage.trim()] }));
+    setCustomLanguage('');
+  };
+
+  const handleToggleStyle = (style: string) => {
+    setFormData(prev => {
+      const exists = prev.styles.includes(style);
+      if (exists) {
+        return { ...prev, styles: prev.styles.filter(s => s !== style) };
+      } else {
+        return { ...prev, styles: [...prev.styles, style] };
       }
     });
   };
@@ -74,18 +98,23 @@ export function VoiceUploadCard() {
   };
 
   const handleUpload = async () => {
-    if (!file || !formData.voiceName || formData.languages.length === 0 || formData.description.length < 20) {
+    if (!file || !formData.voiceName || formData.languages.length === 0 || formData.styles.length === 0 || formData.description.length < 20) {
       toast({ 
         title: "Validation Error", 
         description: formData.languages.length === 0 
           ? "Please select at least one language."
+          : formData.styles.length === 0
+          ? "Please select at least one style."
           : "Please fill all required fields.", 
         variant: "destructive" 
       });
       return;
     }
 
-    const success = await uploadVoice(avatarFile, file, formData);
+    const success = await uploadVoice(avatarFile, file, {
+      ...formData,
+      style: formData.styles[0], // Keep backward compatibility for now
+    } as any);
     
     if (success) {
       setFile(null);
@@ -98,7 +127,7 @@ export function VoiceUploadCard() {
         gender: 'Male',
         ageRange: '',
         accent: '',
-        style: 'Narration',
+        styles: [],
         description: ''
       });
     }
@@ -149,6 +178,7 @@ export function VoiceUploadCard() {
             </div>
           </div>
 
+          {/* Languages Section */}
           <div className="space-y-3">
             <Label className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -158,7 +188,7 @@ export function VoiceUploadCard() {
               <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
             <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl min-h-[100px] max-h-40 overflow-y-auto scrollbar-hide">
-              {LANGUAGES.map(lang => (
+              {PREDEFINED_LANGUAGES.map(lang => (
                 <Badge
                   key={lang}
                   variant={formData.languages.includes(lang) ? "default" : "outline"}
@@ -169,22 +199,55 @@ export function VoiceUploadCard() {
                   {formData.languages.includes(lang) && <X className="ml-1 h-3 w-3" />}
                 </Badge>
               ))}
+              {/* Custom Languages already added */}
+              {formData.languages.filter(l => !PREDEFINED_LANGUAGES.includes(l)).map(lang => (
+                <Badge
+                  key={lang}
+                  variant="default"
+                  className="cursor-pointer transition-all hover:scale-105 bg-indigo-600"
+                  onClick={() => handleToggleLanguage(lang)}
+                >
+                  {lang}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Add other language..." 
+                value={customLanguage}
+                onChange={(e) => setCustomLanguage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddCustomLanguage()}
+                className="h-9 rounded-lg bg-white/5 border-white/10 text-xs"
+              />
+              <Button variant="secondary" size="sm" onClick={handleAddCustomLanguage} className="h-9 rounded-lg">
+                <Plus className="h-3 w-3 mr-1" /> Add
+              </Button>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Style</Label>
-            <Select value={formData.style} onValueChange={(v) => setFormData({...formData, style: v})}>
-              <SelectTrigger className="rounded-xl bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Narration">Narration</SelectItem>
-                <SelectItem value="Conversational">Conversational</SelectItem>
-                <SelectItem value="Emotional">Emotional</SelectItem>
-                <SelectItem value="News Style">News Style</SelectItem>
-                <SelectItem value="Storytelling">Storytelling</SelectItem>
-                <SelectItem value="Friendly">Friendly</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Style Selection Section */}
+          <div className="space-y-3">
+            <Label className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Palette className="h-3 w-3 text-primary" />
+                <span>Voice Styles</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
+            </Label>
+            <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl">
+              {STYLES.map(style => (
+                <Badge
+                  key={style}
+                  variant={formData.styles.includes(style) ? "default" : "outline"}
+                  className="cursor-pointer transition-all hover:scale-105"
+                  onClick={() => handleToggleStyle(style)}
+                >
+                  {style}
+                  {formData.styles.includes(style) && <X className="ml-1 h-3 w-3" />}
+                </Badge>
+              ))}
+            </div>
           </div>
 
           <VoiceDescriptionTextarea 
@@ -237,7 +300,7 @@ export function VoiceUploadCard() {
 
           <Button 
             className="w-full h-14 bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-lg shadow-lg shadow-primary/20 rounded-xl" 
-            disabled={!file || isUploading || formData.languages.length === 0}
+            disabled={!file || isUploading || formData.languages.length === 0 || formData.styles.length === 0}
             onClick={handleUpload}
           >
             {isUploading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Upload className="mr-2 h-5 w-5" />}

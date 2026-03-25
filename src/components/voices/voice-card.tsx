@@ -20,6 +20,7 @@ export type Voice = {
   languages?: string[];
   gender: string;
   style: string;
+  styles?: string[];
   avatarUrl?: string;
   audioUrl?: string;
   userId: string;
@@ -123,6 +124,10 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
     ? voice.languages 
     : [voice.language || voice.languages].filter(Boolean);
 
+  const styles = Array.isArray(voice.styles)
+    ? voice.styles
+    : [voice.style].filter(Boolean);
+
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
@@ -153,7 +158,11 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
                  </div>
                  <div className="min-w-0">
                     <h3 className="font-bold text-sm sm:text-base truncate pr-2">{voice.voiceName}</h3>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate italic">{voice.style}</p>
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                      {styles.slice(0, 2).map(s => (
+                        <span key={s} className="text-[8px] text-muted-foreground italic truncate pr-1">#{s}</span>
+                      ))}
+                    </div>
                  </div>
              </div>
           </div>

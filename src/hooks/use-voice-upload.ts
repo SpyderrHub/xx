@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -8,11 +9,11 @@ import { toast } from '@/hooks/use-toast';
 
 export interface VoiceUploadData {
   voiceName: string;
-  language: string;
+  languages: string[];
   gender: string;
   ageRange: string;
   accent: string;
-  style: string;
+  styles: string[];
   description: string;
 }
 
@@ -79,7 +80,6 @@ export function useVoiceUpload() {
       let avatarUrl = "";
 
       // 2. Upload Avatar (Weight: 20%, Base: 0%)
-      // Requested Path Format: avatars/{uid}/{voiceId}/{fileName}.PNG
       if (avatarFile) {
         avatarUrl = await uploadFile(
           avatarFile, 
@@ -92,7 +92,6 @@ export function useVoiceUpload() {
       }
 
       // 3. Upload Audio (Weight: 70%, Base: 20%)
-      // Path: voices/{userId}/{voiceId}/voice_sample.wav
       const audioUrl = await uploadFile(
         audioFile, 
         `voices/${user.uid}/${voiceId}/voice_sample.wav`, 
@@ -116,6 +115,9 @@ export function useVoiceUpload() {
         audioFormat: audioFile.type,
         status: "pending_review",
         createdAt: new Date().toISOString(),
+        // Support backward compatibility for legacy single-value fields
+        language: formData.languages[0] || "",
+        style: formData.styles[0] || "",
       };
 
       await setDoc(voiceDocRef, voiceData);
@@ -136,7 +138,6 @@ export function useVoiceUpload() {
       });
       return false;
     } finally {
-      // Small delay for UX so user sees 100%
       setTimeout(() => {
         setIsUploading(false);
         setProgress(0);

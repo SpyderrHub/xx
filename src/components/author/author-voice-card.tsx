@@ -3,7 +3,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Mic2, User, Globe, UserCircle, Trash2, Edit2, Loader2 } from 'lucide-react';
+import { Play, Pause, Mic2, User, Globe, UserCircle, Trash2, Edit2, Loader2, Palette } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -62,6 +62,10 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
   const languages = Array.isArray(voice.languages) 
     ? voice.languages 
     : [voice.language || voice.languages].filter(Boolean);
+
+  const styles = Array.isArray(voice.styles)
+    ? voice.styles
+    : [voice.style].filter(Boolean);
 
   return (
     <motion.div
@@ -122,10 +126,14 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-xs sm:text-base truncate pr-14">{voice.voiceName}</h3>
-              <p className="text-[10px] text-primary flex items-center gap-1">
-                <Mic2 className="h-2.5 w-2.5" /> {voice.style}
-              </p>
+              <h3 className="font-bold text-xs sm:text-base pr-14 truncate">{voice.voiceName}</h3>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {styles.slice(0, 2).map((s: string) => (
+                  <Badge key={s} variant="secondary" className="text-[8px] bg-primary/10 text-primary border-none px-1.5 py-0 h-4">
+                    {s}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
 
