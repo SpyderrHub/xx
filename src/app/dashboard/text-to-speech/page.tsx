@@ -17,7 +17,8 @@ import {
   Pause,
   Clock,
   Sparkles,
-  Share2
+  Share2,
+  Library
 } from 'lucide-react';
 import { 
   Select, 
@@ -28,9 +29,10 @@ import {
 } from '@/components/ui/select';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { toast } from '@/hooks/use-toast';
-import { collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs, doc } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const MAX_CHARACTERS = 5000;
 
@@ -139,31 +141,45 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
 };
 
 export default function TextToSpeechPage() {
+  const { user, firestore } = useFirebase();
   const [text, setText] = useState('');
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<{url: string, voice: string, characters: number} | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
   const [settings, setParams] = useState({ stability: 75, clarity: 85, speed: 1.0 });
 
-  const { firestore } = useFirebase();
-  const [voices, setVoices] = useState<any[]>([]);
+  // 1. Fetch User's Selected Voices (myVoices subcollection)
+  const myVoicesQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return collection(firestore, 'users', user.uid, 'myVoices');
+  }, [user, firestore]);
 
-  useEffect(() => {
-    const fetchVoices = async () => {
-      if (!firestore) return;
-      const q = query(collection(firestore, 'voices'));
-      const snap = await getDocs(q);
-      const results: any[] = [];
-      snap.forEach(d => results.push({ id: d.id, ...d.data() }));
-      setVoices(results);
-      if (results.length > 0) setSelectedVoiceId(results[0].id);
-    };
-    fetchVoices();
+  const { data: myVoicesDocs, isLoading: isMyVoicesLoading } = useCollection(myVoicesQuery);
+
+  // 2. Fetch All Public Voices
+  const allVoicesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'voices');
   }, [firestore]);
 
-  const selectedVoice = voices.find(v => v.id === selectedVoiceId);
+  const { data: allVoices, isLoading: isAllVoicesLoading } = useCollection(allVoicesQuery);
+
+  // 3. Filter voices based on User's selection
+  const userVoices = useMemo(() => {
+    if (!allVoices || !myVoicesDocs) return [];
+    const myIds = new Set(myVoicesDocs.map(d => d.id));
+    return allVoices.filter(v => myIds.has(v.id));
+  }, [allVoices, myVoicesDocs]);
+
+  // Set default voice when userVoices list loads
+  useEffect(() => {
+    if (userVoices.length > 0 && !selectedVoiceId) {
+      setSelectedVoiceId(userVoices[0].id);
+    }
+  }, [userVoices, selectedVoiceId]);
+
+  const selectedVoice = userVoices.find(v => v.id === selectedVoiceId);
 
   const handleGenerate = async () => {
     if (!text || isGenerating || !selectedVoiceId) return;
@@ -171,11 +187,11 @@ export default function TextToSpeechPage() {
     setGeneratedAudio(null);
 
     try {
-      // Mock synthesis logic - Replace with actual API call if backend is ready
+      // Mock synthesis logic
       setTimeout(() => {
         setGeneratedAudio({
           url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-          voice: selectedVoice.voiceName,
+          voice: selectedVoice?.voiceName || 'Selected Voice',
           characters: text.length
         });
         setIsGenerating(false);
@@ -186,6 +202,8 @@ export default function TextToSpeechPage() {
       setIsGenerating(false);
     }
   };
+
+  const isLoading = isMyVoicesLoading || isAllVoicesLoading;
 
   return (
     <div className="flex flex-col min-h-[calc(100dvh-theme(spacing.16))] pb-32">
@@ -224,12 +242,12 @@ export default function TextToSpeechPage() {
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">{text.length} / {MAX_CHARACTERS}</p>
             </div>
 
-            <Select value={selectedVoiceId || ''} onValueChange={setSelectedVoiceId}>
+            <Select value={selectedVoiceId || ''} onValueChange={setSelectedVoiceId} disabled={userVoices.length === 0}>
               <SelectTrigger className="w-[130px] md:w-[200px] h-10 md:h-12 rounded-xl bg-white/5 border-white/10 text-[10px] md:text-xs font-bold focus:ring-0">
-                <SelectValue placeholder="Speaker" />
+                <SelectValue placeholder={isLoading ? "Loading..." : userVoices.length === 0 ? "No Voices" : "Speaker"} />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
-                {voices.map((v) => (
+                {userVoices.map((v) => (
                   <SelectItem key={v.id} value={v.id} className="cursor-pointer">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-6 w-6 ring-1 ring-white/10 shrink-0">
@@ -238,7 +256,9 @@ export default function TextToSpeechPage() {
                       </Avatar>
                       <div className="text-left min-w-0">
                         <p className="text-xs font-bold truncate">{v.voiceName}</p>
-                        <p className="text-[8px] text-muted-foreground uppercase font-black">{v.language}</p>
+                        <p className="text-[8px] text-muted-foreground uppercase font-black">
+                          {Array.isArray(v.languages) ? v.languages[0] : v.language}
+                        </p>
                       </div>
                     </div>
                   </SelectItem>
@@ -248,7 +268,7 @@ export default function TextToSpeechPage() {
 
             <Button 
               onClick={handleGenerate}
-              disabled={isGenerating || !text || !selectedVoiceId}
+              disabled={isGenerating || !text || !selectedVoiceId || userVoices.length === 0}
               className="h-10 md:h-12 px-4 md:px-8 rounded-xl bg-primary btn-glow font-black text-xs md:text-sm"
             >
               {isGenerating ? <Loader2 className="md:mr-2 h-4 w-4 animate-spin" /> : <Zap className="md:mr-2 h-4 w-4 fill-current" />}
@@ -261,7 +281,24 @@ export default function TextToSpeechPage() {
 
       {/* Main Studio Editor */}
       <main className="flex-1 flex flex-col container mx-auto px-4 md:px-6">
-        <StudioEditor value={text} onChange={setText} maxLength={MAX_CHARACTERS} />
+        {userVoices.length === 0 && !isLoading ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+            <div className="h-20 w-20 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center">
+              <Library className="h-8 w-8 text-primary/40" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-white">Your Voice Library is Empty</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+                Add voices from the library to start generating ultra-realistic speech.
+              </p>
+            </div>
+            <Button asChild className="rounded-xl bg-white text-black hover:bg-white/90 font-bold h-12 px-8">
+              <Link href="/dashboard/voice-library">Browse Voice Library</Link>
+            </Button>
+          </div>
+        ) : (
+          <StudioEditor value={text} onChange={setText} maxLength={MAX_CHARACTERS} />
+        )}
       </main>
 
       {/* Audio Player Footer */}
