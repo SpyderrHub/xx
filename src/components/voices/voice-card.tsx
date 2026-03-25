@@ -176,14 +176,14 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
           </p>
           
           <div className="flex flex-wrap gap-1 mb-4">
-            {languages.slice(0, 3).map((l: string) => (
-              <Badge key={l} variant="secondary" className="border-none bg-primary/10 text-primary/90 text-[8px] px-1.5 py-0">
-                {l}
+            {languages.length > 0 && (
+              <Badge variant="secondary" className="border-none bg-primary/10 text-primary/90 text-[8px] px-1.5 py-0">
+                {languages[0]}
               </Badge>
-            ))}
-            {languages.length > 3 && (
+            )}
+            {languages.length > 1 && (
               <Badge variant="secondary" className="border-none bg-white/5 text-[8px] px-1.5 py-0">
-                +{languages.length - 3}
+                +{languages.length - 1}
               </Badge>
             )}
           </div>

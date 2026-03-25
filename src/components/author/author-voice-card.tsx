@@ -143,11 +143,16 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
                 <Globe className="h-2 w-2" /> Languages
               </span>
               <div className="flex flex-wrap gap-1">
-                {languages.map((l: string) => (
-                  <Badge key={l} variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4">
-                    {l}
+                {languages.length > 0 && (
+                  <Badge variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4">
+                    {languages[0]}
                   </Badge>
-                ))}
+                )}
+                {languages.length > 1 && (
+                  <Badge variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4">
+                    +{languages.length - 1}
+                  </Badge>
+                )}
               </div>
             </div>
             <div className="flex flex-col">
