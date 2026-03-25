@@ -8,10 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Mic, Trash2, CheckCircle2, Loader2, Sparkles, X, Globe, Plus, Palette } from 'lucide-react';
+import { Upload, Mic, Trash2, CheckCircle2, Loader2, Sparkles, X, Globe, Plus, Palette, FileText } from 'lucide-react';
 import { AudioPreviewPlayer } from './audio-preview-player';
 import { AvatarUpload } from './avatar-upload';
-import { VoiceDescriptionTextarea } from './voice-description-textarea';
+import { VoiceStudioTextarea } from './voice-studio-textarea';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
 import { useVoiceUpload } from '@/hooks/use-voice-upload';
@@ -32,6 +32,7 @@ export function VoiceUploadCard() {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [customLanguage, setCustomLanguage] = useState('');
+  const [customStyle, setCustomStyle] = useState('');
 
   const [formData, setFormData] = useState({
     voiceName: '',
@@ -40,7 +41,8 @@ export function VoiceUploadCard() {
     ageRange: '',
     accent: '',
     styles: [] as string[],
-    description: ''
+    description: '',
+    referenceText: ''
   });
 
   const handleToggleLanguage = (lang: string) => {
@@ -73,6 +75,16 @@ export function VoiceUploadCard() {
         return { ...prev, styles: [...prev.styles, style] };
       }
     });
+  };
+
+  const handleAddCustomStyle = () => {
+    if (!customStyle.trim()) return;
+    if (formData.styles.includes(customStyle.trim())) {
+      setCustomStyle('');
+      return;
+    }
+    setFormData(prev => ({ ...prev, styles: [...prev.styles, customStyle.trim()] }));
+    setCustomStyle('');
   };
 
   const handleAvatarSelect = (file: File | null) => {
@@ -113,7 +125,6 @@ export function VoiceUploadCard() {
 
     const success = await uploadVoice(avatarFile, file, {
       ...formData,
-      style: formData.styles[0], // Keep backward compatibility for now
     } as any);
     
     if (success) {
@@ -128,7 +139,8 @@ export function VoiceUploadCard() {
         ageRange: '',
         accent: '',
         styles: [],
-        description: ''
+        description: '',
+        referenceText: ''
       });
     }
   };
@@ -178,7 +190,6 @@ export function VoiceUploadCard() {
             </div>
           </div>
 
-          {/* Languages Section */}
           <div className="space-y-3">
             <Label className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -199,7 +210,6 @@ export function VoiceUploadCard() {
                   {formData.languages.includes(lang) && <X className="ml-1 h-3 w-3" />}
                 </Badge>
               ))}
-              {/* Custom Languages already added */}
               {formData.languages.filter(l => !PREDEFINED_LANGUAGES.includes(l)).map(lang => (
                 <Badge
                   key={lang}
@@ -226,7 +236,6 @@ export function VoiceUploadCard() {
             </div>
           </div>
 
-          {/* Style Selection Section */}
           <div className="space-y-3">
             <Label className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -235,7 +244,7 @@ export function VoiceUploadCard() {
               </div>
               <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
-            <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl">
+            <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl min-h-[100px] max-h-40 overflow-y-auto scrollbar-hide">
               {STYLES.map(style => (
                 <Badge
                   key={style}
@@ -247,13 +256,49 @@ export function VoiceUploadCard() {
                   {formData.styles.includes(style) && <X className="ml-1 h-3 w-3" />}
                 </Badge>
               ))}
+              {formData.styles.filter(s => !STYLES.includes(s)).map(style => (
+                <Badge
+                  key={style}
+                  variant="default"
+                  className="cursor-pointer transition-all hover:scale-105 bg-indigo-600"
+                  onClick={() => handleToggleStyle(style)}
+                >
+                  {style}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Add custom style..." 
+                value={customStyle}
+                onChange={(e) => setCustomStyle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddCustomStyle()}
+                className="h-9 rounded-lg bg-white/5 border-white/10 text-xs"
+              />
+              <Button variant="secondary" size="sm" onClick={handleAddCustomStyle} className="h-9 rounded-lg">
+                <Plus className="h-3 w-3 mr-1" /> Add
+              </Button>
             </div>
           </div>
 
-          <VoiceDescriptionTextarea 
-            value={formData.description} 
-            onChange={(v) => setFormData({...formData, description: v})} 
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <VoiceStudioTextarea 
+              label="Voice Description"
+              value={formData.description} 
+              onChange={(v) => setFormData({...formData, description: v})} 
+              placeholder="Describe your voice tone, speaking style, and emotional range..."
+              hint="Helps users understand your voice strengths."
+            />
+            <VoiceStudioTextarea 
+              label="Reference Text"
+              value={formData.referenceText} 
+              onChange={(v) => setFormData({...formData, referenceText: v})} 
+              placeholder="Provide a sample script that perfectly demonstrates this voice's character..."
+              hint="Shows exactly how the voice performs."
+              minLength={10}
+            />
+          </div>
 
           <div className="space-y-4">
             <Label className="text-sm font-medium">30-Second Voice Sample</Label>

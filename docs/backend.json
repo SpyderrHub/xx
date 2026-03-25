@@ -28,12 +28,17 @@
         "voiceName": { "type": "string" },
         "avatarUrl": { "type": "string" },
         "description": { "type": "string" },
+        "referenceText": { "type": "string" },
         "languages": { 
           "type": "array",
           "items": { "type": "string" }
         },
         "gender": { "type": "string" },
         "style": { "type": "string" },
+        "styles": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
         "audioUrl": { "type": "string" },
         "status": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }

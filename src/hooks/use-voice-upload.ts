@@ -15,6 +15,7 @@ export interface VoiceUploadData {
   accent: string;
   styles: string[];
   description: string;
+  referenceText: string;
 }
 
 export function useVoiceUpload() {

@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { X, Save, Loader2, Globe, Plus, Palette } from 'lucide-react';
-import { VoiceDescriptionTextarea } from './voice-description-textarea';
+import { X, Save, Loader2, Globe, Plus, Palette, FileText } from 'lucide-react';
+import { VoiceStudioTextarea } from './voice-studio-textarea';
 import { useVoiceUpdate } from '@/hooks/use-voice-update';
 
 const PREDEFINED_LANGUAGES = [
@@ -28,13 +28,15 @@ interface VoiceEditDialogProps {
 export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps) {
   const { updateVoice, isUpdating } = useVoiceUpdate();
   const [customLanguage, setCustomLanguage] = useState('');
+  const [customStyle, setCustomStyle] = useState('');
   
   const [formData, setFormData] = useState({
     voiceName: voice.voiceName || '',
     languages: Array.isArray(voice.languages) ? voice.languages : [voice.language].filter(Boolean),
     gender: voice.gender || 'Male',
     styles: Array.isArray(voice.styles) ? voice.styles : [voice.style].filter(Boolean),
-    description: voice.description || ''
+    description: voice.description || '',
+    referenceText: voice.referenceText || ''
   });
 
   const handleToggleLanguage = (lang: string) => {
@@ -69,6 +71,16 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
     });
   };
 
+  const handleAddCustomStyle = () => {
+    if (!customStyle.trim()) return;
+    if (formData.styles.includes(customStyle.trim())) {
+      setCustomStyle('');
+      return;
+    }
+    setFormData(prev => ({ ...prev, styles: [...prev.styles, customStyle.trim()] }));
+    setCustomStyle('');
+  };
+
   const handleSave = async () => {
     const success = await updateVoice(voice.id, {
       ...formData,
@@ -79,7 +91,7 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl bg-card/95 backdrop-blur-2xl border-white/10 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl bg-card/95 backdrop-blur-2xl border-white/10 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5 text-primary" />
@@ -127,7 +139,6 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
                   {formData.languages.includes(lang) && <X className="ml-1 h-3 w-3" />}
                 </Badge>
               ))}
-              {/* Custom ones */}
               {formData.languages.filter(l => !PREDEFINED_LANGUAGES.includes(l)).map(lang => (
                 <Badge
                   key={lang}
@@ -162,7 +173,7 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
               </div>
               <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
-            <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/10 rounded-xl">
+            <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/10 rounded-xl max-h-32 overflow-y-auto scrollbar-hide">
               {STYLES.map(s => (
                 <Badge
                   key={s}
@@ -174,13 +185,49 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
                   {formData.styles.includes(s) && <X className="ml-1 h-3 w-3" />}
                 </Badge>
               ))}
+              {formData.styles.filter(s => !STYLES.includes(s)).map(style => (
+                <Badge
+                  key={style}
+                  variant="default"
+                  className="cursor-pointer transition-all hover:scale-105 bg-indigo-600"
+                  onClick={() => handleToggleStyle(style)}
+                >
+                  {style}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input 
+                placeholder="Add custom style..." 
+                value={customStyle}
+                onChange={(e) => setCustomStyle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddCustomStyle()}
+                className="h-9 rounded-lg bg-white/5 border-white/10 text-xs"
+              />
+              <Button variant="secondary" size="sm" onClick={handleAddCustomStyle} className="h-9 rounded-lg">
+                <Plus className="h-3 w-3" />
+              </Button>
             </div>
           </div>
 
-          <VoiceDescriptionTextarea 
-            value={formData.description} 
-            onChange={(v) => setFormData({...formData, description: v})} 
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <VoiceStudioTextarea 
+              label="Voice Description"
+              value={formData.description} 
+              onChange={(v) => setFormData({...formData, description: v})} 
+              placeholder="Describe the voice character..."
+              hint="Publicly visible info."
+            />
+            <VoiceStudioTextarea 
+              label="Reference Text"
+              value={formData.referenceText} 
+              onChange={(v) => setFormData({...formData, referenceText: v})} 
+              placeholder="Example script for the voice..."
+              hint="Demonstrates character."
+              minLength={10}
+            />
+          </div>
         </div>
 
         <DialogFooter className="gap-2">
