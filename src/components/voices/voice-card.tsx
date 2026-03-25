@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -122,7 +121,7 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
 
   const languages = Array.isArray(voice.languages) 
     ? voice.languages 
-    : [voice.language || voice.languages].filter(Boolean);
+    : [voice.language].filter(Boolean);
 
   const styles = Array.isArray(voice.styles)
     ? voice.styles
