@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -139,7 +140,6 @@ export default function VoiceLibraryPage() {
 
   const voicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    // Show all uploaded voice profiles in the library
     return query(collection(firestore, 'voices'));
   }, [firestore]);
 
@@ -152,10 +152,24 @@ export default function VoiceLibraryPage() {
 
   const availableOptions = useMemo(() => {
     if (!voices) return { genders: [], languages: [], styles: [] };
+    
+    const genders = new Set<string>();
+    const languages = new Set<string>();
+    const styles = new Set<string>();
+
+    voices.forEach(v => {
+      if (v.gender) genders.add(v.gender);
+      if (v.style) styles.add(v.style);
+      
+      // Handle array or string for languages
+      const vLangs = Array.isArray(v.languages) ? v.languages : (v.language ? [v.language] : []);
+      vLangs.forEach((l: string) => languages.add(l));
+    });
+
     return {
-      genders: Array.from(new Set(voices.map(v => v.gender).filter(Boolean))),
-      languages: Array.from(new Set(voices.map(v => v.language).filter(Boolean))),
-      styles: Array.from(new Set(voices.map(v => v.style).filter(Boolean))),
+      genders: Array.from(genders).sort(),
+      languages: Array.from(languages).sort(),
+      styles: Array.from(styles).sort(),
     };
   }, [voices]);
 
@@ -163,13 +177,15 @@ export default function VoiceLibraryPage() {
     if (!voices) return [];
     return voices.filter((voice) => {
       const searchLower = search.toLowerCase();
+      const voiceLangs = Array.isArray(voice.languages) ? voice.languages : (voice.language ? [voice.language] : []);
+      
       const matchesSearch =
         voice.voiceName.toLowerCase().includes(searchLower) ||
         voice.description?.toLowerCase().includes(searchLower) ||
         voice.style?.toLowerCase().includes(searchLower);
 
       const matchesGender = !filters.gender || voice.gender === filters.gender;
-      const matchesLanguage = !filters.language || voice.language === filters.language;
+      const matchesLanguage = !filters.language || voiceLangs.includes(filters.language);
       const matchesStyle = !filters.style || voice.style === filters.style;
 
       return matchesSearch && matchesGender && matchesLanguage && matchesStyle;
@@ -185,7 +201,7 @@ export default function VoiceLibraryPage() {
             Discover and sample from our extensive collection of premium AI voices.
           </p>
         </div>
-        <Button asChild size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold hover:from-purple-700 hover:to-indigo-700">
+        <Button asChild size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold">
           <Link href="/dashboard/voice-designer">
             <PlusCircle className="mr-2" />
             Create Custom Voice
@@ -210,7 +226,7 @@ export default function VoiceLibraryPage() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredVoices.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredVoices.map((voice) => (
               <VoiceCard key={voice.id} voice={voice} />
             ))}

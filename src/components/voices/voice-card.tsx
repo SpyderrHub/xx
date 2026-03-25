@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -5,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Heart, Plus, Check, User, Loader2 } from 'lucide-react';
+import { Play, Pause, Heart, Plus, Check, User, Loader2, Globe } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
@@ -16,6 +17,7 @@ export type Voice = {
   voiceName: string;
   description: string;
   language: string;
+  languages?: string[];
   gender: string;
   style: string;
   avatarUrl?: string;
@@ -26,25 +28,6 @@ export type Voice = {
 interface VoiceCardProps {
   voice: Voice;
 }
-
-const Waveform = () => {
-  const [heights, setHeights] = useState<number[]>([]);
-  
-  useEffect(() => {
-    setHeights(Array.from({ length: 20 }, () => Math.random() * 80 + 20));
-  }, []);
-
-  return (
-    <div className="flex w-full h-8 items-center justify-center space-x-1">
-        {heights.map((height, i) => (
-            <div key={i} className="w-0.5 bg-primary/50" style={{ height: `${height}%`}}/>
-        ))}
-        {heights.length === 0 && Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="w-0.5 bg-primary/50 h-[40%]" />
-        ))}
-    </div>
-  );
-};
 
 const PlayingWaveform = () => (
      <div className="flex w-full h-8 items-end justify-center space-x-1">
@@ -62,6 +45,14 @@ const PlayingWaveform = () => (
             />
         ))}
     </div>
+);
+
+const Waveform = () => (
+  <div className="flex w-full h-8 items-center justify-center space-x-1 opacity-30">
+      {[...Array(20)].map((_, i) => (
+          <div key={i} className="w-0.5 bg-primary/50" style={{ height: `${Math.random() * 60 + 20}%`}}/>
+      ))}
+  </div>
 );
 
 export default function VoiceCard({ voice }: VoiceCardProps) {
@@ -128,6 +119,10 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
     }
   };
 
+  const languages = Array.isArray(voice.languages) 
+    ? voice.languages 
+    : [voice.language || voice.languages].filter(Boolean);
+
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
@@ -167,23 +162,27 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
               {isPlaying ? <PlayingWaveform /> : <Waveform />}
           </div>
           
-          <p className="text-[10px] sm:text-xs text-muted-foreground flex-1 mb-3 sm:mb-4 line-clamp-3 overflow-hidden min-h-[3.2rem] leading-relaxed">
-            {voice.description || "An expressive AI voice profile built for storytelling, narration, and high-fidelity vocal output."}
+          <p className="text-[10px] sm:text-xs text-muted-foreground flex-1 mb-3 sm:mb-4 line-clamp-2 overflow-hidden leading-relaxed">
+            {voice.description || "Expressive AI voice profile built for storytelling and high-fidelity vocal output."}
           </p>
           
-          <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
-            <Badge variant="secondary" className="border-none bg-primary/10 text-primary/90 text-[9px] sm:text-[10px] px-1.5 py-0">
-              {voice.language}
-            </Badge>
-            <Badge variant="secondary" className="border-none bg-indigo-500/10 text-indigo-400 text-[9px] sm:text-[10px] px-1.5 py-0">
-              {voice.gender}
-            </Badge>
+          <div className="flex flex-wrap gap-1 mb-4">
+            {languages.slice(0, 3).map((l: string) => (
+              <Badge key={l} variant="secondary" className="border-none bg-primary/10 text-primary/90 text-[8px] px-1.5 py-0">
+                {l}
+              </Badge>
+            ))}
+            {languages.length > 3 && (
+              <Badge variant="secondary" className="border-none bg-white/5 text-[8px] px-1.5 py-0">
+                +{languages.length - 3}
+              </Badge>
+            )}
           </div>
 
-          <div className="mt-auto flex items-center justify-between">
-             <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
-                <span className="text-yellow-400">⭐</span>
-                <span>4.8</span>
+          <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-3">
+             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <Globe className="h-2.5 w-2.5" />
+                <span>{voice.gender}</span>
              </div>
              <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsLiked(!isLiked)}>
@@ -192,22 +191,15 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
                 <Button 
                     variant={isAdded ? "secondary" : "outline"} 
                     size="sm" 
-                    className="h-7 sm:h-8 rounded-lg px-2 sm:px-3 text-[10px] sm:text-xs font-semibold"
+                    className="h-7 rounded-lg px-2 text-[10px] font-semibold"
                     onClick={handleToggleAdd}
                     disabled={isMyVoiceLoading || isToggling}
                 >
-                    {isToggling ? (
-                      <Loader2 className="mr-1 h-3 w-3 sm:h-4 w-4 animate-spin" />
-                    ) : isAdded ? (
-                      <Check className="mr-1 h-3 w-3 sm:h-4 w-4" />
-                    ) : (
-                      <Plus className="mr-1 h-3 w-3 sm:h-4 w-4" />
-                    )}
+                    {isToggling ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : isAdded ? <Check className="mr-1 h-3 w-3" /> : <Plus className="mr-1 h-3 w-3" />}
                     {isAdded ? 'Added' : 'Add'}
                 </Button>
              </div>
           </div>
-
         </CardContent>
       </Card>
     </motion.div>

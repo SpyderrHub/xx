@@ -1,12 +1,14 @@
+
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Mic2, User, Globe, UserCircle, Trash2, Loader2 } from 'lucide-react';
+import { Play, Pause, Mic2, User, Globe, UserCircle, Trash2, Edit2, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useVoiceManagement } from '@/hooks/use-voice-management';
+import { VoiceEditDialog } from './voice-edit-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from '@/components/ui/badge';
 
 interface AuthorVoiceCardProps {
   voice: any;
@@ -25,6 +28,7 @@ interface AuthorVoiceCardProps {
 
 export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { deleteVoice, isDeleting } = useVoiceManagement();
 
@@ -55,6 +59,10 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
     await deleteVoice(voice.id, voice.avatarUrl, voice.audioUrl);
   };
 
+  const languages = Array.isArray(voice.languages) 
+    ? voice.languages 
+    : [voice.language || voice.languages].filter(Boolean);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -62,8 +70,17 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
       className="h-full"
     >
       <Card className="h-full bg-card/40 backdrop-blur-md border-white/5 hover:border-primary/20 transition-all overflow-hidden group relative">
-        {/* Delete Trigger positioned absolutely */}
-        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Absolute Actions Overlay */}
+        <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button 
+            variant="secondary" 
+            size="icon" 
+            className="h-7 w-7 rounded-full bg-white/5 hover:bg-primary hover:text-white border border-white/10"
+            onClick={() => setIsEditDialogOpen(true)}
+          >
+            <Edit2 className="h-3.5 w-3.5" />
+          </Button>
+          
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button 
@@ -83,7 +100,7 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">Cancel</AlertDialogCancel>
+                <AlertDialogCancel className="bg-white/5 border-white/10 text-white">Cancel</AlertDialogCancel>
                 <AlertDialogAction 
                   onClick={handleDelete}
                   className="bg-red-600 text-white hover:bg-red-700 font-bold"
@@ -96,7 +113,6 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
         </div>
 
         <CardContent className="p-3 sm:p-4 flex flex-col h-full">
-          {/* Header: Avatar, Name, Style */}
           <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
             <div className="relative h-10 w-10 sm:h-14 sm:w-14 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-white/10 shrink-0">
               {voice.avatarUrl ? (
@@ -106,47 +122,55 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-xs sm:text-base truncate pr-6">{voice.voiceName}</h3>
+              <h3 className="font-bold text-xs sm:text-base truncate pr-14">{voice.voiceName}</h3>
               <p className="text-[10px] text-primary flex items-center gap-1">
                 <Mic2 className="h-2.5 w-2.5" /> {voice.style}
               </p>
             </div>
           </div>
 
-          {/* Details: Language, Gender */}
-          <div className="grid grid-cols-1 gap-1 mb-3 sm:mb-4 bg-black/20 p-2 sm:p-3 rounded-xl border border-white/5">
-            <div className="flex flex-col">
+          <div className="grid grid-cols-1 gap-2 mb-3 sm:mb-4 bg-black/20 p-2 sm:p-3 rounded-xl border border-white/5">
+            <div className="flex flex-col gap-1">
               <span className="text-[9px] text-muted-foreground uppercase flex items-center gap-1">
-                <Globe className="h-2 w-2" /> Language
+                <Globe className="h-2 w-2" /> Languages
               </span>
-              <span className="text-[10px] sm:text-xs font-medium truncate">{voice.language}</span>
+              <div className="flex flex-wrap gap-1">
+                {languages.map((l: string) => (
+                  <Badge key={l} variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4">
+                    {l}
+                  </Badge>
+                ))}
+              </div>
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] text-muted-foreground uppercase flex items-center gap-1">
                 <UserCircle className="h-2 w-2" /> Gender
               </span>
-              <span className="text-[10px] sm:text-xs font-medium truncate">{voice.gender}</span>
+              <span className="text-[10px] sm:text-xs font-medium">{voice.gender}</span>
             </div>
           </div>
 
-          {/* Preview / Footer */}
-          <div className="flex items-center justify-between mt-auto pt-1 sm:pt-2">
-            <div className="flex flex-col">
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground italic">
-                {voice.ageRange || 'Voice Profile'}
-              </p>
-            </div>
+          <div className="flex items-center justify-between mt-auto pt-1">
+            <span className="text-[9px] text-muted-foreground italic truncate max-w-[100px]">
+              {new Date(voice.createdAt).toLocaleDateString()}
+            </span>
             <Button
               variant="secondary"
               size="sm"
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-transform active:scale-95"
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={togglePlay}
             >
-              {isPlaying ? <Pause className="h-4 w-4 sm:h-5 sm:w-5" /> : <Play className="h-4 w-4 sm:h-5 sm:w-5 ml-0.5" />}
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      <VoiceEditDialog 
+        voice={voice} 
+        isOpen={isEditDialogOpen} 
+        onClose={() => setIsEditDialogOpen(false)} 
+      />
     </motion.div>
   );
 }

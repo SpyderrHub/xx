@@ -28,14 +28,17 @@
         "voiceName": { "type": "string" },
         "avatarUrl": { "type": "string" },
         "description": { "type": "string" },
-        "language": { "type": "string" },
+        "languages": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
         "gender": { "type": "string" },
         "style": { "type": "string" },
         "audioUrl": { "type": "string" },
         "status": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "voiceName", "language", "gender", "status", "createdAt"]
+      "required": ["userId", "voiceName", "languages", "gender", "status", "createdAt"]
     },
     "DocumentationPage": {
       "title": "DocumentationPage",
