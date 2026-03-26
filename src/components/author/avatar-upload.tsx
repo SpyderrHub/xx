@@ -2,22 +2,22 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, User, Loader2, RotateCw, Sparkles } from 'lucide-react';
+import { Camera, RotateCw, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-// Premium Abstract Gradient Presets
+// Premium Fluid Radial Gradient Presets
 export const WEAVY_PRESETS = [
-  { name: "Deep Space", base: "bg-slate-950", blob1: "bg-indigo-600", blob2: "bg-violet-500", blob3: "bg-blue-400", blob4: "bg-cyan-300" },
-  { name: "Emerald Glitch", base: "bg-emerald-950", blob1: "bg-emerald-500", blob2: "bg-teal-400", blob3: "bg-cyan-500", blob4: "bg-lime-400" },
-  { name: "Solar Flare", base: "bg-orange-950", blob1: "bg-orange-600", blob2: "bg-amber-500", blob3: "bg-rose-500", blob4: "bg-yellow-400" },
-  { name: "Neon Rose", base: "bg-rose-950", blob1: "bg-pink-600", blob2: "bg-rose-500", blob3: "bg-purple-600", blob4: "bg-indigo-400" },
-  { name: "Electric Blue", base: "bg-blue-950", blob1: "bg-blue-600", blob2: "bg-sky-500", blob3: "bg-indigo-500", blob4: "bg-violet-400" },
-  { name: "Cyber Purple", base: "bg-purple-950", blob1: "bg-purple-600", blob2: "bg-fuchsia-500", blob3: "bg-pink-500", blob4: "bg-blue-400" },
-  { name: "Arctic Mist", base: "bg-cyan-950", blob1: "bg-cyan-600", blob2: "bg-sky-400", blob3: "bg-blue-500", blob4: "bg-emerald-300" },
-  { name: "Lava Mesh", base: "bg-red-950", blob1: "bg-red-600", blob2: "bg-orange-500", blob3: "bg-amber-600", blob4: "bg-rose-400" },
+  { name: "Cosmic Nebula", base: "bg-[#050505]", blob1: "bg-purple-600", blob2: "bg-blue-600", blob3: "bg-indigo-500", blob4: "bg-fuchsia-400" },
+  { name: "Oceanic Depth", base: "bg-[#020817]", blob1: "bg-cyan-600", blob2: "bg-blue-500", blob3: "bg-teal-400", blob4: "bg-sky-300" },
+  { name: "Solar Flare", base: "bg-[#0c0500]", blob1: "bg-orange-600", blob2: "bg-rose-600", blob3: "bg-amber-500", blob4: "bg-yellow-400" },
+  { name: "Emerald Pulse", base: "bg-[#000804]", blob1: "bg-emerald-600", blob2: "bg-lime-500", blob3: "bg-teal-500", blob4: "bg-green-400" },
+  { name: "Cyber Twilight", base: "bg-[#08000c]", blob1: "bg-indigo-600", blob2: "bg-violet-600", blob3: "bg-pink-500", blob4: "bg-blue-400" },
+  { name: "Aurora Mist", base: "bg-[#000c0c]", blob1: "bg-cyan-500", blob2: "bg-emerald-400", blob3: "bg-sky-500", blob4: "bg-indigo-300" },
+  { name: "Lava Core", base: "bg-[#0c0000]", blob1: "bg-red-600", blob2: "bg-orange-600", blob3: "bg-rose-500", blob4: "bg-amber-400" },
+  { name: "Deep Amethyst", base: "bg-[#0a0010]", blob1: "bg-purple-700", blob2: "bg-fuchsia-600", blob3: "bg-indigo-600", blob4: "bg-violet-400" },
 ];
 
 export function WeavyPattern({ presetIndex, className }: { presetIndex: number, className?: string }) {
@@ -25,55 +25,58 @@ export function WeavyPattern({ presetIndex, className }: { presetIndex: number, 
   
   return (
     <div className={cn("relative w-full h-full overflow-hidden", preset.base, className)}>
-      {/* Abstract Blob 1 */}
+      {/* Radial Center Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]" />
+
+      {/* Fluid Liquid Blob 1 - Deep Radial */}
       <motion.div 
         animate={{ 
-          scale: [1, 1.6, 1],
-          x: ['-25%', '25%', '-25%'],
-          y: ['-15%', '15%', '-15%'],
-          rotate: [0, 90, 0]
+          scale: [1, 1.4, 1],
+          x: ['-20%', '20%', '-20%'],
+          y: ['-10%', '10%', '-10%'],
         }}
-        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-        className={cn("absolute -top-1/2 -left-1/2 w-full h-full rounded-full blur-[60px] opacity-60", preset.blob1)} 
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className={cn("absolute -top-1/4 -left-1/4 w-full h-full rounded-full blur-[100px] opacity-60", preset.blob1)} 
       />
       
-      {/* Abstract Blob 2 */}
+      {/* Fluid Liquid Blob 2 - Counter Motion */}
       <motion.div 
         animate={{ 
-          scale: [1.4, 0.9, 1.4],
-          x: ['30%', '-30%', '30%'],
+          scale: [1.3, 0.8, 1.3],
+          x: ['20%', '-20%', '20%'],
+          y: ['15%', '-15%', '15%'],
+        }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        className={cn("absolute -bottom-1/4 -right-1/4 w-full h-full rounded-full blur-[110px] opacity-50", preset.blob2)} 
+      />
+
+      {/* Fluid Liquid Blob 3 - Central Morph */}
+      <motion.div 
+        animate={{ 
+          scale: [0.8, 1.5, 0.8],
+          opacity: [0.2, 0.4, 0.2],
+          x: ['-10%', '10%', '-10%'],
           y: ['20%', '-20%', '20%'],
-          rotate: [0, -90, 0]
         }}
-        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-        className={cn("absolute -bottom-1/2 -right-1/2 w-full h-full rounded-full blur-[70px] opacity-50", preset.blob2)} 
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        className={cn("absolute top-1/4 right-1/4 w-[90%] h-[90%] rounded-full blur-[90px]", preset.blob3)} 
       />
 
-      {/* Abstract Blob 3 */}
+      {/* Fluid Liquid Blob 4 - Detail Layer */}
       <motion.div 
         animate={{ 
-          scale: [0.7, 1.3, 0.7],
-          opacity: [0.2, 0.5, 0.2],
-          x: ['-15%', '15%', '-15%'],
-          y: ['30%', '-30%', '30%'],
-        }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        className={cn("absolute top-1/4 right-1/4 w-[80%] h-[80%] rounded-full blur-[50px]", preset.blob3)} 
-      />
-
-      {/* Abstract Blob 4 (Detail layer) */}
-      <motion.div 
-        animate={{ 
-          opacity: [0.1, 0.4, 0.1],
-          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.3, 0.1],
+          scale: [1, 1.3, 1],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className={cn("absolute bottom-1/4 left-1/4 w-[60%] h-[60%] rounded-full blur-[40px]", preset.blob4)} 
+        className={cn("absolute bottom-1/4 left-1/4 w-[70%] h-[70%] rounded-full blur-[80px]", preset.blob4)} 
       />
       
-      {/* Grain & Overlay */}
-      <div className="absolute inset-0 bg-white/[0.04] backdrop-overlay pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent pointer-events-none" />
+      {/* Noise Texture Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      
+      {/* Glass & Border Highlight */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 pointer-events-none" />
     </div>
   );
 }
@@ -137,7 +140,7 @@ export function AvatarUpload({
         <motion.div 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative h-32 w-32 rounded-[3rem] border-2 border-white/10 bg-white/5 overflow-hidden flex items-center justify-center transition-all group-hover:border-primary/60 group-hover:shadow-[0_0_50px_rgba(168,85,247,0.3)] shadow-2xl"
+          className="relative h-32 w-32 rounded-[3rem] border-2 border-white/10 bg-[#0B0B0F] overflow-hidden flex items-center justify-center transition-all group-hover:border-primary/60 group-hover:shadow-[0_0_50px_rgba(168,85,247,0.3)] shadow-2xl"
         >
           <AnimatePresence mode="wait">
             {avatarPreview ? (
@@ -161,7 +164,7 @@ export function AvatarUpload({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.2 }}
-                transition={{ duration: 0.6, ease: "circOut" }}
+                transition={{ duration: 0.8, ease: "circOut" }}
                 className="h-full w-full"
               >
                 <WeavyPattern presetIndex={selectedGradientIndex} />
@@ -190,7 +193,7 @@ export function AvatarUpload({
         <button 
           onClick={handleRandomize}
           className="absolute -bottom-2 -right-2 h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/20 border border-white/10 hover:scale-110 active:scale-95 transition-all z-20 group/btn"
-          title="Randomize Abstract Identity"
+          title="Randomize Liquid identity"
         >
           <RotateCw className="h-4 w-4 group-hover/btn:rotate-180 transition-transform duration-700 ease-out" />
         </button>
@@ -209,7 +212,7 @@ export function AvatarUpload({
           <Sparkles className="h-3 w-3 text-primary" />
           <p className="text-xs font-black uppercase tracking-widest text-white">Identity Studio</p>
         </div>
-        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Generative Abstract Gradients</p>
+        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Fluid Radial Mesh Gradients</p>
       </div>
     </div>
   );
