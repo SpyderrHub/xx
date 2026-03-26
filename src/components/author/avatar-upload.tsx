@@ -8,16 +8,16 @@ import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-// Premium Fluid Gradients
+// Premium Abstract Gradient Presets
 export const WEAVY_PRESETS = [
-  { base: "bg-indigo-900", blob1: "bg-purple-500", blob2: "bg-blue-400", blob3: "bg-pink-500" },
-  { base: "bg-emerald-900", blob1: "bg-teal-500", blob2: "bg-cyan-400", blob3: "bg-lime-500" },
-  { base: "bg-amber-900", blob1: "bg-orange-500", blob2: "bg-rose-400", blob3: "bg-yellow-500" },
-  { base: "bg-rose-900", blob1: "bg-pink-500", blob2: "bg-purple-400", blob3: "bg-indigo-500" },
-  { base: "bg-blue-900", blob1: "bg-sky-500", blob2: "bg-indigo-400", blob3: "bg-violet-500" },
-  { base: "bg-violet-900", blob1: "bg-purple-500", blob2: "bg-fuchsia-400", blob3: "bg-pink-500" },
-  { base: "bg-cyan-900", blob1: "bg-emerald-500", blob2: "bg-sky-400", blob3: "bg-blue-500" },
-  { base: "bg-fuchsia-900", blob1: "bg-purple-500", blob2: "bg-pink-400", blob3: "bg-rose-500" },
+  { name: "Deep Space", base: "bg-slate-950", blob1: "bg-indigo-600", blob2: "bg-violet-500", blob3: "bg-blue-400", blob4: "bg-cyan-300" },
+  { name: "Emerald Glitch", base: "bg-emerald-950", blob1: "bg-emerald-500", blob2: "bg-teal-400", blob3: "bg-cyan-500", blob4: "bg-lime-400" },
+  { name: "Solar Flare", base: "bg-orange-950", blob1: "bg-orange-600", blob2: "bg-amber-500", blob3: "bg-rose-500", blob4: "bg-yellow-400" },
+  { name: "Neon Rose", base: "bg-rose-950", blob1: "bg-pink-600", blob2: "bg-rose-500", blob3: "bg-purple-600", blob4: "bg-indigo-400" },
+  { name: "Electric Blue", base: "bg-blue-950", blob1: "bg-blue-600", blob2: "bg-sky-500", blob3: "bg-indigo-500", blob4: "bg-violet-400" },
+  { name: "Cyber Purple", base: "bg-purple-950", blob1: "bg-purple-600", blob2: "bg-fuchsia-500", blob3: "bg-pink-500", blob4: "bg-blue-400" },
+  { name: "Arctic Mist", base: "bg-cyan-950", blob1: "bg-cyan-600", blob2: "bg-sky-400", blob3: "bg-blue-500", blob4: "bg-emerald-300" },
+  { name: "Lava Mesh", base: "bg-red-950", blob1: "bg-red-600", blob2: "bg-orange-500", blob3: "bg-amber-600", blob4: "bg-rose-400" },
 ];
 
 export function WeavyPattern({ presetIndex, className }: { presetIndex: number, className?: string }) {
@@ -25,44 +25,55 @@ export function WeavyPattern({ presetIndex, className }: { presetIndex: number, 
   
   return (
     <div className={cn("relative w-full h-full overflow-hidden", preset.base, className)}>
-      {/* Blob 1 - Primary Motion */}
+      {/* Abstract Blob 1 */}
       <motion.div 
         animate={{ 
-          scale: [1, 1.4, 1],
-          x: ['-20%', '20%', '-20%'],
-          y: ['-10%', '10%', '-10%'],
-          rotate: [0, 45, 0]
+          scale: [1, 1.6, 1],
+          x: ['-25%', '25%', '-25%'],
+          y: ['-15%', '15%', '-15%'],
+          rotate: [0, 90, 0]
         }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        className={cn("absolute -top-1/4 -left-1/4 w-[150%] h-[150%] rounded-full blur-[50px] opacity-70", preset.blob1)} 
+        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+        className={cn("absolute -top-1/2 -left-1/2 w-full h-full rounded-full blur-[60px] opacity-60", preset.blob1)} 
       />
       
-      {/* Blob 2 - Secondary Offset Motion */}
+      {/* Abstract Blob 2 */}
       <motion.div 
         animate={{ 
-          scale: [1.2, 0.8, 1.2],
-          x: ['20%', '-20%', '20%'],
-          y: ['10%', '-10%', '10%'],
-          rotate: [0, -45, 0]
+          scale: [1.4, 0.9, 1.4],
+          x: ['30%', '-30%', '30%'],
+          y: ['20%', '-20%', '20%'],
+          rotate: [0, -90, 0]
         }}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className={cn("absolute -bottom-1/4 -right-1/4 w-[150%] h-[150%] rounded-full blur-[60px] opacity-60", preset.blob2)} 
+        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+        className={cn("absolute -bottom-1/2 -right-1/2 w-full h-full rounded-full blur-[70px] opacity-50", preset.blob2)} 
       />
 
-      {/* Blob 3 - Tertiary Highlight */}
+      {/* Abstract Blob 3 */}
       <motion.div 
         animate={{ 
-          scale: [0.8, 1.2, 0.8],
-          opacity: [0.3, 0.6, 0.3],
-          x: ['-10%', '10%', '-10%'],
-          y: ['20%', '-20%', '20%'],
+          scale: [0.7, 1.3, 0.7],
+          opacity: [0.2, 0.5, 0.2],
+          x: ['-15%', '15%', '-15%'],
+          y: ['30%', '-30%', '30%'],
+        }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        className={cn("absolute top-1/4 right-1/4 w-[80%] h-[80%] rounded-full blur-[50px]", preset.blob3)} 
+      />
+
+      {/* Abstract Blob 4 (Detail layer) */}
+      <motion.div 
+        animate={{ 
+          opacity: [0.1, 0.4, 0.1],
+          scale: [1, 1.2, 1],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className={cn("absolute top-1/4 right-1/4 w-[100%] h-[100%] rounded-full blur-[40px]", preset.blob3)} 
+        className={cn("absolute bottom-1/4 left-1/4 w-[60%] h-[60%] rounded-full blur-[40px]", preset.blob4)} 
       />
       
-      {/* Texture Overlay */}
-      <div className="absolute inset-0 bg-white/[0.03] backdrop-overlay" />
+      {/* Grain & Overlay */}
+      <div className="absolute inset-0 bg-white/[0.04] backdrop-overlay pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent pointer-events-none" />
     </div>
   );
 }
@@ -126,7 +137,7 @@ export function AvatarUpload({
         <motion.div 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative h-32 w-32 rounded-[2.5rem] border-2 border-white/10 bg-white/5 overflow-hidden flex items-center justify-center transition-all group-hover:border-primary/60 group-hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] shadow-2xl"
+          className="relative h-32 w-32 rounded-[3rem] border-2 border-white/10 bg-white/5 overflow-hidden flex items-center justify-center transition-all group-hover:border-primary/60 group-hover:shadow-[0_0_50px_rgba(168,85,247,0.3)] shadow-2xl"
         >
           <AnimatePresence mode="wait">
             {avatarPreview ? (
@@ -150,7 +161,7 @@ export function AvatarUpload({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.2 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.6, ease: "circOut" }}
                 className="h-full w-full"
               >
                 <WeavyPattern presetIndex={selectedGradientIndex} />
@@ -179,7 +190,7 @@ export function AvatarUpload({
         <button 
           onClick={handleRandomize}
           className="absolute -bottom-2 -right-2 h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/20 border border-white/10 hover:scale-110 active:scale-95 transition-all z-20 group/btn"
-          title="Randomize Fluid Identity"
+          title="Randomize Abstract Identity"
         >
           <RotateCw className="h-4 w-4 group-hover/btn:rotate-180 transition-transform duration-700 ease-out" />
         </button>
@@ -196,9 +207,9 @@ export function AvatarUpload({
       <div className="text-center space-y-1">
         <div className="flex items-center justify-center gap-2">
           <Sparkles className="h-3 w-3 text-primary" />
-          <p className="text-xs font-black uppercase tracking-widest text-white">Speaker Identity</p>
+          <p className="text-xs font-black uppercase tracking-widest text-white">Identity Studio</p>
         </div>
-        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Fluid Motion or Image Profile</p>
+        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Generative Abstract Gradients</p>
       </div>
     </div>
   );

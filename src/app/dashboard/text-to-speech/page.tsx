@@ -33,6 +33,7 @@ import { collection, query, getDocs, doc } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { WeavyPattern } from '@/components/author/avatar-upload';
 
 const MAX_CHARACTERS = 5000;
 
@@ -247,22 +248,31 @@ export default function TextToSpeechPage() {
                 <SelectValue placeholder={isLoading ? "Loading..." : userVoices.length === 0 ? "No Voices" : "Speaker"} />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
-                {userVoices.map((v) => (
-                  <SelectItem key={v.id} value={v.id} className="cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-6 w-6 ring-1 ring-white/10 shrink-0">
-                        <AvatarImage src={v.avatarUrl} className="object-cover" />
-                        <AvatarFallback className="text-[8px] bg-primary/10">{v.voiceName[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="text-left min-w-0">
-                        <p className="text-xs font-bold truncate">{v.voiceName}</p>
-                        <p className="text-[8px] text-muted-foreground uppercase font-black">
-                          {Array.isArray(v.languages) ? v.languages[0] : v.language}
-                        </p>
+                {userVoices.map((v) => {
+                  const isGradient = v.avatarUrl?.startsWith('weavy:');
+                  const gradientIndex = isGradient ? parseInt(v.avatarUrl.split(':')[1]) : 0;
+                  
+                  return (
+                    <SelectItem key={v.id} value={v.id} className="cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-6 w-6 ring-1 ring-white/10 shrink-0">
+                          {isGradient ? (
+                            <WeavyPattern presetIndex={gradientIndex} />
+                          ) : (
+                            <AvatarImage src={v.avatarUrl} className="object-cover" />
+                          )}
+                          <AvatarFallback className="text-[8px] bg-primary/10">{v.voiceName[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="text-left min-w-0">
+                          <p className="text-xs font-bold truncate">{v.voiceName}</p>
+                          <p className="text-[8px] text-muted-foreground uppercase font-black">
+                            {Array.isArray(v.languages) ? v.languages[0] : v.language}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </SelectItem>
-                ))}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
 
