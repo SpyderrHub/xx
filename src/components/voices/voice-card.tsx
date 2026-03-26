@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -10,6 +11,7 @@ import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, deleteDoc, setDoc } from 'firebase/firestore';
+import { WeavyPattern } from '@/components/author/avatar-upload';
 
 export type Voice = {
   id: string;
@@ -127,6 +129,10 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
     ? voice.styles
     : [voice.style].filter(Boolean);
 
+  // Determine if we should show a gradient or image
+  const isGradient = voice.avatarUrl?.startsWith('weavy:');
+  const gradientIndex = isGradient ? parseInt(voice.avatarUrl?.split(':')[1] || '0') : 0;
+
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
@@ -140,8 +146,10 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
         <CardContent className="flex flex-1 flex-col p-3 sm:p-4">
           <div className="relative mb-3 sm:mb-4 flex items-center justify-between">
              <div className="flex items-center gap-2 sm:gap-3">
-                 <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 overflow-hidden rounded-full bg-primary/10 border border-white/10 flex items-center justify-center">
-                    {voice.avatarUrl ? (
+                 <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 overflow-hidden rounded-2xl bg-primary/10 border border-white/10 flex items-center justify-center shadow-md">
+                    {isGradient ? (
+                      <WeavyPattern presetIndex={gradientIndex} />
+                    ) : voice.avatarUrl ? (
                       <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
                     ) : (
                       <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground/50" />
@@ -149,7 +157,7 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
                     <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="absolute inset-0 h-full w-full rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        className="absolute inset-0 h-full w-full rounded-2xl bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-[2px]"
                         onClick={togglePlay}
                     >
                         {isPlaying ? <Pause className="h-4 w-4 sm:h-5 sm:w-5"/> : <Play className="h-4 w-4 sm:h-5 sm:w-5 ml-0.5" />}
@@ -176,30 +184,30 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
           
           <div className="flex flex-wrap gap-1 mb-4">
             {languages.length > 0 && (
-              <Badge variant="secondary" className="border-none bg-primary/10 text-primary/90 text-[8px] px-1.5 py-0">
+              <Badge variant="secondary" className="border-none bg-primary/10 text-primary/90 text-[8px] px-1.5 py-0 font-bold">
                 {languages[0]}
               </Badge>
             )}
             {languages.length > 1 && (
-              <Badge variant="secondary" className="border-none bg-white/5 text-[8px] px-1.5 py-0">
+              <Badge variant="secondary" className="border-none bg-white/5 text-[8px] px-1.5 py-0 font-bold">
                 +{languages.length - 1}
               </Badge>
             )}
           </div>
 
           <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-3">
-             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+             <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
                 <Globe className="h-2.5 w-2.5" />
                 <span>{voice.gender}</span>
              </div>
              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsLiked(!isLiked)}>
+                <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-white/5" onClick={() => setIsLiked(!isLiked)}>
                     <Heart className={cn("h-4 w-4", isLiked && "fill-red-500 text-red-500")}/>
                 </Button>
                 <Button 
                     variant={isAdded ? "secondary" : "outline"} 
                     size="sm" 
-                    className="h-7 rounded-lg px-2 text-[10px] font-semibold"
+                    className="h-7 rounded-lg px-2 text-[10px] font-black uppercase tracking-widest transition-all"
                     onClick={handleToggleAdd}
                     disabled={isMyVoiceLoading || isToggling}
                 >

@@ -16,6 +16,7 @@ export interface VoiceUploadData {
   styles: string[];
   description: string;
   referenceText: string;
+  selectedGradientIndex?: number;
 }
 
 export function useVoiceUpload() {
@@ -80,7 +81,7 @@ export function useVoiceUpload() {
       const voiceId = crypto.randomUUID();
       let avatarUrl = "";
 
-      // 2. Upload Avatar (Weight: 20%, Base: 0%)
+      // 2. Handle Avatar (Weight: 20%, Base: 0%)
       if (avatarFile) {
         avatarUrl = await uploadFile(
           avatarFile, 
@@ -89,6 +90,8 @@ export function useVoiceUpload() {
           0
         );
       } else {
+        // Use generated gradient string if no file provided
+        avatarUrl = `weavy:${formData.selectedGradientIndex || 0}`;
         setProgress(20);
       }
 

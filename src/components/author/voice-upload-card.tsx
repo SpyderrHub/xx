@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Upload, Mic, Trash2, CheckCircle2, Loader2, Sparkles, X, Globe, Plus, Palette, FileText } from 'lucide-react';
 import { AudioPreviewPlayer } from './audio-preview-player';
-import { AvatarUpload } from './avatar-upload';
+import { AvatarUpload, WEAVY_PRESETS } from './avatar-upload';
 import { VoiceStudioTextarea } from './voice-studio-textarea';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
@@ -30,6 +30,7 @@ export function VoiceUploadCard() {
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
+  const [selectedGradientIndex, setSelectedGradientIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [customLanguage, setCustomLanguage] = useState('');
   const [customStyle, setCustomStyle] = useState('');
@@ -44,6 +45,11 @@ export function VoiceUploadCard() {
     description: '',
     referenceText: ''
   });
+
+  // Randomize initial gradient
+  useEffect(() => {
+    setSelectedGradientIndex(Math.floor(Math.random() * WEAVY_PRESETS.length));
+  }, []);
 
   const handleToggleLanguage = (lang: string) => {
     setFormData(prev => {
@@ -125,6 +131,7 @@ export function VoiceUploadCard() {
 
     const success = await uploadVoice(avatarFile, file, {
       ...formData,
+      selectedGradientIndex
     } as any);
     
     if (success) {
@@ -132,6 +139,7 @@ export function VoiceUploadCard() {
       setAudioPreviewUrl(null);
       setAvatarFile(null);
       setAvatarPreviewUrl(null);
+      setSelectedGradientIndex(Math.floor(Math.random() * WEAVY_PRESETS.length));
       setFormData({
         voiceName: '',
         languages: [],
@@ -164,6 +172,8 @@ export function VoiceUploadCard() {
             <AvatarUpload 
               onAvatarSelect={handleAvatarSelect} 
               avatarPreview={avatarPreviewUrl} 
+              onGradientSelect={setSelectedGradientIndex}
+              selectedGradientIndex={selectedGradientIndex}
             />
           </div>
 
@@ -344,7 +354,7 @@ export function VoiceUploadCard() {
           </div>
 
           <Button 
-            className="w-full h-14 bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-lg shadow-lg shadow-primary/20 rounded-xl" 
+            className="w-full h-14 bg-gradient-to-r from-purple-600 to-indigo-600 font-black text-lg shadow-lg shadow-primary/20 rounded-2xl btn-glow" 
             disabled={!file || isUploading || formData.languages.length === 0 || formData.styles.length === 0}
             onClick={handleUpload}
           >

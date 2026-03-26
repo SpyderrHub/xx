@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useVoiceManagement } from '@/hooks/use-voice-management';
 import { VoiceEditDialog } from './voice-edit-dialog';
+import { WeavyPattern } from './avatar-upload';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,6 +68,10 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
     ? voice.styles
     : [voice.style].filter(Boolean);
 
+  // Determine if we should show a gradient or image
+  const isGradient = voice.avatarUrl?.startsWith('weavy:');
+  const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -117,8 +123,10 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
 
         <CardContent className="p-3 sm:p-4 flex flex-col h-full">
           <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <div className="relative h-10 w-10 sm:h-14 sm:w-14 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center border border-white/10 shrink-0">
-              {voice.avatarUrl ? (
+            <div className="relative h-10 w-10 sm:h-14 sm:w-14 rounded-2xl bg-primary/10 overflow-hidden flex items-center justify-center border border-white/10 shrink-0 shadow-lg">
+              {isGradient ? (
+                <WeavyPattern presetIndex={gradientIndex} />
+              ) : voice.avatarUrl ? (
                 <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
               ) : (
                 <User className="h-5 w-5 sm:h-7 sm:w-7 text-muted-foreground/50" />
@@ -128,7 +136,7 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
               <h3 className="font-bold text-xs sm:text-base pr-14 truncate">{voice.voiceName}</h3>
               <div className="flex flex-wrap gap-1 mt-1">
                 {styles.slice(0, 2).map((s: string) => (
-                  <Badge key={s} variant="secondary" className="text-[8px] bg-primary/10 text-primary border-none px-1.5 py-0 h-4">
+                  <Badge key={s} variant="secondary" className="text-[8px] bg-primary/10 text-primary border-none px-1.5 py-0 h-4 uppercase font-black tracking-widest">
                     {s}
                   </Badge>
                 ))}
@@ -138,24 +146,24 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
 
           <div className="grid grid-cols-1 gap-2 mb-3 sm:mb-4 bg-black/20 p-2 sm:p-3 rounded-xl border border-white/5">
             <div className="flex flex-col gap-1">
-              <span className="text-[9px] text-muted-foreground uppercase flex items-center gap-1">
+              <span className="text-[9px] text-muted-foreground uppercase flex items-center gap-1 font-black tracking-widest">
                 <Globe className="h-2 w-2" /> Languages
               </span>
               <div className="flex flex-wrap gap-1">
                 {languages.length > 0 && (
-                  <Badge variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4">
+                  <Badge variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4 font-bold">
                     {languages[0]}
                   </Badge>
                 )}
                 {languages.length > 1 && (
-                  <Badge variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4">
+                  <Badge variant="secondary" className="text-[8px] bg-white/5 border-none px-1.5 py-0 h-4 font-bold">
                     +{languages.length - 1}
                   </Badge>
                 )}
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-[9px] text-muted-foreground uppercase flex items-center gap-1">
+              <span className="text-[9px] text-muted-foreground uppercase flex items-center gap-1 font-black tracking-widest">
                 <UserCircle className="h-2 w-2" /> Gender
               </span>
               <span className="text-[10px] sm:text-xs font-medium">{voice.gender}</span>
@@ -169,7 +177,7 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
             <Button
               variant="secondary"
               size="sm"
-              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
               onClick={togglePlay}
             >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
