@@ -27,9 +27,9 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { toast } from '@/hooks/use-toast';
-import { collection, query, getDocs, doc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -148,9 +148,17 @@ export default function TextToSpeechPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<{url: string, voice: string, characters: number} | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [settings, setParams] = useState({ stability: 75, clarity: 85, speed: 1.0 });
+  const [params, setParams] = useState({ stability: 75, clarity: 85, speed: 1.0 });
 
-  // 1. Fetch User's Selected Voices (myVoices subcollection)
+  // 1. Fetch User Data for Credits
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userData } = useDoc(userDocRef);
+
+  // 2. Fetch User's Selected Voices (myVoices subcollection)
   const myVoicesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'myVoices');
@@ -158,7 +166,7 @@ export default function TextToSpeechPage() {
 
   const { data: myVoicesDocs, isLoading: isMyVoicesLoading } = useCollection(myVoicesQuery);
 
-  // 2. Fetch All Public Voices
+  // 3. Fetch All Public Voices
   const allVoicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'voices');
@@ -166,7 +174,7 @@ export default function TextToSpeechPage() {
 
   const { data: allVoices, isLoading: isAllVoicesLoading } = useCollection(allVoicesQuery);
 
-  // 3. Filter voices based on User's selection
+  // 4. Filter voices based on User's selection
   const userVoices = useMemo(() => {
     if (!allVoices || !myVoicesDocs) return [];
     const myIds = new Set(myVoicesDocs.map(d => d.id));
@@ -183,18 +191,52 @@ export default function TextToSpeechPage() {
   const selectedVoice = userVoices.find(v => v.id === selectedVoiceId);
 
   const handleGenerate = async () => {
-    if (!text || isGenerating || !selectedVoiceId) return;
+    if (!text || isGenerating || !selectedVoiceId || !user || !firestore) return;
+
+    const charCount = text.length;
+    const currentCredits = userData?.credits || 0;
+
+    if (currentCredits < charCount) {
+      toast({
+        title: "Insufficient Credits",
+        description: "Please upgrade your plan to continue generating speech.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsGenerating(true);
     setGeneratedAudio(null);
 
     try {
       // Mock synthesis logic
-      setTimeout(() => {
+      setTimeout(async () => {
+        const resultUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+        
         setGeneratedAudio({
-          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+          url: resultUrl,
           voice: selectedVoice?.voiceName || 'Selected Voice',
-          characters: text.length
+          characters: charCount
         });
+
+        // 1. Deduct Credits
+        const userRef = doc(firestore, 'users', user.uid);
+        await updateDoc(userRef, {
+          credits: Math.max(0, currentCredits - charCount)
+        });
+
+        // 2. Log to History
+        await addDoc(collection(firestore, 'users', user.uid, 'generations'), {
+          text: text.substring(0, 150) + (text.length > 150 ? '...' : ''),
+          fullText: text,
+          voiceId: selectedVoiceId,
+          voiceName: selectedVoice?.voiceName || 'Unknown',
+          characters: charCount,
+          audioUrl: resultUrl,
+          createdAt: new Date().toISOString(),
+          settings: params
+        });
+
         setIsGenerating(false);
         toast({ title: "Synthesis Complete", description: "Audio ready for review." });
       }, 2000);
@@ -225,16 +267,16 @@ export default function TextToSpeechPage() {
             <div className="flex-1 space-y-2">
               <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
                 <Label>Speed</Label>
-                <span>{settings.speed}x</span>
+                <span>{params.speed}x</span>
               </div>
-              <Slider value={[settings.speed * 100]} min={50} max={200} onValueChange={(v) => setParams({...settings, speed: v[0]/100})} className="h-4" />
+              <Slider value={[params.speed * 100]} min={50} max={200} onValueChange={(v) => setParams({...params, speed: v[0]/100})} className="h-4" />
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
                 <Label>Tone</Label>
-                <span>{settings.stability}%</span>
+                <span>{params.stability}%</span>
               </div>
-              <Slider value={[settings.stability]} onValueChange={(v) => setParams({...settings, stability: v[0]})} className="h-4" />
+              <Slider value={[params.stability]} onValueChange={(v) => setParams({...params, stability: v[0]})} className="h-4" />
             </div>
           </div>
 
