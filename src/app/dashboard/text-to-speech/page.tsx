@@ -1,22 +1,16 @@
-
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
 import { 
   Loader2, 
   Zap, 
   Download, 
   User, 
-  Volume2, 
   Mic2, 
-  Waves, 
   Play, 
   Pause,
-  Clock,
   Sparkles,
   Share2,
   Library
@@ -149,7 +143,6 @@ export default function TextToSpeechPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<{url: string, voice: string, characters: number} | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [params, setParams] = useState({ stability: 75, clarity: 85, speed: 1.0 });
 
   // 1. Fetch User Data for Credits
   const userDocRef = useMemoFirebase(() => {
@@ -244,7 +237,7 @@ export default function TextToSpeechPage() {
           characters: charCount,
           audioUrl: audioUrl,
           createdAt: new Date().toISOString(),
-          settings: params
+          settings: {}
         });
       }).catch(async (serverError) => {
         // If it's a permission error, emit the contextual version for debugging
@@ -296,23 +289,6 @@ export default function TextToSpeechPage() {
             <div className="hidden sm:block">
               <h2 className="text-xs md:text-sm font-black text-white">Studio Workspace</h2>
               <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">v2.0</p>
-            </div>
-          </div>
-
-          <div className="flex-1 max-w-md hidden lg:flex items-center gap-8 px-8">
-            <div className="flex-1 space-y-2">
-              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-                <Label>Speed</Label>
-                <span>{params.speed}x</span>
-              </div>
-              <Slider value={[params.speed * 100]} min={50} max={200} onValueChange={(v) => setParams({...params, speed: v[0]/100})} className="h-4" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-                <Label>Tone</Label>
-                <span>{params.stability}%</span>
-              </div>
-              <Slider value={[params.stability]} onValueChange={(v) => setParams({...params, stability: v[0]})} className="h-4" />
             </div>
           </div>
 
