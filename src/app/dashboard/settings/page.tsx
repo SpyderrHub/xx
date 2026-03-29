@@ -1,8 +1,8 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { 
   User, 
   Mail, 
@@ -11,22 +11,37 @@ import {
   Loader2, 
   ShieldCheck,
   Calendar,
-  Sparkles
+  Sparkles,
+  AlertTriangle,
+  Trash2
 } from 'lucide-react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { updateProfile, deleteUser } from 'firebase/auth';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
   const { user, firestore, auth } = useFirebase();
-  const [isSaving, setIsProcessing] = useState(false);
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Form State
   const [displayName, setDisplayName] = useState('');
@@ -52,7 +67,7 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!user || !firestore || !auth) return;
 
-    setIsProcessing(true);
+    setIsSaving(true);
 
     try {
       // 1. Update Firebase Auth Profile
@@ -80,7 +95,47 @@ export default function SettingsPage() {
         variant: "destructive"
       });
     } finally {
-      setIsProcessing(false);
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user || !firestore) return;
+
+    setIsDeleting(true);
+
+    try {
+      // 1. Delete Firestore User Document
+      const userRef = doc(firestore, 'users', user.uid);
+      await deleteDoc(userRef);
+
+      // 2. Delete Auth User (Note: may require recent login)
+      await deleteUser(user);
+
+      toast({
+        title: "Account Deleted",
+        description: "Your account and data have been permanently removed.",
+      });
+      
+      router.push('/login');
+    } catch (error: any) {
+      console.error("Account deletion failed:", error);
+      
+      if (error.code === 'auth/requires-recent-login') {
+        toast({
+          title: "Security Re-authentication Required",
+          description: "Please log out and log back in before deleting your account for security purposes.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Deletion Error",
+          description: error.message || "Could not complete account deletion.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -101,7 +156,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 pb-20">
+    <div className="max-w-4xl mx-auto space-y-10 pb-32">
       <header className="px-2">
         <h1 className="text-3xl font-bold tracking-tight text-white">Account Settings</h1>
         <p className="text-muted-foreground mt-1 text-sm">Manage your profile information and account preferences.</p>
@@ -167,7 +222,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Main Editor Form */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-8">
           <form onSubmit={handleSaveProfile}>
             <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
               <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
@@ -238,6 +293,58 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
           </form>
+
+          {/* Danger Zone */}
+          <Card className="border-red-500/20 bg-red-500/[0.02] rounded-[2rem] overflow-hidden">
+            <CardHeader className="p-8 border-b border-red-500/10 bg-red-500/[0.01]">
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <CardTitle className="text-xl font-bold text-red-500">Danger Zone</CardTitle>
+              </div>
+              <CardDescription className="text-red-500/60 font-medium">Permanent actions that cannot be undone.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                  <h4 className="font-bold text-white mb-1">Delete Account</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
+                    Permanently remove your account, subscription data, and all generated audio history. This action is irreversible.
+                  </p>
+                </div>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      className="h-12 px-6 rounded-xl font-bold bg-red-600/10 hover:bg-red-600 hover:text-white border border-red-600/20 text-red-500 transition-all shrink-0"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-black/95 backdrop-blur-2xl border-white/10 rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-white">Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground">
+                        This will permanently delete your Saanchi AI account and remove all your data from our servers. You will lose access to your character balance and history.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl hover:bg-white/10">Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl"
+                      >
+                        {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Delete Permanently
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
