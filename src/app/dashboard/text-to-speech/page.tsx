@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select';
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { toast } from '@/hooks/use-toast';
-import { collection, query, getDocs, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, addDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -196,6 +196,7 @@ export default function TextToSpeechPage() {
     const charCount = text.length;
     const currentCredits = userData?.credits || 0;
 
+    // Fast local check
     if (currentCredits < charCount) {
       toast({
         title: "Insufficient Credits",
@@ -209,39 +210,59 @@ export default function TextToSpeechPage() {
     setGeneratedAudio(null);
 
     try {
-      // Mock synthesis logic
-      setTimeout(async () => {
-        const resultUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+      // 1. Mock Synthesis Logic (Simulate high-end neural engine)
+      const audioUrl = await new Promise<string>((resolve) => {
+        setTimeout(() => resolve('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 2000);
+      });
+
+      // 2. Atomic Credit Deduction and History Logging via Transaction
+      await runTransaction(firestore, async (transaction) => {
+        const uRef = doc(firestore, 'users', user.uid);
+        const uSnap = await transaction.get(uRef);
         
-        setGeneratedAudio({
-          url: resultUrl,
-          voice: selectedVoice?.voiceName || 'Selected Voice',
-          characters: charCount
+        if (!uSnap.exists()) throw new Error("User record not found");
+        
+        const dbCredits = uSnap.data().credits || 0;
+        if (dbCredits < charCount) {
+          throw new Error("Insufficient credits in database check");
+        }
+
+        // Deduct credits
+        transaction.update(uRef, {
+          credits: dbCredits - charCount,
+          lastGeneratedAt: new Date().toISOString()
         });
 
-        // 1. Deduct Credits
-        const userRef = doc(firestore, 'users', user.uid);
-        await updateDoc(userRef, {
-          credits: Math.max(0, currentCredits - charCount)
-        });
-
-        // 2. Log to History
-        await addDoc(collection(firestore, 'users', user.uid, 'generations'), {
+        // Add to generations collection
+        const historyRef = doc(collection(firestore, 'users', user.uid, 'generations'));
+        transaction.set(historyRef, {
           text: text.substring(0, 150) + (text.length > 150 ? '...' : ''),
           fullText: text,
           voiceId: selectedVoiceId,
           voiceName: selectedVoice?.voiceName || 'Unknown',
           characters: charCount,
-          audioUrl: resultUrl,
+          audioUrl: audioUrl,
           createdAt: new Date().toISOString(),
           settings: params
         });
+      });
 
-        setIsGenerating(false);
-        toast({ title: "Synthesis Complete", description: "Audio ready for review." });
-      }, 2000);
+      setGeneratedAudio({
+        url: audioUrl,
+        voice: selectedVoice?.voiceName || 'Selected Voice',
+        characters: charCount
+      });
+
+      toast({ title: "Synthesis Complete", description: "Audio ready for review." });
     } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      console.error("Generation failed:", e);
+      toast({ 
+        title: "Generation Error", 
+        description: e.message || "Failed to process speech synthesis.", 
+        variant: "destructive" 
+      });
+    } finally {
+      // Ensure button goes back to initial state immediately
       setIsGenerating(false);
     }
   };
