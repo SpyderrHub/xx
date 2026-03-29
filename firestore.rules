@@ -17,6 +17,10 @@ service cloud.firestore {
       match /myVoices/{voiceId} {
         allow read, write: if isSignedIn() && request.auth.uid == userId;
       }
+
+      match /generations/{genId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
     }
 
     match /subscriptions/{subId} {

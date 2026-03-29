@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -27,7 +28,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useDoc, errorEmitter, FirestorePermissionError, type SecurityRuleContext } from '@/firebase';
 import { toast } from '@/hooks/use-toast';
 import { collection, query, getDocs, doc, updateDoc, addDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -245,6 +246,21 @@ export default function TextToSpeechPage() {
           createdAt: new Date().toISOString(),
           settings: params
         });
+      }).catch(async (serverError) => {
+        // If it's a permission error, emit the contextual version for debugging
+        if (serverError.code === 'permission-denied') {
+          const permissionError = new FirestorePermissionError({
+            path: `users/${user.uid}/generations`,
+            operation: 'write',
+            requestResourceData: { 
+              text: text.substring(0, 150),
+              voiceId: selectedVoiceId,
+              characters: charCount
+            },
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        }
+        throw serverError;
       });
 
       setGeneratedAudio({
@@ -255,7 +271,6 @@ export default function TextToSpeechPage() {
 
       toast({ title: "Synthesis Complete", description: "Audio ready for review." });
     } catch (e: any) {
-      console.error("Generation failed:", e);
       toast({ 
         title: "Generation Error", 
         description: e.message || "Failed to process speech synthesis.", 

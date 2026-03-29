@@ -45,6 +45,21 @@
       },
       "required": ["userId", "voiceName", "languages", "gender", "status", "createdAt"]
     },
+    "Generation": {
+      "title": "Generation",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "fullText": { "type": "string" },
+        "voiceId": { "type": "string" },
+        "voiceName": { "type": "string" },
+        "characters": { "type": "number" },
+        "audioUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "settings": { "type": "object" }
+      },
+      "required": ["text", "fullText", "voiceId", "voiceName", "characters", "audioUrl", "createdAt"]
+    },
     "DocumentationPage": {
       "title": "DocumentationPage",
       "type": "object",
@@ -65,6 +80,10 @@
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "User profiles and subscription data."
+    },
+    "/users/{userId}/generations/{genId}": {
+      "schema": { "$ref": "#/entities/Generation" },
+      "description": "Individual synthesis history records."
     },
     "/voices/{voiceId}": {
       "schema": { "$ref": "#/entities/Voice" },
