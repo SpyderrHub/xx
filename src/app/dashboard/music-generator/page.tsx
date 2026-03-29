@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -26,7 +25,6 @@ import { doc, collection, runTransaction } from 'firebase/firestore';
 import Link from 'next/link';
 
 const MAX_PROMPT_CHARS = 1000;
-const MUSIC_GENERATION_COST = 5000; // Flat cost for music generation
 
 const StudioTextArea = ({ 
   label, 
@@ -140,15 +138,16 @@ export default function MusicGeneratorPage() {
 
   const { data: userData } = useDoc(userDocRef);
   const credits = userData?.credits || 0;
+  const cost = prompt.length;
 
   const handleGenerate = async () => {
     if (!prompt || isGenerating || !user || !firestore) return;
     
-    // Pre-flight check
-    if (credits < MUSIC_GENERATION_COST) {
+    // Fast local check
+    if (credits < cost) {
       toast({
         title: "Insufficient Credits",
-        description: `Music generation requires ${MUSIC_GENERATION_COST.toLocaleString()} credits. Please upgrade your plan.`,
+        description: `Music generation requires ${cost.toLocaleString()} credits for this prompt. Please upgrade your plan.`,
         variant: "destructive"
       });
       return;
@@ -163,7 +162,7 @@ export default function MusicGeneratorPage() {
         setTimeout(() => resolve('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 3000);
       });
 
-      // 2. Atomic Transaction for credit deduction and history
+      // 2. Atomic Transaction for credit deduction and history logging
       await runTransaction(firestore, async (transaction) => {
         const uRef = doc(firestore, 'users', user.uid);
         const uSnap = await transaction.get(uRef);
@@ -171,13 +170,13 @@ export default function MusicGeneratorPage() {
         if (!uSnap.exists()) throw new Error("User record not found");
         
         const dbCredits = uSnap.data().credits || 0;
-        if (dbCredits < MUSIC_GENERATION_COST) {
+        if (dbCredits < cost) {
           throw new Error("Insufficient credits in database check");
         }
 
         // Deduct credits
         transaction.update(uRef, {
-          credits: dbCredits - MUSIC_GENERATION_COST,
+          credits: dbCredits - cost,
           lastMusicGeneratedAt: new Date().toISOString()
         });
 
@@ -188,7 +187,7 @@ export default function MusicGeneratorPage() {
           fullText: prompt,
           voiceId: 'music-engine-v2',
           voiceName: 'Music Engine',
-          characters: MUSIC_GENERATION_COST,
+          characters: cost,
           audioUrl: audioUrl,
           createdAt: new Date().toISOString(),
           settings: settings
@@ -200,7 +199,7 @@ export default function MusicGeneratorPage() {
             operation: 'write',
             requestResourceData: { 
               text: prompt.substring(0, 150),
-              cost: MUSIC_GENERATION_COST
+              cost: cost
             },
           } satisfies SecurityRuleContext);
           errorEmitter.emit('permission-error', permissionError);
@@ -265,7 +264,12 @@ export default function MusicGeneratorPage() {
 
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block mr-2">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Cost: {MUSIC_GENERATION_COST.toLocaleString()} credits</p>
+              <p className={cn(
+                "text-[10px] font-black uppercase tracking-tighter",
+                credits < cost ? "text-destructive" : "text-muted-foreground"
+              )}>
+                Cost: {cost.toLocaleString()} credits
+              </p>
               <p className="text-[10px] font-black text-primary uppercase tracking-tighter">{credits.toLocaleString()} balance</p>
             </div>
             <Button 
