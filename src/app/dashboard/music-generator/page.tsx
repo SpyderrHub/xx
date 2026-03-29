@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -14,14 +15,18 @@ import {
   Pause,
   Sparkles,
   Settings2,
-  Library,
   Clock,
-  Volume2
+  Volume2,
+  Library
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useFirebase, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError, type SecurityRuleContext } from '@/firebase';
+import { doc, collection, runTransaction } from 'firebase/firestore';
+import Link from 'next/link';
 
 const MAX_PROMPT_CHARS = 1000;
+const MUSIC_GENERATION_COST = 5000; // Flat cost for music generation
 
 const StudioTextArea = ({ 
   label, 
@@ -117,6 +122,7 @@ const AudioPlayerFooter = ({ audioUrl, trackName, isPlaying, onTogglePlay }: any
 };
 
 export default function MusicGeneratorPage() {
+  const { user, firestore } = useFirebase();
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
@@ -127,21 +133,96 @@ export default function MusicGeneratorPage() {
     tempo: 120
   });
 
-  const handleGenerate = () => {
-    if (!prompt || isGenerating) return;
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userData } = useDoc(userDocRef);
+  const credits = userData?.credits || 0;
+
+  const handleGenerate = async () => {
+    if (!prompt || isGenerating || !user || !firestore) return;
     
+    // Pre-flight check
+    if (credits < MUSIC_GENERATION_COST) {
+      toast({
+        title: "Insufficient Credits",
+        description: `Music generation requires ${MUSIC_GENERATION_COST.toLocaleString()} credits. Please upgrade your plan.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsGenerating(true);
     setGeneratedAudio(null);
 
-    // Mock composition logic
-    setTimeout(() => {
-      setGeneratedAudio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
-      setIsGenerating(false);
+    try {
+      // 1. Mock Composition Logic
+      const audioUrl = await new Promise<string>((resolve) => {
+        setTimeout(() => resolve('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 3000);
+      });
+
+      // 2. Atomic Transaction for credit deduction and history
+      await runTransaction(firestore, async (transaction) => {
+        const uRef = doc(firestore, 'users', user.uid);
+        const uSnap = await transaction.get(uRef);
+        
+        if (!uSnap.exists()) throw new Error("User record not found");
+        
+        const dbCredits = uSnap.data().credits || 0;
+        if (dbCredits < MUSIC_GENERATION_COST) {
+          throw new Error("Insufficient credits in database check");
+        }
+
+        // Deduct credits
+        transaction.update(uRef, {
+          credits: dbCredits - MUSIC_GENERATION_COST,
+          lastMusicGeneratedAt: new Date().toISOString()
+        });
+
+        // Add to generations collection
+        const historyRef = doc(collection(firestore, 'users', user.uid, 'generations'));
+        transaction.set(historyRef, {
+          text: prompt.substring(0, 150) + (prompt.length > 150 ? '...' : ''),
+          fullText: prompt,
+          voiceId: 'music-engine-v2',
+          voiceName: 'Music Engine',
+          characters: MUSIC_GENERATION_COST,
+          audioUrl: audioUrl,
+          createdAt: new Date().toISOString(),
+          settings: settings
+        });
+      }).catch(async (serverError) => {
+        if (serverError.code === 'permission-denied') {
+          const permissionError = new FirestorePermissionError({
+            path: `users/${user.uid}/generations`,
+            operation: 'write',
+            requestResourceData: { 
+              text: prompt.substring(0, 150),
+              cost: MUSIC_GENERATION_COST
+            },
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        }
+        throw serverError;
+      });
+
+      setGeneratedAudio(audioUrl);
       toast({
         title: "Track Generated",
         description: "Your unique AI composition is ready to preview.",
       });
-    }, 3000);
+    } catch (error: any) {
+      console.error('Generation failed:', error);
+      toast({
+        title: "Generation Error",
+        description: error.message || "Failed to compose music track.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -183,6 +264,10 @@ export default function MusicGeneratorPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block mr-2">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">Cost: {MUSIC_GENERATION_COST.toLocaleString()} credits</p>
+              <p className="text-[10px] font-black text-primary uppercase tracking-tighter">{credits.toLocaleString()} balance</p>
+            </div>
             <Button 
               onClick={handleGenerate}
               disabled={isGenerating || !prompt}
