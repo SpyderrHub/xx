@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Github, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -260,7 +260,7 @@ export function LoginForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1">
           <Button
             variant="outline"
             className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
@@ -268,15 +268,7 @@ export function LoginForm() {
             disabled={isEmailLoading || isGoogleLoading}
           >
             {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2" />}
-            Google
-          </Button>
-          <Button
-            variant="outline"
-            className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
-            disabled={isEmailLoading || isGoogleLoading}
-          >
-            <Github className="mr-2 h-5 w-5" />
-            GitHub
+            Continue with Google
           </Button>
         </div>
       </div>
