@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -8,8 +7,10 @@ import {
   signOut,
   updateProfile,
   UserCredential,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
-import { doc, Firestore, setDoc } from 'firebase/firestore';
+import { doc, Firestore, getDoc, setDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { toast } from '@/hooks/use-toast';
@@ -93,6 +94,46 @@ export async function signInWithEmail(
         error.code === 'auth/user-not-found'
           ? 'Invalid email or password.'
           : 'An unexpected error occurred.',
+    });
+    throw error;
+  }
+}
+
+export async function signInWithGoogle(auth: Auth, firestore: Firestore): Promise<UserCredential> {
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Check if user already exists in Firestore
+    const userDocRef = doc(firestore, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      // Create new user entry
+      const userData = {
+        uid: user.uid,
+        name: user.displayName || 'Anonymous User',
+        email: user.email,
+        createdAt: new Date().toISOString(),
+        plan: 'free',
+        credits: 10000,
+        role: 'user',
+        subscriptionId: null,
+        paymentStatus: 'inactive',
+        currentPeriodStart: new Date().toISOString(),
+        currentPeriodEnd: null,
+      };
+      await setDoc(userDocRef, userData);
+    }
+
+    return result;
+  } catch (error: any) {
+    console.error('Google Sign-In failed:', error);
+    toast({
+      variant: 'destructive',
+      title: 'Authentication failed',
+      description: error.message || 'Failed to sign in with Google.',
     });
     throw error;
   }

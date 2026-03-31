@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useFirebase } from '@/firebase';
-import { signInWithEmail } from '@/lib/auth';
+import { signInWithEmail, signInWithGoogle } from '@/lib/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
 const formSchema = z.object({
@@ -60,12 +60,34 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export function LoginForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
   const { auth, firestore } = useFirebase();
 
+  async function handleGoogleSignIn() {
+    if (!auth || !firestore) return;
+    setIsGoogleLoading(true);
+    try {
+      const userCredential = await signInWithGoogle(auth, firestore);
+      
+      const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
+      const userData = userDoc.data();
+      
+      if (userData?.role === 'admin') {
+        router.replace('/author');
+      } else {
+        router.replace('/dashboard');
+      }
+    } catch (error) {
+      console.error('Google Sign-In failed:', error);
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
+    setIsEmailLoading(true);
     try {
       const userCredential = await signInWithEmail(auth!, values.email, values.password);
       
@@ -84,7 +106,7 @@ export function LoginForm() {
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
-      setIsLoading(false);
+      setIsEmailLoading(false);
     }
   }
 
@@ -216,12 +238,12 @@ export function LoginForm() {
               <Button
                 type="submit"
                 className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
-                disabled={isLoading}
+                disabled={isEmailLoading || isGoogleLoading}
               >
-                {isLoading ? (
+                {isEmailLoading ? (
                   <Loader2 className="animate-spin mr-2" />
                 ) : null}
-                {isLoading ? 'Processing...' : 'Sign In'}
+                {isEmailLoading ? 'Processing...' : 'Sign In'}
               </Button>
             </motion.div>
           </form>
@@ -242,13 +264,16 @@ export function LoginForm() {
           <Button
             variant="outline"
             className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
+            onClick={handleGoogleSignIn}
+            disabled={isEmailLoading || isGoogleLoading}
           >
-            <GoogleIcon className="mr-2" />
+            {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2" />}
             Google
           </Button>
           <Button
             variant="outline"
             className="h-14 border-white/5 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-xs"
+            disabled={isEmailLoading || isGoogleLoading}
           >
             <Github className="mr-2 h-5 w-5" />
             GitHub
