@@ -16,8 +16,8 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
       className="fill-foreground font-bold"
       style={{ fontSize: '20px', fontFamily: 'Inter, sans-serif' }}
     >
-      Saanchi
-      <tspan className="fill-primary"> AI</tspan>
+      Quantis
+      <tspan className="fill-primary">AI</tspan>
     </text>
   </svg>
 );

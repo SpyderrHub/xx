@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -7,7 +8,7 @@ import { Copy, Check, Terminal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const SNIPPETS = {
-  javascript: `const res = await fetch('https://api.saanchi.ai/v1/tts', {
+  javascript: `const res = await fetch('https://api.quantisai.com/v1/tts', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -23,7 +24,7 @@ const SNIPPETS = {
 const audioBlob = await res.blob();`,
   python: `import requests
 
-url = "https://api.saanchi.ai/v1/tts"
+url = "https://api.quantisai.com/v1/tts"
 payload = {
     "text": "Synthesizing batch audio at scale.",
     "voice_id": "ryder-us-male",
@@ -34,7 +35,7 @@ headers = {"Authorization": "Bearer YOUR_API_KEY"}
 response = requests.post(url, json=payload, headers=headers)
 with open("output.mp3", "wb") as f:
     f.write(response.content)`,
-  curl: `curl -X POST https://api.saanchi.ai/v1/tts \\
+  curl: `curl -X POST https://api.quantisai.com/v1/tts \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
@@ -79,7 +80,7 @@ export default function SpeechToTextPage() {
     
     setIsProcessing(true);
     setTimeout(() => {
-      setTranscription("Experience the power of Saanchi AI voices. Our advanced speech-to-text engine captures every nuance, punctuation, and speaker transition with studio-grade accuracy. This transcribed text can now be edited or exported for your convenience.");
+      setTranscription("Experience the power of QuantisAI voices. Our advanced speech-to-text engine captures every nuance, punctuation, and speaker transition with studio-grade accuracy. This transcribed text can now be edited or exported for your convenience.");
       setIsProcessing(false);
       toast({
         title: "Transcription Complete",

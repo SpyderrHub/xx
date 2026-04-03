@@ -25,7 +25,7 @@ interface GeneratedAudio {
 export default function TextToSpeechPage() {
   const { user, firestore } = useFirebase();
   const [text, setText] = useState(
-    'Welcome to Saanchi AI, where your words come to life with the most advanced and expressive AI voices.'
+    'Welcome to QuantisAI, where your words come to life with the most advanced and expressive AI voices.'
   );
   const [selectedVoice, setSelectedVoice] = useState('Algenib');
   const [stability, setStability] = useState(75);

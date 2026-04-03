@@ -1,5 +1,5 @@
 
-# Saanchi AI - Voice Generation Platform
+# QuantisAI - Voice Generation Platform
 
 This is a NextJS-based AI Voice generation platform powered by Genkit and Firebase.
 

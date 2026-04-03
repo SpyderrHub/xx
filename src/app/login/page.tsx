@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -63,7 +64,7 @@ export default function LoginPage() {
         <LoginForm />
 
         <p className="mt-12 text-sm text-gray-500 font-medium">
-          © {new Date().getFullYear()} Saanchi AI. Studio Quality Generation.
+          © {new Date().getFullYear()} QuantisAI. Studio Quality Generation.
         </p>
       </div>
     </div>

@@ -60,7 +60,7 @@ export default function PlanCard({
       const options = {
         key: data.keyId,
         subscription_id: data.subscriptionId,
-        name: 'Saanchi AI',
+        name: 'QuantisAI',
         description: `${plan.name} Subscription (${billingCycle})`,
         handler: async function (response: any) {
           try {

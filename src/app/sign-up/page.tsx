@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -63,7 +64,7 @@ export default function SignUpPage() {
         <SignUpForm />
 
         <p className="mt-12 text-sm text-gray-500 font-medium text-center">
-          © {new Date().getFullYear()} Saanchi AI. All rights reserved.
+          © {new Date().getFullYear()} QuantisAI. All rights reserved.
         </p>
       </div>
     </div>

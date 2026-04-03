@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -61,7 +62,7 @@ export default function ComparisonSlider() {
               <CardContent className="p-8 space-y-4">
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary fill-current" />
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest">Saanchi AI</span>
+                  <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantisAI</span>
                 </div>
                 <div className="text-4xl font-black text-white">${Math.round(saanchiPrice).toLocaleString()}</div>
                 <p className="text-sm text-white/70">Pure batch pricing. No markup. No enterprise tax.</p>

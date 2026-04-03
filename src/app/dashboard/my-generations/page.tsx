@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -69,7 +70,7 @@ const GenerationRow = ({ gen, playingId, onTogglePlay }: { gen: any, playingId: 
             {/* Actions */}
             <div className="flex items-center gap-2 sm:ml-auto">
               <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white/5 text-muted-foreground hover:text-white" asChild>
-                <a href={gen.audioUrl} download={`saanchi_${gen.id}.mp3`}>
+                <a href={gen.audioUrl} download={`quantisai_${gen.id}.mp3`}>
                   <Download className="h-4 w-4" />
                 </a>
               </Button>

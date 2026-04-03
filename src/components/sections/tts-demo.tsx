@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 const MAX_CHARS = 200;
 
 export default function TtsDemoSection() {
-  const [text, setText] = useState('Experience the power of Saanchi AI voices. Simply type your text and choose a speaker to begin.');
+  const [text, setText] = useState('Experience the power of QuantisAI voices. Simply type your text and choose a speaker to begin.');
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -110,7 +110,7 @@ export default function TtsDemoSection() {
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Saanchi AI Voice Studio
+              QuantisAI Voice Studio
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Enter your text, select a professional speaker, and listen to the magic.
@@ -133,7 +133,7 @@ export default function TtsDemoSection() {
                 <Textarea 
                   value={text}
                   onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
-                  placeholder="What would you like Saanchi AI to say?"
+                  placeholder="What would you like QuantisAI to say?"
                   className="h-44 resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-lg leading-relaxed shadow-inner"
                   maxLength={MAX_CHARS}
                 />
@@ -223,7 +223,7 @@ export default function TtsDemoSection() {
                           asChild
                           className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl border-white/10 hover:bg-white/5 transition-all hover:scale-105"
                         >
-                          <a href={audioUrl} download="saanchi-ai-voice.wav">
+                          <a href={audioUrl} download="quantisai-voice.wav">
                             <Download className="h-6 w-6 sm:h-8 sm:w-8" />
                           </a>
                         </Button>

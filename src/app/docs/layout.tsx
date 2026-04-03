@@ -114,7 +114,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
         <footer className="mt-auto border-t border-white/5 p-10 bg-white/[0.01]">
           <div className="flex flex-col md:flex-row justify-between gap-6 items-center">
-            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Saanchi AI Documentation</p>
+            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} QuantisAI Documentation</p>
             <div className="flex gap-6 text-xs text-muted-foreground font-bold uppercase tracking-widest">
               <Link href="/privacy" className="hover:text-white">Privacy</Link>
               <Link href="/terms" className="hover:text-white">Terms</Link>

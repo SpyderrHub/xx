@@ -5,14 +5,14 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const ApiShowcaseSection = () => {
   const codeString = `
-fetch('https://api.saanchi.ai/v1/generate', {
+fetch('https://api.quantisai.com/v1/generate', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    text: "Hello from Saanchi AI!",
+    text: "Hello from QuantisAI!",
     voice: "alex-male-en-us",
   })
 })
@@ -32,7 +32,7 @@ fetch('https://api.saanchi.ai/v1/generate', {
             Developer-Friendly API
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Integrate Saanchi AI's powerful voice generation into your applications
+            Integrate QuantisAI's powerful voice generation into your applications
             with just a few lines of code.
           </p>
         </div>

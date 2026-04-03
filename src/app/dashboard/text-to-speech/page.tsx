@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -64,7 +65,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Saanchi AI Generation',
+          title: 'QuantisAI Generation',
           text: `Check out this AI-generated voice: ${voice}`,
           url: window.location.href,
         });
@@ -99,7 +100,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
           </div>
           <div className="ml-auto flex items-center gap-2 md:hidden">
              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
-                <a href={audioUrl} download="saanchi-ai-generation.mp3">
+                <a href={audioUrl} download="quantisai-generation.mp3">
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -119,7 +120,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
-            <a href={audioUrl} download="saanchi-ai-generation.mp3" title="Download Audio">
+            <a href={audioUrl} download="quantisai-generation.mp3" title="Download Audio">
               <Download className="h-5 w-5" />
             </a>
           </Button>

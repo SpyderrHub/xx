@@ -68,7 +68,7 @@ export default function DocPage({ params }: { params: Promise<{ slug: string }> 
 
       <div className="pt-16 border-t border-white/5 flex justify-between items-center text-sm">
         <p className="text-muted-foreground">Found an issue with this page?</p>
-        <Link href="mailto:support@saanchi.ai" className="text-primary font-bold hover:underline">Contact Support</Link>
+        <Link href="mailto:support@quantisai.com" className="text-primary font-bold hover:underline">Contact Support</Link>
       </div>
     </motion.article>
   );

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -308,7 +309,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="font-bold text-white mb-1">Delete Account</h4>
                   <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                    Permanently remove your account, subscription data, and all generated audio history. This action is irreversible.
+                    Permanently remove your QuantisAI account, subscription data, and all generated audio history. This action is irreversible.
                   </p>
                 </div>
                 
@@ -326,7 +327,7 @@ export default function SettingsPage() {
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-white">Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription className="text-muted-foreground">
-                        This will permanently delete your Saanchi AI account and remove all your data from our servers. You will lose access to your character balance and history.
+                        This will permanently delete your QuantisAI account and remove all your data from our servers. You will lose access to your character balance and history.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

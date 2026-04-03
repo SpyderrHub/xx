@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -154,7 +155,7 @@ export function LoginForm() {
             Welcome back
           </h2>
           <p className="text-sm text-muted-foreground font-medium">
-            Continue your journey with Saanchi Studio.
+            Continue your journey with Quantis Studio.
           </p>
         </div>
 
@@ -274,7 +275,7 @@ export function LoginForm() {
       </div>
 
       <p className="mt-8 text-center text-sm font-medium text-muted-foreground">
-        New to Saanchi?{' '}
+        New to QuantisAI?{' '}
         <Link
           href="/sign-up"
           className="font-black uppercase tracking-widest text-primary hover:underline transition-all ml-1"

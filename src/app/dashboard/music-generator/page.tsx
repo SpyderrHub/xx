@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -90,7 +91,7 @@ const AudioPlayerFooter = ({ audioUrl, trackName, isPlaying, onTogglePlay }: any
 
           <div className="ml-auto flex items-center gap-2 md:hidden">
              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
-                <a href={audioUrl} download="saanchi-ai-music.mp3">
+                <a href={audioUrl} download="quantisai-music.mp3">
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -105,7 +106,7 @@ const AudioPlayerFooter = ({ audioUrl, trackName, isPlaying, onTogglePlay }: any
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
-            <a href={audioUrl} download="saanchi-ai-music.mp3" title="Download Track">
+            <a href={audioUrl} download="quantisai-music.mp3" title="Download Track">
               <Download className="h-5 w-5" />
             </a>
           </Button>
@@ -213,7 +214,7 @@ export default function MusicGeneratorPage() {
         description: "Your unique AI composition is ready to preview.",
       });
     } catch (error: any) {
-      console.error('Generation failed:', error);
+      console.error('Music Generation failed:', error);
       toast({
         title: "Generation Error",
         description: error.message || "Failed to compose music track.",

@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 const quickLinks = [
   { title: 'Quick Start', desc: 'Get up and running in 5 minutes.', icon: Rocket, href: '/docs/quick-start' },
   { title: 'Voice Library', desc: 'Explore the full list of available voices.', icon: Mic2, href: '/docs/voice-library' },
-  { title: 'API Reference', desc: 'Integrate Saanchi into your own apps.', icon: Code2, href: '/docs/api-reference' },
+  { title: 'API Reference', desc: 'Integrate QuantisAI into your own apps.', icon: Code2, href: '/docs/api-reference' },
 ];
 
 export default function DocsIndexPage() {
@@ -18,7 +18,7 @@ export default function DocsIndexPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-6">Documentation</h1>
         <p className="text-xl text-muted-foreground leading-relaxed">
-          Welcome to the Saanchi AI documentation. Here you'll find comprehensive guides and resources to help you generate high-quality AI speech and manage your audio content.
+          Welcome to the QuantisAI documentation. Here you'll find comprehensive guides and resources to help you generate high-quality AI speech and manage your audio content.
         </p>
       </motion.div>
 

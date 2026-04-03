@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -45,7 +46,7 @@ const ComparisonCard = () => (
             <Zap className="h-5 w-5 fill-current" />
           </div>
           <div>
-            <span className="text-base font-black text-white">Saanchi AI</span>
+            <span className="text-base font-black text-white">QuantisAI</span>
             <p className="text-[10px] text-primary font-bold uppercase">Save 96%</p>
           </div>
         </div>
