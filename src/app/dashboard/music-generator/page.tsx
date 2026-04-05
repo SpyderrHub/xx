@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -126,11 +125,6 @@ export default function MusicGeneratorPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
-  const [settings, setSettings] = useState({
-    duration: 30,
-    tempo: 120
-  });
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -191,7 +185,7 @@ export default function MusicGeneratorPage() {
           characters: cost,
           audioUrl: audioUrl,
           createdAt: new Date().toISOString(),
-          settings: settings
+          settings: {}
         });
       }).catch(async (serverError) => {
         if (serverError.code === 'permission-denied') {
@@ -234,45 +228,13 @@ export default function MusicGeneratorPage() {
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
               <Music className="h-5 w-5" />
             </div>
-            <div className="hidden sm:block">
+            <div>
               <h2 className="text-sm font-black text-white">Music Generator</h2>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Composition Engine v2.0</p>
             </div>
           </div>
 
-          <div className="flex-1 max-w-md hidden lg:flex items-center gap-8 px-8">
-            <div className="flex-1 space-y-2">
-              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-3 w-3 text-primary" />
-                  <Label>Duration</Label>
-                </div>
-                <span>{settings.duration}s</span>
-              </div>
-              <Slider value={[settings.duration]} min={10} max={60} step={5} onValueChange={(v) => setSettings({...settings, duration: v[0]})} className="h-4" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <Volume2 className="h-3 w-3 text-primary" />
-                  <Label>Tempo</Label>
-                </div>
-                <span>{settings.tempo} BPM</span>
-              </div>
-              <Slider value={[settings.tempo]} min={60} max={180} step={10} onValueChange={(v) => setSettings({...settings, tempo: v[0]})} className="h-4" />
-            </div>
-          </div>
-
           <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block mr-2">
-              <p className={cn(
-                "text-[10px] font-black uppercase tracking-tighter",
-                credits < cost ? "text-destructive" : "text-muted-foreground"
-              )}>
-                Cost: {cost.toLocaleString()} credits
-              </p>
-              <p className="text-[10px] font-black text-primary uppercase tracking-tighter">{credits.toLocaleString()} balance</p>
-            </div>
             <Button 
               onClick={handleGenerate}
               disabled={isGenerating || !prompt}
