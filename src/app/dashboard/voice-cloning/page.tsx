@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 export default function VoiceCloningPage() {
   const [voiceName, setVoiceName] = useState('');
   const [description, setDescription] = useState('');
+  const [referenceText, setReferenceText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isCloning, setIsCloning] = useState(false);
   const [isAgreed, setIsCheck] = useState(false);
@@ -43,7 +44,7 @@ export default function VoiceCloningPage() {
   };
 
   const handleClone = async () => {
-    if (!voiceName || files.length === 0 || !isAgreed) return;
+    if (!voiceName || !referenceText || files.length === 0 || !isAgreed) return;
     
     setIsCloning(true);
     setTimeout(() => {
@@ -76,7 +77,7 @@ export default function VoiceCloningPage() {
           <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto">
             <Button 
               onClick={handleClone}
-              disabled={!voiceName || files.length === 0 || !isAgreed || isCloning}
+              disabled={!voiceName || !referenceText || files.length === 0 || !isAgreed || isCloning}
               className="w-full sm:w-auto rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               {isCloning ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4 md:h-5 md:w-5" />}
@@ -103,7 +104,16 @@ export default function VoiceCloningPage() {
                   placeholder="How does this voice sound?" 
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="h-24 md:h-32 resize-none rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-sm md:text-base font-medium focus:ring-primary/20"
+                  className="h-24 md:h-28 resize-none rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-sm md:text-base font-medium focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">Reference Text</Label>
+                <Textarea 
+                  placeholder="Paste the script provided in your audio samples..." 
+                  value={referenceText}
+                  onChange={(e) => setReferenceText(e.target.value)}
+                  className="h-24 md:h-28 resize-none rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-sm md:text-base font-medium focus:ring-primary/20"
                 />
               </div>
             </div>
@@ -115,7 +125,7 @@ export default function VoiceCloningPage() {
                 onDrop={onDrop}
                 onClick={() => document.getElementById('file-upload')?.click()}
                 className={cn(
-                  "h-40 md:h-56 border-2 border-dashed rounded-xl md:rounded-[2rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
+                  "h-40 md:h-[320px] border-2 border-dashed rounded-xl md:rounded-[2rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
                   files.length > 0 ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
                 )}
               >
