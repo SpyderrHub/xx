@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -17,13 +18,19 @@ import {
   Sparkles,
   Globe2,
   Settings2,
-  Library
+  Library,
+  CalendarDays,
+  Clock
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useFirebase, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError, type SecurityRuleContext } from '@/firebase';
+import { doc, collection, runTransaction } from 'firebase/firestore';
+import Link from 'next/link';
 
 const MAX_PROMPT_CHARS = 500;
 const MAX_PREVIEW_CHARS = 1000;
+const DAILY_LIMIT = 20;
 
 const StudioTextArea = ({ 
   label, 
@@ -49,7 +56,7 @@ const StudioTextArea = ({
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         dir="ltr"
         placeholder={placeholder}
-        className="w-full min-h-[200px] p-6 text-[18px] text-left leading-relaxed outline-none bg-white/[0.02] border border-white/5 rounded-[2rem] placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 resize-none focus:ring-1 focus:ring-primary/20 transition-all"
+        className="w-full min-h-[200px] p-6 text-[18px] text-left leading-relaxed outline-none bg-white/[0.02] border border-white/5 rounded-[2rem] placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 resize-none focus:ring-1 focus:ring-primary/20 transition-all shadow-inner"
         style={{ fontFamily: "'Inter', sans-serif" }}
       />
     </div>
@@ -89,15 +96,14 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
           >
             {isPlaying ? <Pause className="h-5 w-5 md:h-6 md:w-6 fill-current" /> : <Play className="h-5 w-5 md:h-6 md:w-6 fill-current ml-1" />}
           </Button>
-          <div className="flex flex-col">
-            <p className="text-xs md:text-sm font-black text-white">Designed Voice Preview</p>
-            <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Synthetic Generation</p>
+          <div className="flex flex-col min-w-0">
+            <p className="text-xs md:text-sm font-black text-white truncate max-w-[180px]">Designed Voice Preview</p>
+            <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Synthetic Neural Generation</p>
           </div>
 
-          {/* Mobile Utility Icons */}
           <div className="ml-auto flex items-center gap-2 md:hidden">
              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
-                <a href={audioUrl} download="saanchi-designed-voice.mp3">
+                <a href={audioUrl} download="quantisai-designed-voice.mp3">
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -113,10 +119,9 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
           </div>
         </div>
 
-        {/* Desktop Utility Icons */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
-            <a href={audioUrl} download="saanchi-designed-voice.mp3" title="Download Audio">
+            <a href={audioUrl} download="quantisai-designed-voice.mp3" title="Download Audio">
               <Download className="h-5 w-5" />
             </a>
           </Button>
@@ -129,9 +134,9 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
           >
             <Library className="h-5 w-5" />
           </Button>
-          <Button className="h-12 w-12 rounded-xl bg-white/10 hover:bg-white/20">
+          <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-primary" />
-          </Button>
+          </div>
         </div>
       </div>
       <audio ref={audioRef} src={audioUrl} />
@@ -140,6 +145,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
 };
 
 export default function VoiceDesignerPage() {
+  const { user, firestore } = useFirebase();
   const [prompt, setPrompt] = useState('');
   const [referenceText, setReferenceText] = useState('This is how my new designed voice sounds. You can customize my tone and style using the prompt above.');
   const [isDesigning, setIsDesigning] = useState(false);
@@ -151,21 +157,116 @@ export default function VoiceDesignerPage() {
     clarity: 85
   });
 
-  const handleGenerate = () => {
-    if (!prompt || !referenceText || isDesigning) return;
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userData } = useDoc(userDocRef);
+
+  // Daily quota logic
+  const todayStr = new Date().toISOString().split('T')[0];
+  const dailyCount = userData?.lastVoiceDesignDate === todayStr ? (userData?.dailyVoiceDesignCount || 0) : 0;
+  const remainingGenerations = Math.max(0, DAILY_LIMIT - dailyCount);
+
+  const credits = userData?.credits || 0;
+  const cost = prompt.length;
+
+  const handleGenerate = async () => {
+    if (!prompt || !referenceText || isDesigning || !user || !firestore) return;
     
+    // 1. Check daily limit
+    if (remainingGenerations <= 0) {
+      toast({
+        title: "Daily Limit Reached",
+        description: "You have used your 20 free designs for today. Please try again tomorrow.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // 2. Check credits
+    if (credits < cost) {
+      toast({
+        title: "Insufficient Credits",
+        description: `This prompt requires ${cost.toLocaleString()} credits. Please upgrade your plan.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsDesigning(true);
     setGeneratedAudio(null);
 
-    // Mock synthesis logic
-    setTimeout(() => {
-      setGeneratedAudio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
-      setIsDesigning(false);
+    try {
+      // 1. Mock Design Logic (Simulated neural processing)
+      const audioUrl = await new Promise<string>((resolve) => {
+        setTimeout(() => resolve('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 2500);
+      });
+
+      // 2. Atomic Transaction for quota, credit deduction, and history
+      await runTransaction(firestore, async (transaction) => {
+        const uRef = doc(firestore, 'users', user.uid);
+        const uSnap = await transaction.get(uRef);
+        
+        if (!uSnap.exists()) throw new Error("User record not found");
+        
+        const data = uSnap.data();
+        const dbCredits = data.credits || 0;
+        const dbLastDate = data.lastVoiceDesignDate || '';
+        const dbDailyCount = dbLastDate === todayStr ? (data.dailyVoiceDesignCount || 0) : 0;
+
+        // Verify limits again in transaction
+        if (dbCredits < cost) throw new Error("Insufficient credits");
+        if (dbDailyCount >= DAILY_LIMIT) throw new Error("Daily limit reached");
+
+        // Update User Doc
+        transaction.update(uRef, {
+          credits: dbCredits - cost,
+          dailyVoiceDesignCount: dbDailyCount + 1,
+          lastVoiceDesignDate: todayStr,
+          lastVoiceDesignedAt: new Date().toISOString()
+        });
+
+        // Add to history
+        const historyRef = doc(collection(firestore, 'users', user.uid, 'generations'));
+        transaction.set(historyRef, {
+          text: prompt.substring(0, 150) + (prompt.length > 150 ? '...' : ''),
+          fullText: prompt,
+          voiceId: 'voice-designer-v2',
+          voiceName: 'Designed Voice',
+          characters: cost,
+          audioUrl: audioUrl,
+          createdAt: new Date().toISOString(),
+          settings: settings
+        });
+      }).catch(async (serverError) => {
+        if (serverError.code === 'permission-denied') {
+          const permissionError = new FirestorePermissionError({
+            path: `users/${user.uid}/generations`,
+            operation: 'write',
+            requestResourceData: { text: prompt.substring(0, 50), cost },
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        }
+        throw serverError;
+      });
+
+      setGeneratedAudio(audioUrl);
       toast({
         title: "Voice Designed",
         description: "Your unique custom voice is ready to preview.",
       });
-    }, 2000);
+    } catch (error: any) {
+      console.error('Voice Design failed:', error);
+      toast({
+        title: "Design Error",
+        description: error.message || "Failed to design voice profile.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDesigning(false);
+    }
   };
 
   return (
@@ -174,10 +275,10 @@ export default function VoiceDesignerPage() {
       <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-4 mb-8">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
               <Sparkles className="h-5 w-5" />
             </div>
-            <div className="hidden sm:block">
+            <div>
               <h2 className="text-sm font-black text-white">Voice Designer</h2>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Neural Engine v2.0</p>
             </div>
@@ -200,10 +301,18 @@ export default function VoiceDesignerPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
+            <div className="hidden sm:flex flex-col items-end">
+              <div className="flex items-center gap-1.5 text-primary">
+                <CalendarDays className="h-3 w-3" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Daily Quota</span>
+              </div>
+              <p className="text-xs font-bold text-white">{remainingGenerations} / {DAILY_LIMIT} Left</p>
+            </div>
+
             <Button 
               onClick={handleGenerate}
-              disabled={isDesigning || !prompt || !referenceText}
+              disabled={isDesigning || !prompt || !referenceText || remainingGenerations <= 0}
               className="h-12 px-6 md:px-8 rounded-xl bg-primary btn-glow font-black text-sm"
             >
               {isDesigning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
@@ -231,6 +340,23 @@ export default function VoiceDesignerPage() {
             maxLength={MAX_PREVIEW_CHARS}
             placeholder="Enter the text you want the designed voice to speak for the preview..."
           />
+        </div>
+
+        {/* Informational Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12">
+          {[
+            { title: "Daily Limit", desc: "20 designs per day.", icon: Clock },
+            { title: "Neural Synthesis", desc: "Expressive vocal range.", icon: Volume2 },
+            { title: "Library Sync", desc: "Save clones to library.", icon: Library },
+          ].map((feature, i) => (
+            <div key={i} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 flex items-start gap-4 hover:bg-white/[0.04] transition-colors group">
+              <feature.icon className="h-5 w-5 text-primary mt-1 group-hover:scale-110 transition-transform" />
+              <div>
+                <h5 className="text-xs font-black uppercase tracking-widest text-white">{feature.title}</h5>
+                <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{feature.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
 

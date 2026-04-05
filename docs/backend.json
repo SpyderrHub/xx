@@ -18,7 +18,9 @@
         "currentPeriodEnd": { "type": "string", "format": "date-time" },
         "billingCycle": { "type": "string" },
         "dailyMusicGenerationsCount": { "type": "number" },
-        "lastMusicGenerationDate": { "type": "string" }
+        "lastMusicGenerationDate": { "type": "string" },
+        "dailyVoiceDesignCount": { "type": "number" },
+        "lastVoiceDesignDate": { "type": "string" }
       },
       "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role"]
     },
