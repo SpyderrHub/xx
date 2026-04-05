@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -16,7 +17,8 @@ import {
   Settings2,
   Clock,
   Volume2,
-  Library
+  Library,
+  CalendarDays
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -25,6 +27,7 @@ import { doc, collection, runTransaction } from 'firebase/firestore';
 import Link from 'next/link';
 
 const MAX_PROMPT_CHARS = 1000;
+const DAILY_LIMIT = 20;
 
 const StudioTextArea = ({ 
   label, 
@@ -132,17 +135,33 @@ export default function MusicGeneratorPage() {
   }, [user, firestore]);
 
   const { data: userData } = useDoc(userDocRef);
+  
+  // Calculate daily quota
+  const todayStr = new Date().toISOString().split('T')[0];
+  const dailyCount = userData?.lastMusicGenerationDate === todayStr ? (userData?.dailyMusicGenerationsCount || 0) : 0;
+  const remainingGenerations = Math.max(0, DAILY_LIMIT - dailyCount);
+
   const credits = userData?.credits || 0;
   const cost = prompt.length;
 
   const handleGenerate = async () => {
     if (!prompt || isGenerating || !user || !firestore) return;
     
-    // Fast local check
+    // 1. Check daily limit
+    if (remainingGenerations <= 0) {
+      toast({
+        title: "Daily Limit Reached",
+        description: "You have used your 20 free compositions for today. Please try again tomorrow.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // 2. Check credits
     if (credits < cost) {
       toast({
         title: "Insufficient Credits",
-        description: `Music generation requires ${cost.toLocaleString()} credits for this prompt. Please upgrade your plan.`,
+        description: `This prompt requires ${cost.toLocaleString()} credits. Please upgrade your plan.`,
         variant: "destructive"
       });
       return;
@@ -152,30 +171,36 @@ export default function MusicGeneratorPage() {
     setGeneratedAudio(null);
 
     try {
-      // 1. Mock Composition Logic
+      // 1. Mock Composition Logic (Simulated delay)
       const audioUrl = await new Promise<string>((resolve) => {
         setTimeout(() => resolve('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 3000);
       });
 
-      // 2. Atomic Transaction for credit deduction and history logging
+      // 2. Atomic Transaction for quota, credit deduction, and history
       await runTransaction(firestore, async (transaction) => {
         const uRef = doc(firestore, 'users', user.uid);
         const uSnap = await transaction.get(uRef);
         
         if (!uSnap.exists()) throw new Error("User record not found");
         
-        const dbCredits = uSnap.data().credits || 0;
-        if (dbCredits < cost) {
-          throw new Error("Insufficient credits in database check");
-        }
+        const data = uSnap.data();
+        const dbCredits = data.credits || 0;
+        const dbLastDate = data.lastMusicGenerationDate || '';
+        const dbDailyCount = dbLastDate === todayStr ? (data.dailyMusicGenerationsCount || 0) : 0;
 
-        // Deduct credits
+        // Verify limits again in transaction
+        if (dbCredits < cost) throw new Error("Insufficient credits");
+        if (dbDailyCount >= DAILY_LIMIT) throw new Error("Daily limit reached");
+
+        // Update User Doc
         transaction.update(uRef, {
           credits: dbCredits - cost,
+          dailyMusicGenerationsCount: dbDailyCount + 1,
+          lastMusicGenerationDate: todayStr,
           lastMusicGeneratedAt: new Date().toISOString()
         });
 
-        // Add to generations collection
+        // Add to history
         const historyRef = doc(collection(firestore, 'users', user.uid, 'generations'));
         transaction.set(historyRef, {
           text: prompt.substring(0, 150) + (prompt.length > 150 ? '...' : ''),
@@ -192,10 +217,7 @@ export default function MusicGeneratorPage() {
           const permissionError = new FirestorePermissionError({
             path: `users/${user.uid}/generations`,
             operation: 'write',
-            requestResourceData: { 
-              text: prompt.substring(0, 150),
-              cost: cost
-            },
+            requestResourceData: { text: prompt.substring(0, 50), cost },
           } satisfies SecurityRuleContext);
           errorEmitter.emit('permission-error', permissionError);
         }
@@ -204,8 +226,8 @@ export default function MusicGeneratorPage() {
 
       setGeneratedAudio(audioUrl);
       toast({
-        title: "Track Generated",
-        description: "Your unique AI composition is ready to preview.",
+        title: "Composition Ready",
+        description: "Your unique AI track has been generated.",
       });
     } catch (error: any) {
       console.error('Music Generation failed:', error);
@@ -234,10 +256,18 @@ export default function MusicGeneratorPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
+            <div className="hidden sm:flex flex-col items-end">
+              <div className="flex items-center gap-1.5 text-primary">
+                <CalendarDays className="h-3 w-3" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Daily Quota</span>
+              </div>
+              <p className="text-xs font-bold text-white">{remainingGenerations} / {DAILY_LIMIT} Left</p>
+            </div>
+
             <Button 
               onClick={handleGenerate}
-              disabled={isGenerating || !prompt}
+              disabled={isGenerating || !prompt || remainingGenerations <= 0}
               className="h-12 px-6 md:px-8 rounded-xl bg-primary btn-glow font-black text-sm"
             >
               {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
@@ -262,9 +292,9 @@ export default function MusicGeneratorPage() {
         {/* Informational Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12">
           {[
+            { title: "Daily Allowance", desc: "20 compositions every 24 hours.", icon: Clock },
             { title: "Neural Synthesis", desc: "Studio-grade quality tracks.", icon: Music },
             { title: "Royalty Free", desc: "100% commercial license.", icon: Settings2 },
-            { title: "Unique Composition", desc: "Never the same track twice.", icon: Zap },
           ].map((feature, i) => (
             <div key={i} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 flex items-start gap-4 hover:bg-white/[0.04] transition-colors group">
               <feature.icon className="h-5 w-5 text-primary mt-1 group-hover:scale-110 transition-transform" />

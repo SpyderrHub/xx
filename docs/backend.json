@@ -16,7 +16,9 @@
         "paymentStatus": { "type": "string" },
         "currentPeriodStart": { "type": "string", "format": "date-time" },
         "currentPeriodEnd": { "type": "string", "format": "date-time" },
-        "billingCycle": { "type": "string" }
+        "billingCycle": { "type": "string" },
+        "dailyMusicGenerationsCount": { "type": "number" },
+        "lastMusicGenerationDate": { "type": "string" }
       },
       "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role"]
     },
