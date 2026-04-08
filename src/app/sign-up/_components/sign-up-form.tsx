@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -98,11 +97,12 @@ export function SignUpForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!auth || !firestore) return;
     setIsEmailLoading(true);
     try {
       await signUpWithEmail(
-        auth!,
-        firestore!,
+        auth,
+        firestore,
         values.fullName,
         values.email,
         values.password

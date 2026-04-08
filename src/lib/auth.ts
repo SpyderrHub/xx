@@ -48,7 +48,7 @@ export async function signUpWithEmail(
 
     const userDocRef = doc(firestore, 'users', user.uid);
 
-    setDoc(userDocRef, userData).catch((serverError) => {
+    await setDoc(userDocRef, userData).catch((serverError) => {
       const permissionError = new FirestorePermissionError({
         path: userDocRef.path,
         operation: 'create',
@@ -130,11 +130,21 @@ export async function signInWithGoogle(auth: Auth, firestore: Firestore): Promis
     return result;
   } catch (error: any) {
     console.error('Google Sign-In failed:', error);
-    toast({
-      variant: 'destructive',
-      title: 'Authentication failed',
-      description: error.message || 'Failed to sign in with Google.',
-    });
+    
+    // Check for common configuration errors
+    if (error.code === 'auth/unauthorized-domain') {
+      toast({
+        variant: 'destructive',
+        title: 'Domain not authorized',
+        description: 'Please ensure your custom domain is added to Authorized Domains in the Firebase Console.',
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication failed',
+        description: error.message || 'Failed to sign in with Google.',
+      });
+    }
     throw error;
   }
 }

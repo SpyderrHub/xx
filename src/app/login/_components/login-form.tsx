@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -88,9 +87,10 @@ export function LoginForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!auth) return;
     setIsEmailLoading(true);
     try {
-      const userCredential = await signInWithEmail(auth!, values.email, values.password);
+      const userCredential = await signInWithEmail(auth, values.email, values.password);
       
       if (firestore) {
         const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));

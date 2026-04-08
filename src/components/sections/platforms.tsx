@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
@@ -47,7 +46,7 @@ const PlatformsSection = () => {
             Use AI Voices Anywhere
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Saanchi AI provides the flexibility to integrate high-quality speech into any hardware or software platform.
+            QuantisAI provides the flexibility to integrate high-quality speech into any hardware or software platform.
           </p>
         </div>
 
