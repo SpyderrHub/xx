@@ -110,7 +110,7 @@ export async function signInWithGoogle(auth: Auth, firestore: Firestore): Promis
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      // Create new user entry
+      // Create new user entry with default credits
       const userData = {
         uid: user.uid,
         name: user.displayName || 'Anonymous User',
@@ -131,7 +131,6 @@ export async function signInWithGoogle(auth: Auth, firestore: Firestore): Promis
   } catch (error: any) {
     console.error('Google Sign-In failed:', error);
     
-    // Check for common configuration errors
     if (error.code === 'auth/unauthorized-domain') {
       toast({
         variant: 'destructive',

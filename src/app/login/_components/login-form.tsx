@@ -87,20 +87,16 @@ export function LoginForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!auth) return;
+    if (!auth || !firestore) return;
     setIsEmailLoading(true);
     try {
       const userCredential = await signInWithEmail(auth, values.email, values.password);
       
-      if (firestore) {
-        const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
-        const userData = userDoc.data();
-        
-        if (userData?.role === 'admin') {
-          router.replace('/author');
-        } else {
-          router.replace('/dashboard');
-        }
+      const userDoc = await getDoc(doc(firestore, 'users', userCredential.user.uid));
+      const userData = userDoc.data();
+      
+      if (userData?.role === 'admin') {
+        router.replace('/author');
       } else {
         router.replace('/dashboard');
       }
@@ -155,7 +151,7 @@ export function LoginForm() {
             Welcome back
           </h2>
           <p className="text-sm text-muted-foreground font-medium">
-            Continue your journey with Quantis Studio.
+            Continue your journey with QuantisAI Studio.
           </p>
         </div>
 
