@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -11,8 +10,8 @@ export default function ComparisonSlider() {
   const [minutes, setMinutes] = useState(100000); // Minutes per month
 
   const elevenLabsPrice = (minutes / 1000) * 0.30;
-  const saanchiPrice = (minutes / 1000) * 0.012;
-  const savings = ((elevenLabsPrice - saanchiPrice) / elevenLabsPrice) * 100;
+  const quantisaiPrice = (minutes / 1000) * 0.012;
+  const savings = ((elevenLabsPrice - quantisaiPrice) / elevenLabsPrice) * 100;
 
   return (
     <section className="py-24 relative overflow-hidden">
@@ -64,7 +63,7 @@ export default function ComparisonSlider() {
                   <Zap className="h-4 w-4 text-primary fill-current" />
                   <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantisAI</span>
                 </div>
-                <div className="text-4xl font-black text-white">${Math.round(saanchiPrice).toLocaleString()}</div>
+                <div className="text-4xl font-black text-white">${Math.round(quantisaiPrice).toLocaleString()}</div>
                 <p className="text-sm text-white/70">Pure batch pricing. No markup. No enterprise tax.</p>
               </CardContent>
             </Card>

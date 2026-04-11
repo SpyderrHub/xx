@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -30,7 +29,7 @@ const plans = {
     },
     {
       name: 'Creator',
-      price: '₹399',
+      price: '₹2,499',
       description: 'For professionals & growing businesses.',
       features: [
         '500,000 characters/month',
@@ -44,7 +43,7 @@ const plans = {
     },
     {
       name: 'Pro',
-      price: '₹699',
+      price: '₹7,999',
       description: 'For power users with high-volume needs.',
       features: [
         '2,000,000 characters/month',
@@ -72,7 +71,7 @@ const plans = {
     },
     {
       name: 'Creator',
-      price: '₹4,788',
+      price: '₹23,999',
       description: 'Save big with annual billing.',
       features: [
         '500,000 characters/month',
@@ -86,7 +85,7 @@ const plans = {
     },
     {
       name: 'Pro',
-      price: '₹8,388',
+      price: '₹76,999',
       description: 'Save big with annual billing.',
       features: [
         '2,000,000 characters/month',
@@ -141,7 +140,7 @@ export default function SubscriptionPage() {
           />
           <Label htmlFor="billing-cycle">Yearly</Label>
           <div className="rounded-full border border-green-500/50 bg-green-500/10 px-3 py-1 text-xs text-green-400">
-            Save 20%
+            Save ~20%
           </div>
         </div>
       </div>

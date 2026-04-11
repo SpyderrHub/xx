@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 const plans = [
   {
     name: 'Free',
-    price: '$0',
+    price: '₹0',
     period: '/ mo',
     description: 'For hobbyists testing the waters.',
     features: ['10,000 Characters', '3 Premium Voices', 'Standard Support'],
@@ -22,22 +22,22 @@ const plans = [
     highlight: false,
   },
   {
-    name: 'Starter',
-    price: '$12',
+    name: 'Creator',
+    price: '₹2,499',
     period: '/ mo',
-    description: 'Perfect for small batch projects.',
+    description: 'Perfect for professionals.',
     features: ['500,000 Characters', 'All Premium Voices', 'API Access', 'Email Support'],
     cta: 'Get Started',
-    highlight: false,
+    highlight: true,
   },
   {
     name: 'Pro',
-    price: '$49',
+    price: '₹7,999',
     period: '/ mo',
     description: 'Built for scale and automation.',
     features: ['2,500,000 Characters', 'Unlimited Parallelism', 'Voice Cloning', 'Priority API Support'],
     cta: 'Go Pro Now',
-    highlight: true,
+    highlight: false,
   },
   {
     name: 'Enterprise',
