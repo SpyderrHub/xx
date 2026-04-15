@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -12,7 +13,8 @@ const VOICES = [
   { id: '1', name: 'Ryder', language: 'English (US)', gender: 'Male', style: 'Narrator', avatar: 'https://picsum.photos/seed/ryder/200/200' },
   { id: '2', name: 'Selene', language: 'English (UK)', gender: 'Female', style: 'Conversational', avatar: 'https://picsum.photos/seed/selene/200/200' },
   { id: '3', name: 'Arjun', language: 'Hindi', gender: 'Male', style: 'Emotional', avatar: 'https://picsum.photos/seed/arjun/200/200' },
-  { id: '4', name: 'Mei', language: 'Japanese', gender: 'Female', style: 'News', avatar: 'https://picsum.photos/seed/mei/200/200' },
+  { id: '4', name: 'Elena', language: 'Spanish', gender: 'Female', style: 'Professional', avatar: 'https://picsum.photos/seed/elena/200/200' },
+  { id: '5', name: 'Mei', language: 'Japanese', gender: 'Female', style: 'News', avatar: 'https://picsum.photos/seed/mei/200/200' },
 ];
 
 const VoiceCard = ({ voice }: { voice: typeof VOICES[0] }) => {
@@ -90,7 +92,7 @@ export default function VoiceSamplesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {VOICES.map((voice) => (
             <VoiceCard key={voice.id} voice={voice} />
           ))}
