@@ -1,44 +1,74 @@
-
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Play, Pause, User, Volume2, Waves } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, User, Volume2, Waves, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { WeavyPattern } from '@/components/author/avatar-upload';
 
-const VOICES = [
-  { id: '1', name: 'Ryder', language: 'English (US)', gender: 'Male', style: 'Narrator', avatar: 'https://picsum.photos/seed/ryder/200/200' },
-  { id: '2', name: 'Selene', language: 'English (UK)', gender: 'Female', style: 'Conversational', avatar: 'https://picsum.photos/seed/selene/200/200' },
-  { id: '3', name: 'Arjun', language: 'Hindi', gender: 'Male', style: 'Emotional', avatar: 'https://picsum.photos/seed/arjun/200/200' },
-  { id: '4', name: 'Elena', language: 'Spanish', gender: 'Female', style: 'Professional', avatar: 'https://picsum.photos/seed/elena/200/200' },
-  { id: '5', name: 'Mei', language: 'Japanese', gender: 'Female', style: 'News', avatar: 'https://picsum.photos/seed/mei/200/200' },
-];
-
-const VoiceCard = ({ voice }: { voice: typeof VOICES[0] }) => {
+const VoiceCard = ({ voice }: { voice: any }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [randomBars, setRandomBars] = useState<number[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setRandomBars(Array.from({ length: 15 }, () => Math.random() * 100));
   }, []);
 
+  const togglePlay = useCallback(() => {
+    if (!voice.audioUrl) return;
+
+    if (!audioRef.current) {
+      audioRef.current = new Audio(voice.audioUrl);
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(err => console.error("Playback failed:", err));
+    }
+    setIsPlaying(!isPlaying);
+  }, [isPlaying, voice.audioUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const languages = Array.isArray(voice.languages) ? voice.languages : [voice.language].filter(Boolean);
+  const isGradient = voice.avatarUrl?.startsWith('weavy:');
+  const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
+
   return (
     <motion.div 
       whileHover={{ y: -5 }}
-      className="glass-card rounded-[2rem] p-6 group transition-all hover:border-primary/40"
+      className="glass-card rounded-[2rem] p-6 group transition-all hover:border-primary/40 flex flex-col h-full"
     >
       <div className="flex items-center gap-4 mb-6">
-        <div className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-primary/50 transition-colors">
-          <Image src={voice.avatar} alt={voice.name} fill className="object-cover" />
+        <div className="relative h-14 w-14 rounded-2xl overflow-hidden border-2 border-white/10 group-hover:border-primary/50 transition-colors shrink-0 flex items-center justify-center bg-white/5">
+          {isGradient ? (
+            <WeavyPattern presetIndex={gradientIndex} />
+          ) : voice.avatarUrl ? (
+            <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+          ) : (
+            <User className="h-6 w-6 text-white/20" />
+          )}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-black text-white text-lg truncate">{voice.name}</h4>
-          <div className="flex gap-2 mt-1">
+          <h4 className="font-black text-white text-lg truncate">{voice.voiceName}</h4>
+          <div className="flex flex-wrap gap-1.5 mt-1">
             <Badge variant="outline" className="bg-white/5 border-none text-[9px] uppercase font-bold text-muted-foreground px-2">
-              {voice.language}
+              {languages[0] || 'Global'}
             </Badge>
             <Badge variant="outline" className="bg-primary/10 border-none text-[9px] uppercase font-bold text-primary px-2">
               {voice.gender}
@@ -47,11 +77,11 @@ const VoiceCard = ({ voice }: { voice: typeof VOICES[0] }) => {
         </div>
       </div>
 
-      <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 border border-white/5 group-hover:bg-white/10 transition-colors">
+      <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 border border-white/5 group-hover:bg-white/10 transition-colors mt-auto">
         <Button 
           size="icon" 
           variant="secondary" 
-          onClick={() => setIsPlaying(!isPlaying)}
+          onClick={togglePlay}
           className="h-10 w-10 rounded-full bg-white text-black hover:bg-white/90 shadow-xl shrink-0"
         >
           {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
@@ -72,14 +102,27 @@ const VoiceCard = ({ voice }: { voice: typeof VOICES[0] }) => {
         </div>
       </div>
       
-      <p className="mt-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] italic px-2">
-        {voice.style} &bull; 48kHz Stereo
+      <p className="mt-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] italic px-2 truncate">
+        {voice.style || 'Premium Voice'} &bull; 48kHz Stereo
       </p>
     </motion.div>
   );
 };
 
 export default function VoiceSamplesSection() {
+  const { firestore } = useFirebase();
+
+  const voicesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'voices'),
+      orderBy('createdAt', 'desc'),
+      limit(5)
+    );
+  }, [firestore]);
+
+  const { data: voices, isLoading } = useCollection(voicesQuery);
+
   return (
     <section id="voice-samples" className="py-24 bg-black/20">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
@@ -92,11 +135,23 @@ export default function VoiceSamplesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          {VOICES.map((voice) => (
-            <VoiceCard key={voice.id} voice={voice} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-12 w-12 animate-spin text-primary/50 mb-4" />
+            <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Loading Premium Samples...</p>
+          </div>
+        ) : voices && voices.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            {voices.map((voice) => (
+              <VoiceCard key={voice.id} voice={voice} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
+            <Volume2 className="h-12 w-12 text-white/10 mx-auto mb-4" />
+            <p className="text-muted-foreground italic">No speakers found in the studio library.</p>
+          </div>
+        )}
       </div>
     </section>
   );
