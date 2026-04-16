@@ -44,7 +44,7 @@ const plans = [
     price: '₹999',
     period: '/ mo',
     description: 'The ultimate synthesis experience.',
-    features: ['1,000,000 Characters', 'Max 360 Min Sessions', '30 Daily Pro Generations', 'Voice Cloning', 'Priority Support'],
+    features: ['1,000,000 Characters', 'Max 360 Min Sessions', '30 Daily Pro Generations', 'No watermarks', 'Priority Support'],
     cta: 'Go Pro Now',
     highlight: false,
   },

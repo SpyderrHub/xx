@@ -64,9 +64,9 @@ const plans = {
       features: [
         '1,000,000 characters/month',
         'Max 360 min audio generation',
-        'All premium voices',
+        'No watermarks',
         '30 daily Pro generations',
-        'Advanced voice cloning',
+        'All premium voices',
         'Priority API access',
         'Email support',
       ],
@@ -123,9 +123,9 @@ const plans = {
       features: [
         '1,000,000 characters/month',
         'Max 360 min audio generation',
-        'All premium voices',
+        'No watermarks',
         '30 daily Pro generations',
-        'Advanced voice cloning',
+        'All premium voices',
         'Priority API access',
         'Email support',
       ],
