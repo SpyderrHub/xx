@@ -30,7 +30,7 @@ const plans = {
     },
     {
       name: 'Starter',
-      price: '₹999',
+      price: '₹149',
       description: 'The perfect kickstart for your content.',
       features: [
         '50,000 characters/month',
@@ -38,7 +38,7 @@ const plans = {
         'No watermarks',
         '10 daily Pro generations',
         'Premium voice access',
-        'Starter API tier',
+        'Standard support',
       ],
       isHighlighted: false,
     },
@@ -89,7 +89,7 @@ const plans = {
     },
     {
       name: 'Starter',
-      price: '₹9,999',
+      price: '₹1,490',
       description: 'Save big with annual billing.',
       features: [
         '50,000 characters/month',
@@ -97,7 +97,7 @@ const plans = {
         'No watermarks',
         '10 daily Pro generations',
         'Premium voice access',
-        'Starter API tier',
+        'Standard support',
       ],
       isHighlighted: false,
     },

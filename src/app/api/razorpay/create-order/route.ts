@@ -4,7 +4,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 
 // Prices matching the Subscription Page UI (in INR)
 const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
-  Starter: { monthly: 999, yearly: 9999 },
+  Starter: { monthly: 149, yearly: 1490 },
   Creator: { monthly: 2499, yearly: 23999 },
   Pro: { monthly: 7999, yearly: 76999 },
 };

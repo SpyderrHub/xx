@@ -23,10 +23,10 @@ const plans = [
   },
   {
     name: 'Starter',
-    price: '₹999',
+    price: '₹149',
     period: '/ mo',
     description: 'Essential for new creators.',
-    features: ['50,000 Characters', '10 Daily Pro Generations', 'No Watermarks', 'Standard API'],
+    features: ['50,000 Characters', '10 Daily Pro Generations', 'No Watermarks', 'Standard Support'],
     cta: 'Select Starter',
     highlight: false,
   },
