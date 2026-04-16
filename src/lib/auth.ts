@@ -38,7 +38,7 @@ export async function signUpWithEmail(
       email: user.email,
       createdAt: new Date().toISOString(),
       plan: 'free',
-      credits: 10000, // 10k initial characters
+      credits: 3000, // 3k initial characters for free plan
       role: 'user',
       subscriptionId: null,
       paymentStatus: 'inactive',
@@ -117,7 +117,7 @@ export async function signInWithGoogle(auth: Auth, firestore: Firestore): Promis
         email: user.email,
         createdAt: new Date().toISOString(),
         plan: 'free',
-        credits: 10000,
+        credits: 3000, // 3k initial characters for free plan
         role: 'user',
         subscriptionId: null,
         paymentStatus: 'inactive',

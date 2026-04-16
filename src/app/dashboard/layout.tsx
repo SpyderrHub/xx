@@ -50,7 +50,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const planLimits: Record<string, number> = {
-  free: 10000,
+  free: 3000,
   creator: 500000,
   pro: 2000000,
   business: 10000000,
@@ -90,7 +90,7 @@ const DashboardHeader = ({ title }: { title: string }) => {
 
   const creditsRemaining = userData?.credits || 0;
   const plan = userData?.plan || 'free';
-  const limit = planLimits[plan] || 10000;
+  const limit = planLimits[plan] || 3000;
   const creditsUsed = Math.max(0, limit - creditsRemaining);
 
   return (

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
 
 const planDetails: Record<string, { characterLimit: number }> = {
-  free: { characterLimit: 10000 },
+  free: { characterLimit: 3000 },
   creator: { characterLimit: 500000 },
   pro: { characterLimit: 2000000 },
   business: { characterLimit: Infinity },

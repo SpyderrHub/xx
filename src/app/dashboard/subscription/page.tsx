@@ -20,7 +20,8 @@ const plans = {
       price: '₹0',
       description: 'For personal projects & exploration.',
       features: [
-        '10,000 characters/month',
+        '3,000 characters/month',
+        'Watermarked audio',
         'Access to standard voices',
         '1 project',
         'Community support',
@@ -33,6 +34,7 @@ const plans = {
       description: 'For professionals & growing businesses.',
       features: [
         '500,000 characters/month',
+        'No watermarks',
         'Access to premium voices',
         'Voice Cloning Tool',
         'Unlimited projects',
@@ -62,7 +64,8 @@ const plans = {
       price: '₹0',
       description: 'For personal projects & exploration.',
       features: [
-        '10,000 characters/month',
+        '3,000 characters/month',
+        'Watermarked audio',
         'Access to standard voices',
         '1 project',
         'Community support',
@@ -75,6 +78,7 @@ const plans = {
       description: 'Save big with annual billing.',
       features: [
         '500,000 characters/month',
+        'No watermarks',
         'Access to premium voices',
         'Voice Cloning Tool',
         'Unlimited projects',
