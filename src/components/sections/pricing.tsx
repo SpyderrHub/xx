@@ -26,7 +26,7 @@ const plans = [
     price: '₹149',
     period: '/ mo',
     description: 'Essential for new creators.',
-    features: ['50,000 Characters', '10 Daily Pro Generations', 'No Watermarks', 'Standard Support'],
+    features: ['50,000 Characters', 'Max 60 Min Sessions', '10 Daily Pro Generations', 'No Watermarks', 'Standard Support'],
     cta: 'Select Starter',
     highlight: false,
   },
