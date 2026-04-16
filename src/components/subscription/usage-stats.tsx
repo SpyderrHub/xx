@@ -9,7 +9,7 @@ const planDetails: Record<string, { characterLimit: number }> = {
   free: { characterLimit: 3000 },
   starter: { characterLimit: 50000 },
   creator: { characterLimit: 300000 },
-  pro: { characterLimit: 2000000 },
+  pro: { characterLimit: 1000000 },
   business: { characterLimit: Infinity },
 };
 

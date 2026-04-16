@@ -6,7 +6,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
   Starter: { monthly: 149, yearly: 1490 },
   Creator: { monthly: 399, yearly: 3990 },
-  Pro: { monthly: 7999, yearly: 76999 },
+  Pro: { monthly: 999, yearly: 9990 },
 };
 
 export async function POST(request: NextRequest) {

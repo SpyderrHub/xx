@@ -53,7 +53,7 @@ const planLimits: Record<string, number> = {
   free: 3000,
   starter: 50000,
   creator: 300000,
-  pro: 2000000,
+  pro: 1000000,
   business: 10000000,
 };
 
@@ -296,7 +296,7 @@ const DashboardSidebar = () => {
               <span className="text-xs font-black uppercase tracking-widest text-white">Go Pro</span>
             </div>
             <p className="text-[10px] text-muted-foreground mb-3 leading-relaxed">
-              Unlock ultra-realistic cloning and 2M monthly characters.
+              Unlock ultra-realistic cloning and 1M monthly characters.
             </p>
             <Button asChild size="sm" className="w-full h-8 bg-primary hover:bg-primary/90 text-[11px] font-bold rounded-lg shadow-lg shadow-primary/20">
               <Link href="/dashboard/subscription">Upgrade Now</Link>

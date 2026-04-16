@@ -135,7 +135,7 @@ export default function MusicGeneratorPage() {
   const { data: userData } = useDoc(userDocRef);
   
   // Dynamic daily quota based on plan
-  const dailyLimit = userData?.plan === 'starter' ? 10 : 20;
+  const dailyLimit = userData?.plan === 'starter' ? 10 : userData?.plan === 'creator' ? 20 : 30;
   
   // Calculate daily quota
   const todayStr = new Date().toISOString().split('T')[0];
@@ -189,7 +189,7 @@ export default function MusicGeneratorPage() {
         const dbLastDate = data.lastMusicGenerationDate || '';
         const dbDailyCount = dbLastDate === todayStr ? (data.dailyMusicGenerationsCount || 0) : 0;
         const dbPlan = data.plan || 'free';
-        const dbLimit = dbPlan === 'starter' ? 10 : 20;
+        const dbLimit = dbPlan === 'starter' ? 10 : dbPlan === 'creator' ? 20 : 30;
 
         // Verify limits again in transaction
         if (dbCredits < cost) throw new Error("Insufficient credits");
