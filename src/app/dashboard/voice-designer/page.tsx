@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -30,7 +29,6 @@ import Link from 'next/link';
 
 const MAX_PROMPT_CHARS = 500;
 const MAX_PREVIEW_CHARS = 1000;
-const DAILY_LIMIT = 20;
 
 const StudioTextArea = ({ 
   label, 
@@ -164,10 +162,13 @@ export default function VoiceDesignerPage() {
 
   const { data: userData } = useDoc(userDocRef);
 
+  // Dynamic daily quota based on plan
+  const dailyLimit = userData?.plan === 'starter' ? 10 : 20;
+
   // Daily quota logic
   const todayStr = new Date().toISOString().split('T')[0];
   const dailyCount = userData?.lastVoiceDesignDate === todayStr ? (userData?.dailyVoiceDesignCount || 0) : 0;
-  const remainingGenerations = Math.max(0, DAILY_LIMIT - dailyCount);
+  const remainingGenerations = Math.max(0, dailyLimit - dailyCount);
 
   const credits = userData?.credits || 0;
   const cost = prompt.length;
@@ -179,7 +180,7 @@ export default function VoiceDesignerPage() {
     if (remainingGenerations <= 0) {
       toast({
         title: "Daily Limit Reached",
-        description: "You have used your 20 free designs for today. Please try again tomorrow.",
+        description: `You have used your ${dailyLimit} free designs for today. Please try again tomorrow.`,
         variant: "destructive"
       });
       return;
@@ -215,10 +216,12 @@ export default function VoiceDesignerPage() {
         const dbCredits = data.credits || 0;
         const dbLastDate = data.lastVoiceDesignDate || '';
         const dbDailyCount = dbLastDate === todayStr ? (data.dailyVoiceDesignCount || 0) : 0;
+        const dbPlan = data.plan || 'free';
+        const dbLimit = dbPlan === 'starter' ? 10 : 20;
 
         // Verify limits again in transaction
         if (dbCredits < cost) throw new Error("Insufficient credits");
-        if (dbDailyCount >= DAILY_LIMIT) throw new Error("Daily limit reached");
+        if (dbDailyCount >= dbLimit) throw new Error("Daily limit reached");
 
         // Update User Doc
         transaction.update(uRef, {
@@ -307,7 +310,7 @@ export default function VoiceDesignerPage() {
                 <CalendarDays className="h-3 w-3" />
                 <span className="text-[10px] font-black uppercase tracking-widest">Daily Quota</span>
               </div>
-              <p className="text-xs font-bold text-white">{remainingGenerations} / {DAILY_LIMIT} Left</p>
+              <p className="text-xs font-bold text-white">{remainingGenerations} / {dailyLimit} Left</p>
             </div>
 
             <Button 
@@ -345,7 +348,7 @@ export default function VoiceDesignerPage() {
         {/* Informational Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12">
           {[
-            { title: "Daily Limit", desc: "20 designs per day.", icon: Clock },
+            { title: "Daily Limit", desc: `${dailyLimit} designs per day.`, icon: Clock },
             { title: "Neural Synthesis", desc: "Expressive vocal range.", icon: Volume2 },
             { title: "Library Sync", desc: "Save clones to library.", icon: Library },
           ].map((feature, i) => (

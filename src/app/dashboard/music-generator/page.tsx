@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -27,7 +26,6 @@ import { doc, collection, runTransaction } from 'firebase/firestore';
 import Link from 'next/link';
 
 const MAX_PROMPT_CHARS = 1000;
-const DAILY_LIMIT = 20;
 
 const StudioTextArea = ({ 
   label, 
@@ -136,10 +134,13 @@ export default function MusicGeneratorPage() {
 
   const { data: userData } = useDoc(userDocRef);
   
+  // Dynamic daily quota based on plan
+  const dailyLimit = userData?.plan === 'starter' ? 10 : 20;
+  
   // Calculate daily quota
   const todayStr = new Date().toISOString().split('T')[0];
   const dailyCount = userData?.lastMusicGenerationDate === todayStr ? (userData?.dailyMusicGenerationsCount || 0) : 0;
-  const remainingGenerations = Math.max(0, DAILY_LIMIT - dailyCount);
+  const remainingGenerations = Math.max(0, dailyLimit - dailyCount);
 
   const credits = userData?.credits || 0;
   const cost = prompt.length;
@@ -151,7 +152,7 @@ export default function MusicGeneratorPage() {
     if (remainingGenerations <= 0) {
       toast({
         title: "Daily Limit Reached",
-        description: "You have used your 20 free compositions for today. Please try again tomorrow.",
+        description: `You have used your ${dailyLimit} free compositions for today. Please try again tomorrow.`,
         variant: "destructive"
       });
       return;
@@ -187,10 +188,12 @@ export default function MusicGeneratorPage() {
         const dbCredits = data.credits || 0;
         const dbLastDate = data.lastMusicGenerationDate || '';
         const dbDailyCount = dbLastDate === todayStr ? (data.dailyMusicGenerationsCount || 0) : 0;
+        const dbPlan = data.plan || 'free';
+        const dbLimit = dbPlan === 'starter' ? 10 : 20;
 
         // Verify limits again in transaction
         if (dbCredits < cost) throw new Error("Insufficient credits");
-        if (dbDailyCount >= DAILY_LIMIT) throw new Error("Daily limit reached");
+        if (dbDailyCount >= dbLimit) throw new Error("Daily limit reached");
 
         // Update User Doc
         transaction.update(uRef, {
@@ -262,7 +265,7 @@ export default function MusicGeneratorPage() {
                 <CalendarDays className="h-3 w-3" />
                 <span className="text-[10px] font-black uppercase tracking-widest">Daily Quota</span>
               </div>
-              <p className="text-xs font-bold text-white">{remainingGenerations} / {DAILY_LIMIT} Left</p>
+              <p className="text-xs font-bold text-white">{remainingGenerations} / {dailyLimit} Left</p>
             </div>
 
             <Button 
@@ -292,7 +295,7 @@ export default function MusicGeneratorPage() {
         {/* Informational Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12">
           {[
-            { title: "Daily Allowance", desc: "20 compositions every 24 hours.", icon: Clock },
+            { title: "Daily Allowance", desc: `${dailyLimit} compositions every 24 hours.`, icon: Clock },
             { title: "Neural Synthesis", desc: "Studio-grade quality tracks.", icon: Music },
             { title: "Royalty Free", desc: "100% commercial license.", icon: Settings2 },
           ].map((feature, i) => (
