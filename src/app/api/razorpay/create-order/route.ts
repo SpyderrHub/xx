@@ -4,6 +4,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 
 // Prices matching the Subscription Page UI (in INR)
 const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
+  Starter: { monthly: 999, yearly: 9999 },
   Creator: { monthly: 2499, yearly: 23999 },
   Pro: { monthly: 7999, yearly: 76999 },
 };
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
-      return NextResponse.json({ message: 'Authentication required. Please log in again.' }, { status: 401 });
+      return NextResponse.json({ message: 'Authentication required. Please log in again.' }, { status: 410 });
     }
 
     if (!adminAuth) {

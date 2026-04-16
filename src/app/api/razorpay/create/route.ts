@@ -1,10 +1,11 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import { razorpay } from '@/lib/razorpay';
 import { adminAuth } from '@/lib/firebase-admin';
 
 // Map plan types to Razorpay Plan IDs from environment variables
 const RAZORPAY_PLAN_MAP: Record<string, string | undefined> = {
+  'starter_monthly': process.env.RAZORPAY_PLAN_STARTER_MONTHLY,
+  'starter_yearly': process.env.RAZORPAY_PLAN_STARTER_YEARLY,
   'creator_monthly': process.env.RAZORPAY_PLAN_CREATOR_MONTHLY,
   'creator_yearly': process.env.RAZORPAY_PLAN_CREATOR_YEARLY,
   'pro_monthly': process.env.RAZORPAY_PLAN_PRO_MONTHLY,
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 410 });
     }
 
     if (!adminAuth) {

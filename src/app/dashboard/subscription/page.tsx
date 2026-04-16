@@ -29,6 +29,19 @@ const plans = {
       isHighlighted: false,
     },
     {
+      name: 'Starter',
+      price: '₹999',
+      description: 'The perfect kickstart for your content.',
+      features: [
+        '50,000 characters/month',
+        'Max 60 min audio generation',
+        'No watermarks',
+        'Premium voice access',
+        'Starter API tier',
+      ],
+      isHighlighted: false,
+    },
+    {
       name: 'Creator',
       price: '₹2,499',
       description: 'For professionals & growing businesses.',
@@ -73,11 +86,24 @@ const plans = {
       isHighlighted: false,
     },
     {
+      name: 'Starter',
+      price: '₹9,999',
+      description: 'Save big with annual billing.',
+      features: [
+        '50,000 characters/month',
+        'Max 60 min audio generation',
+        'No watermarks',
+        'Premium voice access',
+        'Starter API tier',
+      ],
+      isHighlighted: false,
+    },
+    {
       name: 'Creator',
       price: '₹23,999',
       description: 'Save big with annual billing.',
       features: [
-        '500,000 characters/month',
+        '50,000 characters/month',
         'No watermarks',
         'Access to premium voices',
         'Voice Cloning Tool',
@@ -165,7 +191,7 @@ export default function SubscriptionPage() {
         <h2 className="mb-8 text-2xl font-semibold tracking-tight text-center">
           Choose the plan that's right for you
         </h2>
-        <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
           {displayPlans.map((plan) => (
             <PlanCard
               key={plan.name}

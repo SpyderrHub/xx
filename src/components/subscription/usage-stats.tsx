@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 
 const planDetails: Record<string, { characterLimit: number }> = {
   free: { characterLimit: 3000 },
+  starter: { characterLimit: 50000 },
   creator: { characterLimit: 500000 },
   pro: { characterLimit: 2000000 },
   business: { characterLimit: Infinity },

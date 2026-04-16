@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import Link from 'next/link';
 
 const planDetails: Record<string, {name: string, price: string, period: string}> = {
     free: { name: 'Free', price: '₹0', period: 'per month' },
+    starter: { name: 'Starter', price: '₹999', period: 'per month' },
     creator: { name: 'Creator', price: '₹2,499', period: 'per month' },
     pro: { name: 'Pro', price: '₹7,999', period: 'per month' },
     business: { name: 'Business', price: 'Custom', period: ''},

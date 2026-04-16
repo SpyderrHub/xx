@@ -1,4 +1,3 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import crypto from 'crypto';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
@@ -7,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 410 });
     }
 
     if (!adminAuth || !adminDb) {
@@ -44,6 +43,7 @@ export async function POST(request: NextRequest) {
     const billingCycle = planType.split('_')[1];
     
     const creditsMap: Record<string, number> = {
+      starter: 50000,
       creator: 500000,
       pro: 2000000,
     };

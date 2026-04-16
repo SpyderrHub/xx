@@ -22,6 +22,15 @@ const plans = [
     highlight: false,
   },
   {
+    name: 'Starter',
+    price: '₹999',
+    period: '/ mo',
+    description: 'Essential for new creators.',
+    features: ['50,000 Characters', '60 Min Generation', 'No Watermarks', 'Standard API'],
+    cta: 'Select Starter',
+    highlight: false,
+  },
+  {
     name: 'Creator',
     price: '₹2,499',
     period: '/ mo',
@@ -37,15 +46,6 @@ const plans = [
     description: 'Built for scale and automation.',
     features: ['2,500,000 Characters', 'Unlimited Parallelism', 'Voice Cloning', 'Priority API Support'],
     cta: 'Go Pro Now',
-    highlight: false,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    description: 'Dedicated resources for large teams.',
-    features: ['Unlimited Usage', 'Custom Neural Voices', 'Dedicated Infrastructure', 'SLA Guarantee'],
-    cta: 'Contact Sales',
     highlight: false,
   },
 ];
