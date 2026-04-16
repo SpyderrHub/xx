@@ -52,7 +52,7 @@ import { motion } from 'framer-motion';
 const planLimits: Record<string, number> = {
   free: 3000,
   starter: 50000,
-  creator: 500000,
+  creator: 300000,
   pro: 2000000,
   business: 10000000,
 };

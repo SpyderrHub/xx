@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 const planDetails: Record<string, { characterLimit: number }> = {
   free: { characterLimit: 3000 },
   starter: { characterLimit: 50000 },
-  creator: { characterLimit: 500000 },
+  creator: { characterLimit: 300000 },
   pro: { characterLimit: 2000000 },
   business: { characterLimit: Infinity },
 };
@@ -21,7 +21,7 @@ export default function UsageStats({ userData }: any) {
   const { plan, credits, currentPeriodEnd } = userData;
   const currentPlanDetails = planDetails[plan] || planDetails['free'];
   const charactersUsed = Math.max(0, currentPlanDetails.characterLimit - credits);
-  const usagePercentage = (charactersUsed / currentPlanDetails.characterLimit) * 100;
+  const usagePercentage = (charactersUsed / (currentPlanDetails.characterLimit || 1)) * 100;
   // Mocked value for voice generation time
   const voiceGenerationTimeUsed = (charactersUsed / 1000).toFixed(2); // e.g. 1 char = 1ms
 
@@ -37,7 +37,7 @@ export default function UsageStats({ userData }: any) {
               <Label htmlFor="character-usage">Characters Used</Label>
               <span className="font-medium text-muted-foreground">
                 {charactersUsed.toLocaleString()} /{' '}
-                {currentPlanDetails.characterLimit.toLocaleString()}
+                {currentPlanDetails.characterLimit === Infinity ? '∞' : currentPlanDetails.characterLimit.toLocaleString()}
               </span>
             </div>
             <Progress id="character-usage" value={usagePercentage} />

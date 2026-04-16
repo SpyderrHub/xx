@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     
     const creditsMap: Record<string, number> = {
       starter: 50000,
-      creator: 500000,
+      creator: 300000,
       pro: 2000000,
     };
 
