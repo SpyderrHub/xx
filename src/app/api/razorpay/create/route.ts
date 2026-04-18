@@ -14,17 +14,17 @@ const RAZORPAY_PLAN_MAP: Record<string, string | undefined> = {
 
 export async function POST(request: NextRequest) {
   if (!razorpay) {
-    return NextResponse.json({ message: 'Razorpay keys not configured' }, { status: 500 });
+    return NextResponse.json({ message: 'Razorpay is not configured on the server. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env.local' }, { status: 500 });
   }
 
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 410 });
+      return NextResponse.json({ message: 'Authentication required. Please log in again.' }, { status: 401 });
     }
 
     if (!adminAuth) {
-      return NextResponse.json({ message: 'Auth service not available' }, { status: 500 });
+      return NextResponse.json({ message: 'Firebase Admin SDK not initialized correctly.' }, { status: 500 });
     }
 
     const decodedToken = await adminAuth.verifyIdToken(idToken);
@@ -32,8 +32,10 @@ export async function POST(request: NextRequest) {
     const { planType } = await request.json();
 
     const planId = RAZORPAY_PLAN_MAP[planType];
-    if (!planId) {
-      return NextResponse.json({ message: `Invalid plan type: ${planType}` }, { status: 400 });
+    if (!planId || planId === 'REQUIRED_FROM_DASHBOARD') {
+      return NextResponse.json({ 
+        message: `Plan ID for ${planType} is missing. Please create this plan in your Razorpay Dashboard and add it to your .env.local file.` 
+      }, { status: 400 });
     }
 
     // Create Razorpay Subscription
@@ -52,7 +54,9 @@ export async function POST(request: NextRequest) {
       keyId: process.env.RAZORPAY_KEY_ID 
     });
   } catch (error: any) {
-    console.error('Error creating subscription:', error);
-    return NextResponse.json({ message: error.message || 'Internal Server Error' }, { status: 500 });
+    console.error('Razorpay Subscription Error:', error);
+    return NextResponse.json({ 
+      message: error.description || error.message || 'An unexpected error occurred while contacting the payment gateway.' 
+    }, { status: 500 });
   }
 }
