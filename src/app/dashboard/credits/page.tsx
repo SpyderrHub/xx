@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Coins, 
@@ -13,7 +14,10 @@ import {
   Loader2,
   MessageSquare,
   Sparkles,
-  Music
+  Music,
+  ShoppingCart,
+  CheckCircle2,
+  Plus
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +28,8 @@ import { doc } from 'firebase/firestore';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import Script from 'next/script';
+import { toast } from '@/hooks/use-toast';
 
 const planLimits: Record<string, number> = {
   free: 3000,
@@ -40,8 +46,15 @@ const planNames: Record<string, string> = {
   pro: 'Premium Pro',
 };
 
+const topupPlans = [
+  { id: 'topup_25k', name: 'Lite Pack', characters: 25000, price: 49, desc: 'Great for small projects' },
+  { id: 'topup_50k', name: 'Power Pack', characters: 50000, price: 99, desc: 'Our most popular pack', popular: true },
+  { id: 'topup_100k', name: 'Studio Pack', characters: 100000, price: 149, desc: 'Best value for high volume' },
+];
+
 export default function CreditsPage() {
   const { user, firestore } = useFirebase();
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -49,6 +62,81 @@ export default function CreditsPage() {
   }, [user, firestore]);
 
   const { data: userData, isLoading } = useDoc(userDocRef);
+
+  const handleTopup = async (plan: typeof topupPlans[0]) => {
+    if (!user) return;
+    setIsProcessing(plan.id);
+
+    try {
+      const idToken = await user.getIdToken();
+      
+      // 1. Create Razorpay Order
+      const orderRes = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ 
+          planName: plan.id, 
+          billingCycle: 'one-time' 
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData.message);
+
+      // 2. Open Razorpay Checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'QuantisAI',
+        description: `Top-up: ${plan.characters.toLocaleString()} Characters`,
+        order_id: orderData.orderId,
+        handler: async (response: any) => {
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify-order', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                topupType: plan.id
+              }),
+            });
+
+            if (verifyRes.ok) {
+              toast({ title: 'Top-up Successful', description: `${plan.characters.toLocaleString()} characters added to your balance.` });
+            } else {
+              const err = await verifyRes.json();
+              throw new Error(err.message);
+            }
+          } catch (err: any) {
+            toast({ title: 'Verification Failed', description: err.message, variant: 'destructive' });
+          }
+        },
+        prefill: {
+          name: user.displayName || '',
+          email: user.email || '',
+        },
+        theme: {
+          color: '#A855F7',
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsProcessing(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -66,13 +154,15 @@ export default function CreditsPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-32">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      
       {/* Page Header */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2">
         <div className="space-y-1">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Resource Management</p>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Credits & Usage</h1>
           <p className="text-muted-foreground text-sm max-w-md">
-            Monitor your character balance and generation resources in real-time.
+            Monitor your character balance and top up whenever you need extra volume.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -80,7 +170,7 @@ export default function CreditsPage() {
                 <Link href="/dashboard/subscription">View Billing</Link>
             </Button>
             <Button className="rounded-xl bg-primary hover:bg-primary/90 h-12 px-6 font-black shadow-lg shadow-primary/20 btn-glow" asChild>
-                <Link href="/dashboard/subscription#pricing-plans">Get More Credits</Link>
+                <Link href="#topup-section">Instant Top-up</Link>
             </Button>
         </div>
       </header>
@@ -178,7 +268,7 @@ export default function CreditsPage() {
                     <span className="text-xs font-black uppercase tracking-widest text-white">How it works</span>
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    1 character of input text equals 1 credit. Spaces and punctuation are counted. Neural generations (Music & Designer) have a fixed cost per use as per your tier.
+                    1 character of input text equals 1 credit. Credits from top-ups do not expire and are used after your monthly plan balance is exhausted.
                 </p>
                 <Button variant="link" className="p-0 h-auto text-primary text-[10px] font-black uppercase tracking-widest" asChild>
                     <Link href="/docs/billing">Detailed Calculation Guide →</Link>
@@ -187,8 +277,69 @@ export default function CreditsPage() {
         </div>
       </div>
 
+      {/* Top-up Plans Section */}
+      <section id="topup-section" className="space-y-8 pt-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
+          <div>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <ShoppingCart className="h-6 w-6 text-primary" />
+              Instant Character Top-ups
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">Need more volume? Add credits to your account instantly.</p>
+          </div>
+          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest">
+            Credits Never Expire
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {topupPlans.map((pack) => (
+            <motion.div key={pack.id} whileHover={{ y: -5 }} className="relative">
+              {pack.popular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-primary text-white text-[10px] font-black uppercase px-4 py-1 rounded-full shadow-lg shadow-primary/20 ring-4 ring-[#0B0B0F]">
+                  Most Popular
+                </div>
+              )}
+              <Card className={cn(
+                "bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden transition-all",
+                pack.popular ? "border-primary/40 bg-primary/[0.03]" : "hover:border-white/20"
+              )}>
+                <CardContent className="p-8 text-center space-y-6">
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">{pack.name}</h3>
+                    <div className="flex items-center justify-center gap-1.5 text-white">
+                      <Plus className="h-4 w-4 text-primary" />
+                      <span className="text-4xl font-black">{pack.characters.toLocaleString()}</span>
+                    </div>
+                    <p className="text-[10px] text-primary/60 font-bold uppercase tracking-widest">Characters</p>
+                  </div>
+
+                  <div className="py-4 border-y border-white/5">
+                    <p className="text-sm text-muted-foreground">{pack.desc}</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="text-3xl font-black text-white">₹{pack.price}</div>
+                    <Button 
+                      onClick={() => handleTopup(pack)}
+                      disabled={!!isProcessing}
+                      className={cn(
+                        "w-full h-12 rounded-xl font-black text-sm transition-all",
+                        pack.popular ? "bg-primary hover:bg-primary/90 btn-glow" : "bg-white text-black hover:bg-white/90"
+                      )}
+                    >
+                      {isProcessing === pack.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buy Now"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* Feature Usage Stats */}
-      <section className="space-y-6 pt-6">
+      <section className="space-y-6 pt-10">
         <div className="flex items-center gap-2 px-2">
             <BarChart3 className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-bold text-white">Generation Breakdown</h2>
