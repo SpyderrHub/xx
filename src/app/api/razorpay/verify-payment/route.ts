@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!idToken) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 410 });
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     if (!adminAuth || !adminDb) {
