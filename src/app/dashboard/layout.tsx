@@ -17,6 +17,7 @@ import {
   Sparkles,
   Ear,
   Music,
+  Coins,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -191,6 +192,7 @@ const DashboardSidebar = () => {
   ], []);
 
   const footerNav = useMemo(() => [
+    { href: '/dashboard/credits', label: 'Credits', icon: Coins },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     { href: '#', label: 'API Docs', icon: Code2 },
   ], []);
@@ -271,11 +273,17 @@ const DashboardSidebar = () => {
             <SidebarMenuItem key={item.label}>
               <SidebarMenuButton
                 asChild
+                isActive={pathname === item.href}
                 tooltip={item.label}
-                className="rounded-xl h-10 px-3 hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                className={cn(
+                  "relative rounded-xl h-10 px-3 transition-all duration-200",
+                  pathname === item.href 
+                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
+                    : "hover:bg-white/5 text-white/70 hover:text-white"
+                )}
               >
                 <Link href={item.href}>
-                  <item.icon className="shrink-0" />
+                  <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
                 </Link>
               </SidebarMenuButton>
@@ -381,6 +389,7 @@ export default function DashboardLayout({
     if (pathname === '/dashboard/my-generations') return 'Generation History';
     if (pathname === '/dashboard/subscription') return 'Plan & Billing';
     if (pathname === '/dashboard/settings') return 'Account Settings';
+    if (pathname === '/dashboard/credits') return 'Credits & Usage';
     return 'Dashboard';
   };
 
