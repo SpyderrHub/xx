@@ -10,7 +10,10 @@ import {
   Info,
   ShieldCheck,
   BarChart3,
-  Loader2
+  Loader2,
+  MessageSquare,
+  Sparkles,
+  Music
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +23,7 @@ import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const planLimits: Record<string, number> = {
   free: 3000,
