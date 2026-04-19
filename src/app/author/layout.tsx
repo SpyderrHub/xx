@@ -66,7 +66,8 @@ const AuthorHeader = ({ title }: { title: string }) => {
         </Button>
       )}
       <div className="flex flex-1 items-center gap-4">
-        <h1 className="text-xl font-semibold">{title}</h1>
+        {isMobile && <Logo className="h-5" />}
+        <h1 className="text-xl font-semibold hidden sm:block">{title}</h1>
         <Badge variant="outline" className="border-primary/50 text-primary">Author Studio</Badge>
       </div>
       <div className="flex items-center gap-4">

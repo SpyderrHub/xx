@@ -102,7 +102,16 @@ const DashboardHeader = ({ title }: { title: string }) => {
           <Menu className="h-6 w-6" />
         </Button>
       )}
-      <h1 className="flex-1 text-xl font-semibold tracking-tight">{title}</h1>
+      
+      <div className="flex flex-1 items-center gap-4">
+        {isMobile && (
+          <Link href="/dashboard" className="mr-2">
+            <Logo className="h-5" />
+          </Link>
+        )}
+        {!isMobile && <h1 className="text-xl font-semibold tracking-tight">{title}</h1>}
+      </div>
+
       <div className="flex items-center gap-4">
         {!isUserLoading && user && (
           <div className="hidden flex-col items-end sm:flex">
@@ -113,7 +122,7 @@ const DashboardHeader = ({ title }: { title: string }) => {
           </div>
         )}
 
-        <Button asChild className="hidden bg-gradient-to-r from-primary to-indigo-600 font-bold text-white hover:opacity-90 sm:block rounded-xl shadow-lg shadow-primary/20">
+        <Button asChild className="hidden bg-gradient-to-r from-primary to-orange-600 font-bold text-white hover:opacity-90 sm:block rounded-xl shadow-lg shadow-primary/20">
           <Link href="/dashboard/subscription">Upgrade</Link>
         </Button>
 
@@ -225,7 +234,7 @@ const DashboardSidebar = () => {
                 className={cn(
                   "relative rounded-xl h-10 px-3 transition-all duration-200",
                   pathname === item.href 
-                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
+                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(255,102,0,0.15)] border border-primary/20" 
                     : "hover:bg-white/5 text-white/70 hover:text-white"
                 )}
               >
@@ -249,7 +258,7 @@ const DashboardSidebar = () => {
                 className={cn(
                   "relative rounded-xl h-10 px-3 transition-all duration-200",
                   pathname === item.href 
-                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
+                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(255,102,0,0.15)] border border-primary/20" 
                     : "hover:bg-white/5 text-white/70 hover:text-white"
                 )}
               >
@@ -278,7 +287,7 @@ const DashboardSidebar = () => {
                 className={cn(
                   "relative rounded-xl h-10 px-3 transition-all duration-200",
                   pathname === item.href 
-                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)] border border-primary/20" 
+                    ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(255,102,0,0.15)] border border-primary/20" 
                     : "hover:bg-white/5 text-white/70 hover:text-white"
                 )}
               >
@@ -297,7 +306,7 @@ const DashboardSidebar = () => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-indigo-600/20 border border-primary/20 p-4 shadow-xl"
+            className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-orange-600/20 border border-primary/20 p-4 shadow-xl"
           >
             <div className="flex items-center gap-2 mb-2">
               <Zap className="h-4 w-4 text-primary fill-primary animate-pulse" />
