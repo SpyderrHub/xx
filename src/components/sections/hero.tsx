@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
@@ -16,7 +15,7 @@ const ComparisonCard = () => (
     
     <div>
       <h3 className="text-xl font-bold text-white mb-1">Pricing Comparison</h3>
-      <p className="text-xs text-muted-foreground">Based on 1M Characters / Month</p>
+      <p className="text-xs text-muted-foreground">Based on 600K Characters / Month</p>
     </div>
 
     <div className="space-y-4">
@@ -25,7 +24,7 @@ const ComparisonCard = () => (
           <div className="h-8 w-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 font-bold text-xs">E</div>
           <span className="text-sm font-medium text-white/70">ElevenLabs</span>
         </div>
-        <span className="text-sm font-bold text-white/50">$330/mo</span>
+        <span className="text-sm font-bold text-white/50">₹9,179/mo</span>
       </div>
       
       <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
@@ -33,33 +32,33 @@ const ComparisonCard = () => (
           <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-xs">A</div>
           <span className="text-sm font-medium text-white/70">Azure TTS</span>
         </div>
-        <span className="text-sm font-bold text-white/50">$160/mo</span>
+        <span className="text-sm font-bold text-white/50">₹4,200/mo</span>
       </div>
 
       <motion.div 
         initial={{ scale: 0.95 }}
         animate={{ scale: 1 }}
-        className="flex items-center justify-between p-5 rounded-2xl bg-primary/10 border-2 border-primary/50 shadow-[0_0_30px_rgba(168,85,247,0.2)]"
+        className="flex items-center justify-between p-5 rounded-2xl bg-primary/10 border-2 border-primary/50 shadow-[0_0_30px_rgba(255,102,0,0.2)]"
       >
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
             <Zap className="h-5 w-5 fill-current" />
           </div>
           <div>
-            <span className="text-base font-black text-white">QuantisAI</span>
-            <p className="text-[10px] text-primary font-bold uppercase">Save 96%</p>
+            <span className="text-base font-black text-white">QuantosAI</span>
+            <p className="text-[10px] text-primary font-bold uppercase">Save 92%</p>
           </div>
         </div>
         <div className="text-right">
-          <span className="text-xl font-black text-white">$12</span>
-          <p className="text-[10px] text-muted-foreground">Pay-as-you-go</p>
+          <span className="text-xl font-black text-white">₹799</span>
+          <p className="text-[10px] text-muted-foreground">Estimated</p>
         </div>
       </motion.div>
     </div>
 
     <div className="pt-2">
       <ul className="space-y-2">
-        {['Unlimited Clones', 'Batch Processing', 'API Access'].map((feat) => (
+        {['Unlimited Clones', 'Batch Processing', 'No Watermarks'].map((feat) => (
           <li key={feat} className="flex items-center gap-2 text-xs text-muted-foreground">
             <Check className="h-3.5 w-3.5 text-primary" />
             {feat}
@@ -88,7 +87,7 @@ const HeroSection = () => {
             
             <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-8xl leading-[1.05] mb-8">
               Stop Paying <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-indigo-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-amber-400">
                 Enterprise Prices.
               </span>
               <br />

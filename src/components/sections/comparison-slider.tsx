@@ -7,10 +7,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Zap } from 'lucide-react';
 
 export default function ComparisonSlider() {
-  const [minutes, setMinutes] = useState(100000); // Minutes per month
+  const [chars, setChars] = useState(600000); // Characters per month
 
-  const elevenLabsPrice = (minutes / 1000) * 0.30;
-  const quantisaiPrice = (minutes / 1000) * 0.012;
+  // Based on user provided rates: 
+  // ElevenLabs: ~₹9,179 for 600k chars (₹15.3 per 1k)
+  // QuantisAI: ₹999 for 1M chars (₹1.0 per 1k)
+  
+  const elevenLabsPrice = (chars / 1000) * 15.3;
+  const quantisaiPrice = (chars / 1000) * 1.0;
   const savings = ((elevenLabsPrice - quantisaiPrice) / elevenLabsPrice) * 100;
 
   return (
@@ -28,20 +32,20 @@ export default function ComparisonSlider() {
         <div className="max-w-3xl mx-auto space-y-12">
           <div className="space-y-6">
             <div className="flex justify-between items-end">
-              <span className="text-sm font-black uppercase tracking-widest text-muted-foreground">Usage Volume</span>
-              <span className="text-3xl font-black text-white">{(minutes / 60 / 1000).toFixed(1)}M <span className="text-lg text-muted-foreground">Hours / Month</span></span>
+              <span className="text-sm font-black uppercase tracking-widest text-muted-foreground">Monthly Character Volume</span>
+              <span className="text-3xl font-black text-white">{(chars / 1000).toLocaleString()}K <span className="text-lg text-muted-foreground">Chars / Month</span></span>
             </div>
             <Slider 
-              value={[minutes]}
-              onValueChange={(v) => setMinutes(v[0])}
+              value={[chars]}
+              onValueChange={(v) => setChars(v[0])}
               min={10000}
-              max={10000000}
+              max={1000000}
               step={10000}
               className="h-12"
             />
             <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              <span>10K Minutes</span>
-              <span>10M Minutes</span>
+              <span>10K Characters</span>
+              <span>1M Characters</span>
             </div>
           </div>
 
@@ -49,8 +53,8 @@ export default function ComparisonSlider() {
             <Card className="glass-card border-white/5 bg-white/[0.02]">
               <CardContent className="p-8 space-y-4">
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Traditional Platforms</span>
-                <div className="text-4xl font-black text-white/40">${Math.round(elevenLabsPrice).toLocaleString()}</div>
-                <p className="text-sm text-muted-foreground italic">"Volume pricing" that isn't built for scale.</p>
+                <div className="text-4xl font-black text-white/40">₹{Math.round(elevenLabsPrice).toLocaleString()}</div>
+                <p className="text-sm text-muted-foreground italic">Legacy volume pricing that isn't built for scale.</p>
               </CardContent>
             </Card>
 
@@ -61,10 +65,10 @@ export default function ComparisonSlider() {
               <CardContent className="p-8 space-y-4">
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary fill-current" />
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantisAI</span>
+                  <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantosAI</span>
                 </div>
-                <div className="text-4xl font-black text-white">${Math.round(quantisaiPrice).toLocaleString()}</div>
-                <p className="text-sm text-white/70">Pure batch pricing. No markup. No enterprise tax.</p>
+                <div className="text-4xl font-black text-white">₹{Math.round(quantisaiPrice).toLocaleString()}</div>
+                <p className="text-sm text-white/70">Pure synthesis. No markup. No enterprise tax.</p>
               </CardContent>
             </Card>
           </div>
