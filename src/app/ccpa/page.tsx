@@ -144,7 +144,13 @@ export default function CCPAPage() {
                 </Section>
               </div>
 
-              <div className="pt-12 border-t border-white/5 flex flex-col items-center lg:items-start gap-8">
+              <div className="pt-12 border-t border-white/5 space-y-8">
+                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                  <h3 className="text-white font-bold mb-2">Contact Us</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    California residents may exercise their privacy rights or ask questions about our CCPA compliance by emailing us at <a href="mailto:support@quantisai.com" className="text-primary hover:underline font-bold">support@quantisai.com</a>.
+                  </p>
+                </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
                   © {new Date().getFullYear()} QuantosAI Legal Systems
                 </p>
