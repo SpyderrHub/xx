@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
@@ -33,10 +32,10 @@ const FinalCTASection = () => {
                 <Link href="/sign-up">Get Started For Free</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-16 rounded-2xl px-12 text-xl font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10">
-                <Link href="/docs">
+                <a href="https://docs.quantisai.org/" target="_blank" rel="noopener noreferrer" className="flex items-center">
                   Documentation
                   <ArrowRight className="ml-2 h-6 w-6" />
-                </Link>
+                </a>
               </Button>
             </div>
           </div>

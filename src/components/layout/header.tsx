@@ -13,7 +13,7 @@ const navLinks = [
   { name: 'Product', href: '/#features' },
   { name: 'Voices', href: '/dashboard/voice-library' },
   { name: 'Pricing', href: '/#pricing' },
-  { name: 'Docs', href: '/docs' },
+  { name: 'Docs', href: 'https://docs.quantisai.org/' },
 ];
 
 export default function Header() {
@@ -49,6 +49,8 @@ export default function Header() {
               <Link 
                 key={link.name} 
                 href={link.href}
+                target={link.name === 'Docs' ? "_blank" : undefined}
+                rel={link.name === 'Docs' ? "noopener noreferrer" : undefined}
                 className="text-sm font-bold text-white/60 hover:text-white transition-colors relative group"
               >
                 {link.name}
@@ -102,6 +104,8 @@ export default function Header() {
                 <Link 
                   key={link.name} 
                   href={link.href}
+                  target={link.name === 'Docs' ? "_blank" : undefined}
+                  rel={link.name === 'Docs' ? "noopener noreferrer" : undefined}
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center justify-between text-lg font-bold text-white/80 hover:text-white transition-colors py-2"
                 >

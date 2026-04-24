@@ -42,7 +42,7 @@ const Footer = () => {
             <h4 className="text-white font-bold mb-6">Developers</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
               <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
-              <li><Link href="/docs" className="hover:text-primary transition-colors">Documentation</Link></li>
+              <li><a href="https://docs.quantisai.org/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Documentation</a></li>
               <li><Link href="/status" className="hover:text-primary transition-colors">System Status</Link></li>
             </ul>
           </div>
