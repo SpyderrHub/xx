@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -9,6 +10,7 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, limit } from 'firebase/firestore';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { WeavyPattern } from '@/components/author/avatar-upload';
 
 const COLORS = ['bg-primary', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500'];
 
@@ -93,6 +95,9 @@ const VoiceQualitySection = () => {
             ) : voices && voices.length > 0 ? (
               voices.map((voice, idx) => {
                 const colorClass = COLORS[idx % COLORS.length];
+                const isGradient = voice.avatarUrl?.startsWith('weavy:');
+                const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
+                
                 return (
                   <motion.div
                     key={voice.id}
@@ -107,7 +112,9 @@ const VoiceQualitySection = () => {
                           className="relative h-10 w-10 sm:h-14 sm:w-14 rounded-full overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center shrink-0 cursor-pointer group/avatar shadow-lg transition-transform active:scale-95"
                           onClick={() => togglePlay(voice)}
                         >
-                          {voice.avatarUrl ? (
+                          {isGradient ? (
+                            <WeavyPattern presetIndex={gradientIndex} />
+                          ) : voice.avatarUrl ? (
                             <Image 
                               src={voice.avatarUrl} 
                               alt={voice.voiceName} 

@@ -12,6 +12,7 @@ import { Loader2, Zap, Play, Pause, Download, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { WeavyPattern } from '@/components/author/avatar-upload';
 
 const MAX_CHARS = 200;
 
@@ -151,40 +152,47 @@ export default function TtsDemoSection() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                    {voices?.map((voice) => (
-                      <button
-                        key={voice.id}
-                        onClick={() => setSelectedVoiceId(voice.id)}
-                        className={cn(
-                          "h-20 flex items-center gap-3 sm:gap-4 px-3 sm:px-4 rounded-2xl transition-all border text-left group",
-                          selectedVoiceId === voice.id 
-                            ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
-                        )}
-                      >
-                        <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden border border-white/10 shrink-0">
-                          {voice.avatarUrl ? (
-                            <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
-                          ) : (
-                            <div className="h-full w-full bg-white/10 flex items-center justify-center">
-                              <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
-                            </div>
+                    {voices?.map((voice) => {
+                      const isGradient = voice.avatarUrl?.startsWith('weavy:');
+                      const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
+                      
+                      return (
+                        <button
+                          key={voice.id}
+                          onClick={() => setSelectedVoiceId(voice.id)}
+                          className={cn(
+                            "h-20 flex items-center gap-3 sm:gap-4 px-3 sm:px-4 rounded-2xl transition-all border text-left group",
+                            selectedVoiceId === voice.id 
+                              ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(168,85,247,0.1)]" 
+                              : "bg-white/5 border-white/5 hover:border-white/20"
                           )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className={cn(
-                            "font-bold text-xs sm:text-sm truncate",
-                            selectedVoiceId === voice.id ? "text-primary" : "text-white"
-                          )}>
-                            {voice.voiceName}
-                          </h4>
-                          <p className="text-[8px] sm:text-[10px] text-muted-foreground truncate uppercase tracking-wider">{voice.language}</p>
-                        </div>
-                        {selectedVoiceId === voice.id && (
-                          <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shrink-0" />
-                        )}
-                      </button>
-                    ))}
+                        >
+                          <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden border border-white/10 shrink-0 flex items-center justify-center bg-white/5">
+                            {isGradient ? (
+                              <WeavyPattern presetIndex={gradientIndex} />
+                            ) : voice.avatarUrl ? (
+                              <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+                            ) : (
+                              <div className="h-full w-full bg-white/10 flex items-center justify-center">
+                                <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className={cn(
+                              "font-bold text-xs sm:text-sm truncate",
+                              selectedVoiceId === voice.id ? "text-primary" : "text-white"
+                            )}>
+                              {voice.voiceName}
+                            </h4>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground truncate uppercase tracking-wider">{voice.language}</p>
+                          </div>
+                          {selectedVoiceId === voice.id && (
+                            <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

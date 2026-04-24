@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -22,6 +23,7 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { motion } from 'framer-motion';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
+import { WeavyPattern } from '@/components/author/avatar-upload';
 
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
@@ -154,54 +156,65 @@ export default function DashboardPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary/50" />
               </div>
             ) : latestVoices && latestVoices.length > 0 ? (
-              latestVoices.map((voice, i) => (
-                <motion.div
-                  key={voice.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.05 }}
-                >
-                  <Link href="/dashboard/voice-library">
-                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer group relative shadow-sm">
-                      <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-primary/30 transition-all">
-                        <AvatarImage src={voice.avatarUrl} className="object-cover" />
-                        <AvatarFallback className="bg-white/5 text-xs">{voice.voiceName[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "font-bold transition-colors",
-                            playingVoiceId === voice.id ? "text-primary" : "text-white/90"
-                          )}>
-                            {voice.voiceName}
-                          </span>
-                          {voice.style && (
-                            <span className="text-[9px] uppercase font-black tracking-widest text-white/30">{voice.style}</span>
+              latestVoices.map((voice, i) => {
+                const isGradient = voice.avatarUrl?.startsWith('weavy:');
+                const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
+                
+                return (
+                  <motion.div
+                    key={voice.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + i * 0.05 }}
+                  >
+                    <Link href="/dashboard/voice-library">
+                      <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer group relative shadow-sm">
+                        <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-primary/30 transition-all overflow-hidden bg-white/5">
+                          {isGradient ? (
+                            <WeavyPattern presetIndex={gradientIndex} />
+                          ) : (
+                            <>
+                              <AvatarImage src={voice.avatarUrl} className="object-cover" />
+                              <AvatarFallback className="bg-white/5 text-xs">{voice.voiceName[0]}</AvatarFallback>
+                            </>
                           )}
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              "font-bold transition-colors",
+                              playingVoiceId === voice.id ? "text-primary" : "text-white/90"
+                            )}>
+                              {voice.voiceName}
+                            </span>
+                            {voice.style && (
+                              <span className="text-[9px] uppercase font-black tracking-widest text-white/30">{voice.style}</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-white/40 truncate">{voice.description || voice.language}</p>
                         </div>
-                        <p className="text-xs text-white/40 truncate">{voice.description || voice.language}</p>
+                        <Button 
+                          variant="secondary" 
+                          size="icon" 
+                          onClick={(e) => togglePlay(e, voice)}
+                          className={cn(
+                            "h-10 w-10 rounded-full transition-all duration-300 relative z-10",
+                            playingVoiceId === voice.id 
+                              ? "bg-primary text-white scale-110 shadow-lg shadow-primary/20" 
+                              : "bg-white/10 text-white/60 hover:text-primary hover:bg-white/20"
+                          )}
+                        >
+                          {playingVoiceId === voice.id ? (
+                            <Pause className="h-5 w-5 fill-current" />
+                          ) : (
+                            <Play className="h-5 w-5 fill-current ml-0.5" />
+                          )}
+                        </Button>
                       </div>
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
-                        onClick={(e) => togglePlay(e, voice)}
-                        className={cn(
-                          "h-10 w-10 rounded-full transition-all duration-300 relative z-10",
-                          playingVoiceId === voice.id 
-                            ? "bg-primary text-white scale-110 shadow-lg shadow-primary/20" 
-                            : "bg-white/10 text-white/60 hover:text-primary hover:bg-white/20"
-                        )}
-                      >
-                        {playingVoiceId === voice.id ? (
-                          <Pause className="h-5 w-5 fill-current" />
-                        ) : (
-                          <Play className="h-5 w-5 fill-current ml-0.5" />
-                        )}
-                      </Button>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))
+                    </Link>
+                  </motion.div>
+                );
+              })
             ) : (
               <div className="p-8 text-center rounded-3xl bg-white/5 border border-dashed border-white/10">
                 <p className="text-sm text-white/20 italic">No voices found in the library.</p>
