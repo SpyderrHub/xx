@@ -103,7 +103,7 @@ const HeroSection = () => {
                 <Link href="/sign-up">Get Started Free</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-16 rounded-2xl px-10 text-lg font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10">
-                <Link href="#voice-samples">
+                <Link href="/#voice-samples">
                   <Play className="mr-2 h-5 w-5 fill-current" />
                   Listen Demo
                 </Link>
