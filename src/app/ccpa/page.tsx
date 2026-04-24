@@ -7,13 +7,15 @@ import { Button } from '@/components/ui/button';
 import Footer from '@/components/layout/footer';
 import { 
   ChevronLeft, 
-  ShieldCheck, 
-  Lock, 
-  Eye, 
+  FileLock, 
   Clock, 
-  UserCheck, 
+  Lock, 
   List,
-  Database
+  UserCheck,
+  Search,
+  Trash2,
+  Scale,
+  Hand
 } from 'lucide-react';
 
 const Section = ({ id, title, icon: Icon, children }: { id: string; title: string; icon: any; children: React.ReactNode }) => (
@@ -31,20 +33,21 @@ const Section = ({ id, title, icon: Icon, children }: { id: string; title: strin
 );
 
 const tocItems = [
-  { id: 'introduction', title: '1. Introduction', icon: Eye },
-  { id: 'collection', title: '2. Information We Collect', icon: Database },
-  { id: 'usage', title: '3. How We Use Data', icon: UserCheck },
-  { id: 'security', title: '4. Data Security', icon: Lock },
-  { id: 'cookies', title: '5. Cookies Policy', icon: ShieldCheck },
+  { id: 'introduction', title: '1. Introduction', icon: Scale },
+  { id: 'right-to-know', title: '2. Right to Know', icon: Search },
+  { id: 'right-to-delete', title: '3. Right to Delete', icon: Trash2 },
+  { id: 'opt-out', title: '4. Right to Opt-Out', icon: Hand },
+  { id: 'non-discrimination', title: '5. Non-Discrimination', icon: UserCheck },
+  { id: 'exercise', title: '6. Exercising Rights', icon: FileLock },
 ];
 
-export default function PrivacyPage() {
+export default function CCPAPage() {
   return (
     <div className="min-h-screen bg-[#0B0B0F] text-white selection:bg-primary/30">
       {/* Background Neural Glows */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full" />
       </div>
 
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5 py-4">
@@ -53,9 +56,9 @@ export default function PrivacyPage() {
             <Logo className="h-7 transition-transform group-hover:scale-105" />
           </Link>
           <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-white">
-            <Link href="/dashboard">
+            <Link href="/privacy">
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Studio
+              Back to Privacy
             </Link>
           </Button>
         </div>
@@ -72,11 +75,11 @@ export default function PrivacyPage() {
             >
               <header className="space-y-6 text-center lg:text-left">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                  <ShieldCheck className="h-3.5 w-3.5 fill-current" />
-                  <span>Privacy Shield</span>
+                  <FileLock className="h-3.5 w-3.5 fill-current" />
+                  <span>California Consumer Privacy Act</span>
                 </div>
                 <h1 className="text-4xl lg:text-6xl font-black tracking-tight leading-tight">
-                  Privacy <span className="text-primary">Policy</span>
+                  CCPA <span className="text-primary">Notice</span>
                 </h1>
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground font-bold uppercase tracking-widest">
                   <div className="flex items-center gap-2">
@@ -84,74 +87,86 @@ export default function PrivacyPage() {
                     Last Updated: March 2024
                   </div>
                   <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4 text-primary" />
-                    Secure & Verified
+                    <Scale className="h-4 w-4 text-primary" />
+                    State Compliance
                   </div>
                 </div>
               </header>
 
               <div className="prose prose-invert max-w-none space-y-16">
-                <Section id="introduction" title="1. Introduction" icon={Eye}>
+                <Section id="introduction" title="1. Introduction" icon={Scale}>
                   <p>
-                    At QuantosAI, we value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our AI voice synthesis platform.
+                    This CCPA Notice for California Residents supplements the information contained in our Privacy Policy and applies solely to all visitors, users, and others who reside in the State of California.
                   </p>
                   <p>
-                    By using our services, you consent to the data practices described in this policy. We designed our platform to ensure that your generated audio content remains your property and your personal details are encrypted.
+                    The California Consumer Privacy Act of 2018 (CCPA) provides California residents with specific rights regarding their personal information. This section describes those rights and explains how to exercise them.
                   </p>
                 </Section>
 
-                <Section id="collection" title="2. Information We Collect" icon={Database}>
+                <Section id="right-to-know" title="2. Right to Know" icon={Search}>
                   <p>
-                    We collect information that helps us provide a better experience and maintain the security of our platform:
+                    You have the right to request that QuantosAI disclose certain information to you about our collection and use of your personal information over the past 12 months:
                   </p>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li><strong>Account Data:</strong> Email address, name, and profile settings when you register.</li>
-                    <li><strong>Usage Data:</strong> Number of characters synthesized, voice IDs used, and generation timestamps.</li>
-                    <li><strong>Payment Info:</strong> Transaction IDs and billing status (processed securely via Razorpay).</li>
-                    <li><strong>Content Data:</strong> The text you input for synthesis and the resulting audio files.</li>
+                    <li>The categories of personal information we collected about you.</li>
+                    <li>The categories of sources for the personal information we collected about you.</li>
+                    <li>Our business or commercial purpose for collecting that personal information.</li>
+                    <li>The specific pieces of personal information we collected about you.</li>
                   </ul>
                 </Section>
 
-                <Section id="usage" title="3. How We Use Data" icon={UserCheck}>
+                <Section id="right-to-delete" title="3. Right to Delete" icon={Trash2}>
                   <p>
-                    Your data is used primarily to facilitate the voice synthesis process and manage your subscription:
+                    You have the right to request that QuantosAI delete any of your personal information that we collected from you and retained, subject to certain exceptions.
+                  </p>
+                  <p>
+                    Once we receive and confirm your verifiable consumer request, we will delete (and direct our service providers to delete) your personal information from our records, unless an exception applies (such as completing a transaction or complying with legal obligations).
+                  </p>
+                </Section>
+
+                <Section id="opt-out" title="4. Right to Opt-Out" icon={Hand}>
+                  <p>
+                    QuantosAI does not "sell" personal information in the traditional sense. However, like many online services, we may use cookies or advertising IDs to provide you with personalized experiences.
+                  </p>
+                  <p>
+                    You have the right to opt-out of the "sale" or "sharing" of your personal information for cross-context behavioral advertising. You can exercise this right through your browser settings or by contacting our support team.
+                  </p>
+                </Section>
+
+                <Section id="non-discrimination" title="5. Non-Discrimination" icon={UserCheck}>
+                  <p>
+                    We will not discriminate against you for exercising any of your CCPA rights. Unless permitted by the CCPA, we will not:
                   </p>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>To provide and maintain the QuantosAI service.</li>
-                    <li>To notify you about changes to our service or your account balance.</li>
-                    <li>To provide customer support and troubleshoot technical issues.</li>
-                    <li>To detect and prevent fraudulent usage.</li>
+                    <li>Deny you goods or services.</li>
+                    <li>Charge you different prices or rates for goods or services.</li>
+                    <li>Provide you a different level or quality of goods or services.</li>
                   </ul>
                 </Section>
 
-                <Section id="security" title="4. Data Security" icon={Lock}>
+                <Section id="exercise" title="6. Exercising Your Rights" icon={FileLock}>
                   <p>
-                    The security of your data is a top priority. QuantosAI uses industry-standard encryption protocols (SSL/TLS) for all data in transit and at rest.
+                    To exercise the access, data portability, and deletion rights described above, please submit a verifiable consumer request to us by:
                   </p>
-                  <p>
-                    Access to your account and generated content is strictly restricted to you through Firebase Authentication. We regularly audit our systems to ensure compliance with modern security standards.
-                  </p>
-                </Section>
-
-                <Section id="cookies" title="5. Cookies Policy" icon={ShieldCheck}>
-                  <p>
-                    We use cookies to keep you logged in and remember your studio preferences (like selected voices and stability settings).
-                  </p>
-                  <p>
-                    You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some parts of our Service.
+                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                    <p className="font-bold text-white mb-2">Email: privacy@quantosai.com</p>
+                    <p className="text-sm">Subject Line: "CCPA Rights Request"</p>
+                  </div>
+                  <p className="text-sm italic mt-4">
+                    Only you, or someone legally authorized to act on your behalf, may make a verifiable consumer request related to your personal information.
                   </p>
                 </Section>
               </div>
 
               <div className="pt-12 border-t border-white/5 flex flex-col items-center lg:items-start gap-8">
                 <div className="text-center lg:text-left">
-                  <p className="text-muted-foreground text-sm mb-4">Have questions about your data? Our team is here to help.</p>
+                  <p className="text-muted-foreground text-sm mb-4">Need help with your CCPA request?</p>
                   <Button asChild className="bg-primary hover:bg-primary/90 rounded-xl px-8 font-black shadow-lg shadow-primary/20 btn-glow">
-                    <Link href="mailto:privacy@quantosai.com" className="text-white">Contact Privacy Team</Link>
+                    <Link href="mailto:privacy@quantosai.com" className="text-white">Email Legal Team</Link>
                   </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
-                  © {new Date().getFullYear()} QuantosAI Privacy Systems
+                  © {new Date().getFullYear()} QuantosAI Legal Systems
                 </p>
               </div>
             </motion.div>
@@ -163,7 +178,7 @@ export default function PrivacyPage() {
               <div className="p-8 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-md">
                 <div className="flex items-center gap-3 mb-6">
                   <List className="h-5 w-5 text-primary" />
-                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Table of Contents</h3>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Notice Sections</h3>
                 </div>
                 <nav className="space-y-1">
                   {tocItems.map((item) => (
@@ -180,13 +195,13 @@ export default function PrivacyPage() {
               </div>
 
               <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/10">
-                <ShieldCheck className="h-8 w-8 text-primary mb-4" />
-                <h4 className="text-lg font-bold text-white mb-2">CCPA Compliance</h4>
+                <Lock className="h-8 w-8 text-primary mb-4" />
+                <h4 className="text-lg font-bold text-white mb-2">Privacy Policy</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  California residents have additional rights regarding their personal data under the CCPA.
+                  For information on how we handle data for non-California residents, please see our general policy.
                 </p>
                 <Button variant="link" asChild className="p-0 h-auto text-primary text-[10px] font-black uppercase tracking-widest mt-4">
-                  <Link href="/ccpa">View CCPA Notice →</Link>
+                  <Link href="/privacy">Read Privacy Policy →</Link>
                 </Button>
               </div>
             </div>

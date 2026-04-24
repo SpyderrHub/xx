@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { Github, Linkedin, Twitter, Mail, MapPin, Phone } from 'lucide-react';
 import Logo from '@/components/logo';
@@ -50,9 +49,10 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-bold mb-6">Support</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> support@quantisai.com</li>
+              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> support@quantosai.com</li>
               <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +1 (555) 123-4567</li>
               <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/ccpa" className="hover:text-primary transition-colors">CCPA Notice</Link></li>
               <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
@@ -60,10 +60,11 @@ const Footer = () => {
         
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} QuantisAI. All rights reserved.
+            © {new Date().getFullYear()} QuantosAI. All rights reserved.
           </p>
           <div className="flex gap-8 text-xs text-muted-foreground font-bold uppercase tracking-widest">
              <Link href="/privacy" className="hover:text-white">Privacy</Link>
+             <Link href="/ccpa" className="hover:text-white">CCPA</Link>
              <Link href="/terms" className="hover:text-white">Terms</Link>
              <Link href="/cookies" className="hover:text-white">Cookies</Link>
           </div>
