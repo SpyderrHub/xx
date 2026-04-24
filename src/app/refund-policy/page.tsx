@@ -90,7 +90,7 @@ export default function RefundPolicyPage() {
               <div className="prose prose-invert max-w-none space-y-16">
                 <Section id="cancellation" title="1. Cancellation Policy" icon={XCircle}>
                   <p>
-                    You can cancel your QuantosAI subscription at any time through your Dashboard settings.
+                    You can cancel your QuantisAI subscription at any time through your Dashboard settings.
                   </p>
                   <div className="bg-primary/5 border border-primary/20 p-6 rounded-2xl">
                     <p className="font-bold text-white mb-2">Subscription Cancellations:</p>
@@ -155,7 +155,7 @@ export default function RefundPolicyPage() {
                   </p>
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
-                  © {new Date().getFullYear()} QuantosAI Billing Systems
+                  © {new Date().getFullYear()} QuantisAI Billing Systems
                 </p>
               </div>
             </motion.div>

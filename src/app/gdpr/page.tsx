@@ -90,7 +90,7 @@ export default function GDPRPage() {
               <div className="prose prose-invert max-w-none space-y-16">
                 <Section id="overview" title="1. GDPR Overview" icon={Scale}>
                   <p>
-                    QuantosAI is committed to protecting the privacy and security of our users' personal data. This GDPR Policy explains how we comply with the General Data Protection Regulation (GDPR) for our users in the European Economic Area (EEA).
+                    QuantisAI is committed to protecting the privacy and security of our users' personal data. This GDPR Policy explains how we comply with the General Data Protection Regulation (GDPR) for our users in the European Economic Area (EEA).
                   </p>
                   <p>
                     We act as the "Data Controller" for your account information and the "Data Processor" for the content you upload for voice synthesis.
@@ -144,7 +144,7 @@ export default function GDPRPage() {
                   </p>
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
-                  © {new Date().getFullYear()} QuantosAI Privacy Systems
+                  © {new Date().getFullYear()} QuantisAI Privacy Systems
                 </p>
               </div>
             </motion.div>

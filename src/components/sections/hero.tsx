@@ -45,7 +45,7 @@ const ComparisonCard = () => (
             <Zap className="h-5 w-5 fill-current" />
           </div>
           <div>
-            <span className="text-base font-black text-white">QuantosAI</span>
+            <span className="text-base font-black text-white">QuantisAI</span>
             <p className="text-[10px] text-primary font-bold uppercase">Save 92%</p>
           </div>
         </div>

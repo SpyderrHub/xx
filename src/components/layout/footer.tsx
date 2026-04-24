@@ -61,7 +61,7 @@ const Footer = () => {
         
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} QuantosAI. All rights reserved.
+            © {new Date().getFullYear()} QuantisAI. All rights reserved.
           </p>
           <div className="flex gap-8 text-xs text-muted-foreground font-bold uppercase tracking-widest">
              <Link href="/privacy" className="hover:text-white">Privacy</Link>

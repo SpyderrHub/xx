@@ -65,7 +65,7 @@ export default function ComparisonSlider() {
               <CardContent className="p-8 space-y-4">
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary fill-current" />
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantosAI</span>
+                  <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantisAI</span>
                 </div>
                 <div className="text-4xl font-black text-white">₹{Math.round(quantisaiPrice).toLocaleString()}</div>
                 <p className="text-sm text-white/70">Pure synthesis. No markup. No enterprise tax.</p>
