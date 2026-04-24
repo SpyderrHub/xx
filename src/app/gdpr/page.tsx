@@ -37,7 +37,6 @@ const tocItems = [
   { id: 'collection', title: '3. Data Processing', icon: Database },
   { id: 'security', title: '4. Security Measures', icon: Lock },
   { id: 'transfers', title: '5. Data Transfers', icon: Globe },
-  { id: 'contact', title: '6. Data Officer', icon: Fingerprint },
 ];
 
 export default function GDPRPage() {
@@ -134,16 +133,6 @@ export default function GDPRPage() {
                   <p>
                     For transfers out of the EEA, we use Standard Contractual Clauses (SCCs) approved by the European Commission to ensure your data remains protected.
                   </p>
-                </Section>
-
-                <Section id="contact" title="6. Data Protection Officer" icon={Fingerprint}>
-                  <p>
-                    If you have questions about this policy or wish to exercise your rights, please contact our Data Protection Officer:
-                  </p>
-                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                    <p className="font-bold text-white mb-2">Email: dpo@quantosai.com</p>
-                    <p className="text-sm">Response time: Within 30 days as per GDPR requirements.</p>
-                  </div>
                 </Section>
               </div>
 

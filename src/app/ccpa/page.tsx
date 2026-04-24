@@ -38,7 +38,6 @@ const tocItems = [
   { id: 'right-to-delete', title: '3. Right to Delete', icon: Trash2 },
   { id: 'opt-out', title: '4. Right to Opt-Out', icon: Hand },
   { id: 'non-discrimination', title: '5. Non-Discrimination', icon: UserCheck },
-  { id: 'exercise', title: '6. Exercising Rights', icon: FileLock },
 ];
 
 export default function CCPAPage() {
@@ -142,19 +141,6 @@ export default function CCPAPage() {
                     <li>Charge you different prices or rates for goods or services.</li>
                     <li>Provide you a different level or quality of goods or services.</li>
                   </ul>
-                </Section>
-
-                <Section id="exercise" title="6. Exercising Your Rights" icon={FileLock}>
-                  <p>
-                    To exercise the access, data portability, and deletion rights described above, please submit a verifiable consumer request to us by:
-                  </p>
-                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                    <p className="font-bold text-white mb-2">Email: privacy@quantosai.com</p>
-                    <p className="text-sm">Subject Line: "CCPA Rights Request"</p>
-                  </div>
-                  <p className="text-sm italic mt-4">
-                    Only you, or someone legally authorized to act on your behalf, may make a verifiable consumer request related to your personal information.
-                  </p>
                 </Section>
               </div>
 
