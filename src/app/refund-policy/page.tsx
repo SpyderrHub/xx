@@ -37,7 +37,6 @@ const tocItems = [
   { id: 'credits', title: '3. Character Credits', icon: Zap },
   { id: 'subscriptions', title: '4. Subscription Cycles', icon: Clock },
   { id: 'disputes', title: '5. Payment Disputes', icon: CreditCard },
-  { id: 'contact', title: '6. Billing Support', icon: AlertTriangle },
 ];
 
 export default function RefundPolicyPage() {
@@ -145,16 +144,6 @@ export default function RefundPolicyPage() {
                   <p className="text-sm italic">
                     Initiating a chargeback without contacting our support team first may lead to permanent suspension of your account and loss of all generated audio data.
                   </p>
-                </Section>
-
-                <Section id="contact" title="6. Billing Support" icon={AlertTriangle}>
-                  <p>
-                    For all refund requests or billing questions, please reach out to our dedicated billing team:
-                  </p>
-                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                    <p className="font-bold text-white mb-2">Email: billing@quantosai.com</p>
-                    <p className="text-sm">Please include your account email and transaction ID.</p>
-                  </div>
                 </Section>
               </div>
 
