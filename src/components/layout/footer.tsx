@@ -42,6 +42,7 @@ const Footer = () => {
             <h4 className="text-white font-bold mb-6">Developers</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
               <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
+              <li><Link href="/docs" className="hover:text-primary transition-colors">Documentation</Link></li>
               <li><Link href="/status" className="hover:text-primary transition-colors">System Status</Link></li>
             </ul>
           </div>
@@ -49,11 +50,12 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-bold mb-6">Support</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> support@quantosai.com</li>
-              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> +1 (555) 123-4567</li>
+              <li className="flex items-center gap-2 text-white/80"><Mail className="h-4 w-4" /> support@quantosai.com</li>
               <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/gdpr" className="hover:text-primary transition-colors">GDPR Policy</Link></li>
               <li><Link href="/ccpa" className="hover:text-primary transition-colors">CCPA Notice</Link></li>
               <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund & Cancellation</Link></li>
             </ul>
           </div>
         </div>
@@ -64,9 +66,10 @@ const Footer = () => {
           </p>
           <div className="flex gap-8 text-xs text-muted-foreground font-bold uppercase tracking-widest">
              <Link href="/privacy" className="hover:text-white">Privacy</Link>
+             <Link href="/gdpr" className="hover:text-white">GDPR</Link>
              <Link href="/ccpa" className="hover:text-white">CCPA</Link>
              <Link href="/terms" className="hover:text-white">Terms</Link>
-             <Link href="/cookies" className="hover:text-white">Cookies</Link>
+             <Link href="/refund-policy" className="hover:text-white">Refunds</Link>
           </div>
         </div>
       </div>
