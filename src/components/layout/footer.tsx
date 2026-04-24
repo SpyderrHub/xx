@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github, Linkedin, Twitter, Mail, MapPin, Phone } from 'lucide-react';
+import { Github, Linkedin, Twitter } from 'lucide-react';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 
@@ -48,9 +48,8 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-white font-bold mb-6">Support</h4>
+            <h4 className="text-white font-bold mb-6">Legal</h4>
             <ul className="space-y-4 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2 text-white/80"><Mail className="h-4 w-4" /> support@quantosai.com</li>
               <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
               <li><Link href="/gdpr" className="hover:text-primary transition-colors">GDPR Policy</Link></li>
               <li><Link href="/ccpa" className="hover:text-primary transition-colors">CCPA Notice</Link></li>
