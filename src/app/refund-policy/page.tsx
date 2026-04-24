@@ -159,12 +159,6 @@ export default function RefundPolicyPage() {
               </div>
 
               <div className="pt-12 border-t border-white/5 flex flex-col items-center lg:items-start gap-8">
-                <div className="text-center lg:text-left">
-                  <p className="text-muted-foreground text-sm mb-4">Need to discuss your plan?</p>
-                  <Button asChild className="bg-primary hover:bg-primary/90 rounded-xl px-8 font-black shadow-lg shadow-primary/20 btn-glow">
-                    <Link href="mailto:billing@quantosai.com" className="text-white">Contact Billing Support</Link>
-                  </Button>
-                </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
                   © {new Date().getFullYear()} QuantosAI Billing Systems
                 </p>
@@ -178,7 +172,7 @@ export default function RefundPolicyPage() {
               <div className="p-8 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-md">
                 <div className="flex items-center gap-3 mb-6">
                   <List className="h-5 w-5 text-primary" />
-                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Policy Content</h3>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Table of Contents</h3>
                 </div>
                 <nav className="space-y-1">
                   {tocItems.map((item) => (

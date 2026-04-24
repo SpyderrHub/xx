@@ -148,12 +148,6 @@ export default function GDPRPage() {
               </div>
 
               <div className="pt-12 border-t border-white/5 flex flex-col items-center lg:items-start gap-8">
-                <div className="text-center lg:text-left">
-                  <p className="text-muted-foreground text-sm mb-4">Request your data archive or deletion.</p>
-                  <Button asChild className="bg-primary hover:bg-primary/90 rounded-xl px-8 font-black shadow-lg shadow-primary/20 btn-glow">
-                    <Link href="mailto:privacy@quantosai.com" className="text-white">Submit GDPR Request</Link>
-                  </Button>
-                </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
                   © {new Date().getFullYear()} QuantosAI Privacy Systems
                 </p>
