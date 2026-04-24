@@ -5,12 +5,12 @@ import { motion } from 'framer-motion';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import Footer from '@/components/layout/footer';
-import { 
-  ChevronLeft, 
-  Zap, 
-  RotateCcw, 
-  CreditCard, 
-  Clock, 
+import {
+  ChevronLeft,
+  Zap,
+  RotateCcw,
+  CreditCard,
+  Clock,
   AlertTriangle,
   List,
   CheckCircle2,
@@ -91,9 +91,15 @@ export default function RefundPolicyPage() {
               <div className="prose prose-invert max-w-none space-y-16">
                 <Section id="cancellation" title="1. Cancellation Policy" icon={XCircle}>
                   <p>
-                    You can cancel your QuantosAI subscription at any time through your Dashboard settings. Your cancellation will take effect at the end of the current billing cycle.
+                    You can cancel your QuantosAI subscription at any time through your Dashboard settings.
                   </p>
-                  <p>
+                  <div className="bg-primary/5 border border-primary/20 p-6 rounded-2xl">
+                    <p className="font-bold text-white mb-2">Subscription Cancellations:</p>
+                    <p className="text-sm leading-relaxed">
+                      Subscriptions are managed through auto-pay for Credit and Debit card users. To prevent future charges, simply disable auto-pay from your Account → Subscription settings page. Your plan will remain active until the end of the current billing period at no additional cost.
+                    </p>
+                  </div>
+                  <p className="mt-4">
                     Upon cancellation, you will retain access to your plan features and character balance until the end of the period you have paid for. No further charges will be applied.
                   </p>
                 </Section>
