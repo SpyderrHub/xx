@@ -28,7 +28,7 @@ export function useVoiceUpload() {
     
     const idToken = await user.getIdToken();
     
-    // 1. Get Presigned URL (Backend enforces uid folder)
+    // 1. Get Presigned URL
     const presignRes = await fetch('/api/r2/presign', {
       method: 'POST',
       headers: {
@@ -42,17 +42,19 @@ export function useVoiceUpload() {
       }),
     });
 
+    const presignData = await presignRes.json();
     if (!presignRes.ok) {
-      const err = await presignRes.json();
-      throw new Error(err.message || 'Failed to get upload authorization');
+      throw new Error(presignData.message || 'Failed to get upload authorization');
     }
 
-    const { presignedUrl, publicUrl, key } = await presignRes.json();
+    const { presignedUrl, publicUrl, key } = presignData;
 
     // 2. Perform XHR upload for progress tracking
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', presignedUrl, true);
+      
+      // Crucial: Send exactly the same Content-Type as defined in the signature
       xhr.setRequestHeader('Content-Type', file.type);
 
       xhr.upload.onprogress = (event) => {
@@ -63,14 +65,19 @@ export function useVoiceUpload() {
       };
 
       xhr.onload = () => {
-        if (xhr.status === 200) {
+        if (xhr.status === 200 || xhr.status === 204) {
           resolve({ url: publicUrl, key });
         } else {
-          reject(new Error('Failed to upload file to R2'));
+          console.error('R2 Upload Error Response:', xhr.responseText);
+          reject(new Error(`Storage server rejected upload (Status: ${xhr.status}). Check CORS and permissions.`));
         }
       };
 
-      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.onerror = () => {
+        console.error('XHR Network Error during R2 upload');
+        reject(new Error('Network error during upload. Please check your internet connection and ensure Cloudflare R2 CORS is configured.'));
+      };
+
       xhr.send(file);
     });
   };
@@ -129,7 +136,7 @@ export function useVoiceUpload() {
         audioKey,
         audioDuration,
         audioFormat: audioFile.type,
-        status: "approved", // In studio mode, we auto-approve for now
+        status: "approved",
         createdAt: new Date().toISOString(),
         language: formData.languages[0] || "",
         style: formData.styles[0] || "",
@@ -145,7 +152,7 @@ export function useVoiceUpload() {
       
       return true;
     } catch (error: any) {
-      console.error("Upload failed:", error);
+      console.error("Upload process failed:", error);
       toast({ 
         title: "Upload Failed", 
         description: error.message || "An unexpected error occurred during asset upload.", 

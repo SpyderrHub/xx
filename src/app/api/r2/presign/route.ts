@@ -1,6 +1,6 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { s3Client, BUCKET_NAME } from '@/lib/s3-client';
+import { s3Client, BUCKET_NAME, getPublicDomain } from '@/lib/s3-client';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { adminAuth } from '@/lib/firebase-admin';
@@ -16,6 +16,12 @@ export async function POST(request: NextRequest) {
     
     if (!idToken || !adminAuth) {
       return NextResponse.json({ message: 'Unauthorized: Missing token' }, { status: 401 });
+    }
+
+    if (!s3Client || !BUCKET_NAME) {
+      return NextResponse.json({ 
+        message: 'Storage configuration missing. Please set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_BUCKET_NAME in .env.local' 
+      }, { status: 500 });
     }
 
     // Verify user and get UID
@@ -35,15 +41,17 @@ export async function POST(request: NextRequest) {
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
-      ContentType: contentType,
+      ContentType: contentType || 'application/octet-stream',
     });
 
+    // Generate signed URL (expires in 1 hour)
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    const publicDomain = getPublicDomain();
 
     return NextResponse.json({
       presignedUrl,
       key,
-      publicUrl: `${process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN}/${key}`,
+      publicUrl: publicDomain ? `${publicDomain}/${key}` : key,
     });
   } catch (error: any) {
     console.error('Presign error:', error);
