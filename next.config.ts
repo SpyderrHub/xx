@@ -43,6 +43,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'pub-64f17ada5eb44c81841333ce82896264.r2.dev',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: new URL(process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN || 'https://example.com').hostname,
         port: '',
         pathname: '/**',
