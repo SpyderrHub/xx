@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -47,12 +46,15 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: new URL(process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN || 'https://example.com').hostname,
-        port: '',
-        pathname: '/**',
-      },
+      // Robust support for dynamic R2 domain
+      ...(process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN ? [
+        {
+          protocol: 'https' as const,
+          hostname: process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN.replace(/^https?:\/\//, '').split('/')[0],
+          port: '',
+          pathname: '/**' as const,
+        }
+      ] : []),
     ],
   },
 };
