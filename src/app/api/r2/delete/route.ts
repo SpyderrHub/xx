@@ -4,9 +4,15 @@ import { s3Client, BUCKET_NAME } from '@/lib/s3-client';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { adminAuth } from '@/lib/firebase-admin';
 
+/**
+ * Securely deletes an object from R2.
+ * Verifies that the object key belongs to the authenticated user.
+ */
 export async function POST(request: NextRequest) {
   try {
-    const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
+    const authHeader = request.headers.get('authorization');
+    const idToken = authHeader?.split('Bearer ')[1];
+    
     if (!idToken || !adminAuth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
@@ -16,10 +22,17 @@ export async function POST(request: NextRequest) {
 
     const { key } = await request.json();
 
-    // Verification: Ensure user is only deleting their own files
-    // Key format: path/{uid}/uuid-filename
-    if (!key.includes(`/${uid}/`)) {
-      return NextResponse.json({ message: 'Forbidden: Cannot delete files belonging to other users' }, { status: 403 });
+    if (!key) {
+      return NextResponse.json({ message: 'Key required' }, { status: 400 });
+    }
+
+    // Verification: Ensure key follows path structure and belongs to this user
+    // Expected structure: category/uid/...
+    const keyParts = key.split('/');
+    if (keyParts.length < 2 || keyParts[1] !== uid) {
+      return NextResponse.json({ 
+        message: 'Forbidden: You can only delete your own assets' 
+      }, { status: 403 });
     }
 
     const command = new DeleteObjectCommand({
@@ -32,6 +45,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('R2 Delete error:', error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: error.message || 'Deletion Error' }, { status: 500 });
   }
 }

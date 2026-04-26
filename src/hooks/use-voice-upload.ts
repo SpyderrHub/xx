@@ -28,7 +28,7 @@ export function useVoiceUpload() {
     
     const idToken = await user.getIdToken();
     
-    // 1. Get Presigned URL
+    // 1. Get Presigned URL (Backend enforces uid folder)
     const presignRes = await fetch('/api/r2/presign', {
       method: 'POST',
       headers: {
@@ -38,7 +38,7 @@ export function useVoiceUpload() {
       body: JSON.stringify({
         fileName: file.name,
         contentType: file.type,
-        path: path, // e.g., 'avatars' or 'voices'
+        path: path, // 'avatars' or 'voices'
       }),
     });
 
@@ -140,15 +140,15 @@ export function useVoiceUpload() {
 
       toast({ 
         title: "Upload Successful", 
-        description: "Your voice profile has been submitted to R2 and reviewed.",
+        description: "Your voice profile has been submitted and is under review.",
       });
       
       return true;
     } catch (error: any) {
-      console.error("R2 Upload failed:", error);
+      console.error("Upload failed:", error);
       toast({ 
         title: "Upload Failed", 
-        description: error.message || "An unexpected error occurred during R2 upload.", 
+        description: error.message || "An unexpected error occurred during asset upload.", 
         variant: "destructive" 
       });
       return false;

@@ -5,20 +5,32 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { adminAuth } from '@/lib/firebase-admin';
 
+/**
+ * Generates a presigned URL for secure client-side upload to R2.
+ * Enforces a path structure of: {path}/{uid}/{uuid}-{fileName}
+ */
 export async function POST(request: NextRequest) {
   try {
-    const idToken = request.headers.get('authorization')?.split('Bearer ')[1];
+    const authHeader = request.headers.get('authorization');
+    const idToken = authHeader?.split('Bearer ')[1];
+    
     if (!idToken || !adminAuth) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized: Missing token' }, { status: 401 });
     }
 
+    // Verify user and get UID
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
     const { fileName, contentType, path } = await request.json();
     
-    // Enforce folder structure: uploads/{uid}/{path}/{fileName}
-    const key = `${path}/${uid}/${crypto.randomUUID()}-${fileName}`;
+    if (!path || !fileName) {
+      return NextResponse.json({ message: 'Bad Request: Path and fileName required' }, { status: 400 });
+    }
+
+    // Enforce isolation: category/uid/random-file
+    const safePath = path.replace(/^\/|\/$/g, ''); // strip leading/trailing slashes
+    const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
@@ -35,6 +47,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Presign error:', error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

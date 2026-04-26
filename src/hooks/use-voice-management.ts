@@ -22,6 +22,7 @@ export function useVoiceManagement() {
       const idToken = await user.getIdToken();
 
       // 1. Delete Files from Cloudflare R2 via Secure API
+      // The API verifies that the keys belong to the user's UID folder
       const deletePromises = [];
       
       if (audioKey) {
@@ -37,7 +38,7 @@ export function useVoiceManagement() {
         );
       }
 
-      if (avatarKey) {
+      if (avatarKey && !avatarKey.startsWith('weavy:')) {
         deletePromises.push(
           fetch('/api/r2/delete', {
             method: 'POST',
@@ -51,7 +52,13 @@ export function useVoiceManagement() {
       }
 
       if (deletePromises.length > 0) {
-        await Promise.all(deletePromises);
+        const results = await Promise.all(deletePromises);
+        for (const res of results) {
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || 'Failed to delete one or more assets');
+          }
+        }
       }
 
       // 2. Delete Firestore Document
@@ -60,7 +67,7 @@ export function useVoiceManagement() {
 
       toast({ 
         title: "Voice deleted", 
-        description: "The voice profile and associated R2 files have been permanently removed.",
+        description: "The voice profile and associated storage files have been permanently removed.",
       });
       
       return true;
@@ -68,7 +75,7 @@ export function useVoiceManagement() {
       console.error("Deletion failed:", error);
       toast({ 
         title: "Deletion Failed", 
-        description: error.message || "An error occurred while deleting files from R2.", 
+        description: error.message || "An error occurred while cleaning up storage assets.", 
         variant: "destructive" 
       });
       return false;
