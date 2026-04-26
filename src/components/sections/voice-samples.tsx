@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, User, Volume2, Waves, Loader2 } from 'lucide-react';
+import { Play, Pause, User, Volume2, Waves } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
@@ -10,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, limit, orderBy } from 'firebase/firestore';
 import { WeavyPattern } from '@/components/author/avatar-upload';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const VoiceCard = ({ voice }: { voice: any }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -136,9 +138,20 @@ export default function VoiceSamplesSection() {
         </div>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-12 w-12 animate-spin text-primary/50 mb-4" />
-            <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Loading Premium Samples...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="glass-card rounded-[2rem] p-6 space-y-6">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+                <Skeleton className="h-20 w-full rounded-2xl" />
+                <Skeleton className="h-3 w-1/2 mx-2" />
+              </div>
+            ))}
           </div>
         ) : voices && voices.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">

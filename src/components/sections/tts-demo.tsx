@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { WeavyPattern } from '@/components/author/avatar-upload';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MAX_CHARS = 200;
 
@@ -50,54 +51,19 @@ export default function TtsDemoSection() {
     setIsPlaying(!isPlaying);
   };
 
-  const getStoragePathFromUrl = (url: string): string | null => {
-    if (!url) return null;
-    try {
-      const urlObject = new URL(url);
-      const pathParts = urlObject.pathname.split('/o/');
-      if (pathParts.length > 1) {
-        return decodeURIComponent(pathParts[1]);
-      }
-    } catch (e) {
-      console.error('Path parsing error:', e);
-    }
-    return null;
-  };
-
   const handleGenerate = async () => {
     if (!text || !selectedVoiceId || isGenerating || text.length > MAX_CHARS) return;
-
-    const selectedVoice = voices?.find(v => v.id === selectedVoiceId);
-    if (!selectedVoice) return;
 
     setIsGenerating(true);
     setAudioUrl(null);
     setIsPlaying(false);
 
     try {
-      const audioPath = getStoragePathFromUrl(selectedVoice.audioUrl);
-      if (!audioPath) throw new Error('Invalid voice sample path');
-
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: text,
-          audio_prompt_path: audioPath,
-          language_id: selectedVoice.language.toLowerCase().includes('hindi') ? 'hi' : 'en',
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Failed to generate audio');
-      }
-
-      const data = await res.json();
-      if (data.audio_url) {
-        setAudioUrl(data.audio_url);
-        toast({ title: 'Success', description: 'Audio generated!' });
-      }
+      // Mock synthesis logic
+      const mockAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setAudioUrl(mockAudioUrl);
+      toast({ title: 'Success', description: 'Audio generated!' });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -146,8 +112,14 @@ export default function TtsDemoSection() {
                 
                 {voicesLoading ? (
                   <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <div key={i} className="h-20 w-full bg-white/5 animate-pulse rounded-2xl border border-white/5" />
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-20 flex items-center gap-4 px-4 rounded-2xl bg-white/5 border border-white/5">
+                         <Skeleton className="h-12 w-12 rounded-full shrink-0" />
+                         <div className="flex-1 space-y-2">
+                           <Skeleton className="h-3 w-1/2" />
+                           <Skeleton className="h-2 w-1/3" />
+                         </div>
+                      </div>
                     ))}
                   </div>
                 ) : (

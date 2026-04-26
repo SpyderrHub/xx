@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, X, PlusCircle, Filter, Loader2 } from 'lucide-react';
+import { Search, X, PlusCircle, Filter } from 'lucide-react';
 import VoiceCard from '@/components/voices/voice-card';
 import {
   Sheet,
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/sheet';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const FilterControls = ({ filters, setFilters, clearFilters, availableOptions, inSheet = false }: any) => {
   const containerClasses = inSheet ? 'flex flex-col gap-4' : 'hidden lg:flex flex-wrap gap-2 sm:flex-nowrap';
@@ -222,8 +223,23 @@ export default function VoiceLibraryPage() {
         <h2 className="mb-6 text-2xl font-semibold tracking-tight">All Voices</h2>
         
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="bg-card/40 rounded-2xl border border-white/5 p-4 space-y-4">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-12 w-12 rounded-2xl" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+                <Skeleton className="h-20 w-full rounded-xl" />
+                <div className="flex justify-between items-center pt-2">
+                   <Skeleton className="h-3 w-1/4" />
+                   <Skeleton className="h-7 w-16 rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredVoices.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">

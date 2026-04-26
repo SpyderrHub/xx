@@ -11,7 +11,6 @@ import {
   Library,
   ChevronRight,
   ArrowRight,
-  Loader2,
   Play,
   Pause,
   Music
@@ -24,6 +23,7 @@ import { motion } from 'framer-motion';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { WeavyPattern } from '@/components/author/avatar-upload';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
@@ -110,7 +110,7 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         className="px-2"
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">My Workspace</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">My Workspace</p>
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
           Welcome, {user?.displayName?.split(' ')[0] || 'User'}
         </h1>
@@ -152,9 +152,16 @@ export default function DashboardPage() {
           
           <div className="space-y-3">
             {isVoicesLoading ? (
-              <div className="flex h-40 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-primary/50" />
-              </div>
+              [...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <Skeleton className="h-12 w-12 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                  <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                </div>
+              ))
             ) : latestVoices && latestVoices.length > 0 ? (
               latestVoices.map((voice, i) => {
                 const isGradient = voice.avatarUrl?.startsWith('weavy:');
