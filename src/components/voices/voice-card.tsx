@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -6,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Heart, Plus, Check, User, Loader2, Globe } from 'lucide-react';
+import { Play, Pause, Plus, Check, User, Loader2, Globe } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
@@ -59,7 +58,6 @@ const Waveform = () => (
 
 export default function VoiceCard({ voice }: VoiceCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
@@ -201,9 +199,6 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
                 <span>{voice.gender}</span>
              </div>
              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-white/5" onClick={() => setIsLiked(!isLiked)}>
-                    <Heart className={cn("h-4 w-4", isLiked && "fill-red-500 text-red-500")}/>
-                </Button>
                 <Button 
                     variant={isAdded ? "secondary" : "outline"} 
                     size="sm" 
