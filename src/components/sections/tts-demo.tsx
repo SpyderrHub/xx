@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -117,7 +116,6 @@ export default function TtsDemoSection() {
                          <Skeleton className="h-12 w-12 rounded-full shrink-0" />
                          <div className="flex-1 space-y-2">
                            <Skeleton className="h-3 w-1/2" />
-                           <Skeleton className="h-2 w-1/3" />
                          </div>
                       </div>
                     ))}
@@ -157,7 +155,6 @@ export default function TtsDemoSection() {
                             )}>
                               {voice.voiceName}
                             </h4>
-                            <p className="text-[8px] sm:text-[10px] text-muted-foreground truncate uppercase tracking-wider">{voice.language}</p>
                           </div>
                           {selectedVoiceId === voice.id && (
                             <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shrink-0" />

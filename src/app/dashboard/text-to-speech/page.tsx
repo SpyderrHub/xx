@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -320,9 +319,6 @@ export default function TextToSpeechPage() {
                         </Avatar>
                         <div className="text-left min-w-0">
                           <p className="text-xs font-bold truncate">{v.voiceName}</p>
-                          <p className="text-[8px] text-muted-foreground uppercase font-black">
-                            {Array.isArray(v.languages) ? v.languages[0] : v.language}
-                          </p>
                         </div>
                       </div>
                     </SelectItem>
