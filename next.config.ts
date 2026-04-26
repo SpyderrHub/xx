@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -37,6 +38,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'flagcdn.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: new URL(process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN || 'https://example.com').hostname,
         port: '',
         pathname: '/**',
       },

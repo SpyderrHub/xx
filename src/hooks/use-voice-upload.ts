@@ -3,7 +3,6 @@
 
 import { useState } from 'react';
 import { useFirebase } from '@/firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
 
@@ -22,39 +21,57 @@ export interface VoiceUploadData {
 export function useVoiceUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const { storage, firestore, user } = useFirebase();
+  const { firestore, user } = useFirebase();
 
-  const uploadFile = (file: File, path: string, weight: number, baseProgress: number): Promise<string> => {
+  const uploadFileToR2 = async (file: File, path: string, weight: number, baseProgress: number): Promise<{ url: string; key: string }> => {
+    if (!user) throw new Error('User not authenticated');
+    
+    const idToken = await user.getIdToken();
+    
+    // 1. Get Presigned URL
+    const presignRes = await fetch('/api/r2/presign', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        contentType: file.type,
+        path: path, // e.g., 'avatars' or 'voices'
+      }),
+    });
+
+    if (!presignRes.ok) {
+      const err = await presignRes.json();
+      throw new Error(err.message || 'Failed to get upload authorization');
+    }
+
+    const { presignedUrl, publicUrl, key } = await presignRes.json();
+
+    // 2. Perform XHR upload for progress tracking
     return new Promise((resolve, reject) => {
-      try {
-        if (!storage) {
-          throw new Error('Storage service is not available');
-        }
-        const storageRef = ref(storage, path);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', presignedUrl, true);
+      xhr.setRequestHeader('Content-Type', file.type);
 
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const fileProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * weight;
-            setProgress(Math.round(baseProgress + fileProgress));
-          },
-          (error) => {
-            console.error('Storage upload error:', error);
-            reject(error);
-          },
-          async () => {
-            try {
-              const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve(downloadUrl);
-            } catch (error) {
-              reject(error);
-            }
-          }
-        );
-      } catch (err) {
-        reject(err);
-      }
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const fileProgress = (event.loaded / event.total) * weight;
+          setProgress(Math.round(baseProgress + fileProgress));
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve({ url: publicUrl, key });
+        } else {
+          reject(new Error('Failed to upload file to R2'));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.send(file);
     });
   };
 
@@ -68,8 +85,8 @@ export function useVoiceUpload() {
       return false;
     }
 
-    if (!storage || !firestore) {
-      toast({ title: "Service Unavailable", description: "Firebase services are not ready.", variant: "destructive" });
+    if (!firestore) {
+      toast({ title: "Service Unavailable", description: "Firestore is not ready.", variant: "destructive" });
       return false;
     }
 
@@ -77,36 +94,29 @@ export function useVoiceUpload() {
     setProgress(0);
 
     try {
-      // 1. Generate unique voice ID
       const voiceId = crypto.randomUUID();
       let avatarUrl = "";
+      let avatarKey = "";
 
-      // 2. Handle Avatar (Weight: 20%, Base: 0%)
+      // 1. Handle Avatar (Weight: 20%, Base: 0%)
       if (avatarFile) {
-        avatarUrl = await uploadFile(
-          avatarFile, 
-          `avatars/${user.uid}/${voiceId}/avatar.PNG`, 
-          20, 
-          0
-        );
+        const res = await uploadFileToR2(avatarFile, 'avatars', 20, 0);
+        avatarUrl = res.url;
+        avatarKey = res.key;
       } else {
-        // Use generated gradient string if no file provided
         avatarUrl = `weavy:${formData.selectedGradientIndex || 0}`;
         setProgress(20);
       }
 
-      // 3. Upload Audio (Weight: 70%, Base: 20%)
-      const audioUrl = await uploadFile(
-        audioFile, 
-        `voices/${user.uid}/${voiceId}/voice_sample.wav`, 
-        70, 
-        20
-      );
+      // 2. Upload Audio (Weight: 70%, Base: 20%)
+      const audioRes = await uploadFileToR2(audioFile, 'voices', 70, 20);
+      const audioUrl = audioRes.url;
+      const audioKey = audioRes.key;
 
-      // 4. Calculate Audio Duration
+      // 3. Calculate Audio Duration
       const audioDuration = await getAudioDuration(audioFile);
 
-      // 5. Save metadata to Firestore (Base: 90%)
+      // 4. Save metadata to Firestore (Base: 90%)
       setProgress(95);
       const voiceDocRef = doc(firestore, 'voices', voiceId);
       const voiceData = {
@@ -114,12 +124,13 @@ export function useVoiceUpload() {
         userId: user.uid,
         ...formData,
         avatarUrl,
+        avatarKey,
         audioUrl,
+        audioKey,
         audioDuration,
         audioFormat: audioFile.type,
         status: "pending_review",
         createdAt: new Date().toISOString(),
-        // Support backward compatibility for legacy single-value fields
         language: formData.languages[0] || "",
         style: formData.styles[0] || "",
       };
@@ -129,15 +140,15 @@ export function useVoiceUpload() {
 
       toast({ 
         title: "Upload Successful", 
-        description: "Your voice profile has been submitted for review.",
+        description: "Your voice profile has been submitted to R2 and reviewed.",
       });
       
       return true;
     } catch (error: any) {
-      console.error("Upload process failed:", error);
+      console.error("R2 Upload failed:", error);
       toast({ 
         title: "Upload Failed", 
-        description: error.message || "An unexpected error occurred during upload.", 
+        description: error.message || "An unexpected error occurred during R2 upload.", 
         variant: "destructive" 
       });
       return false;
