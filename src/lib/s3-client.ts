@@ -12,6 +12,7 @@ const getS3Client = () => {
   const SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
 
   if (!ACCOUNT_ID || !ACCESS_KEY_ID || !SECRET_ACCESS_KEY) {
+    console.warn('R2 Configuration missing. Check R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY in .env.local');
     return null;
   }
 
@@ -22,6 +23,9 @@ const getS3Client = () => {
       accessKeyId: ACCESS_KEY_ID,
       secretAccessKey: SECRET_ACCESS_KEY,
     },
+    // R2 works best with path-style access in some SDK versions, 
+    // but the subdomain approach is standard for the R2 endpoint.
+    forcePathStyle: false,
   });
 };
 

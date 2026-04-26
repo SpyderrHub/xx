@@ -27,6 +27,7 @@ export function useVoiceUpload() {
     if (!user) throw new Error('User not authenticated');
     
     const idToken = await user.getIdToken();
+    const contentType = file.type || 'application/octet-stream';
     
     // 1. Get Presigned URL
     const presignRes = await fetch('/api/r2/presign', {
@@ -37,7 +38,7 @@ export function useVoiceUpload() {
       },
       body: JSON.stringify({
         fileName: file.name,
-        contentType: file.type,
+        contentType: contentType,
         path: path, // 'avatars' or 'voices'
       }),
     });
@@ -55,7 +56,7 @@ export function useVoiceUpload() {
       xhr.open('PUT', presignedUrl, true);
       
       // Crucial: Send exactly the same Content-Type as defined in the signature
-      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.setRequestHeader('Content-Type', contentType);
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -69,13 +70,13 @@ export function useVoiceUpload() {
           resolve({ url: publicUrl, key });
         } else {
           console.error('R2 Upload Error Response:', xhr.responseText);
-          reject(new Error(`Storage server rejected upload (Status: ${xhr.status}). Check CORS and permissions.`));
+          reject(new Error(`Storage server rejected upload (Status: ${xhr.status}). This is usually a CORS or signature mismatch issue.`));
         }
       };
 
       xhr.onerror = () => {
-        console.error('XHR Network Error during R2 upload');
-        reject(new Error('Network error during upload. Please check your internet connection and ensure Cloudflare R2 CORS is configured.'));
+        console.error('XHR Network Error during R2 upload. URL:', presignedUrl);
+        reject(new Error('Network error during upload. Please ensure Cloudflare R2 CORS is configured for your domain.'));
       };
 
       xhr.send(file);

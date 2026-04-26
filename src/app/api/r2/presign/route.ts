@@ -38,13 +38,17 @@ export async function POST(request: NextRequest) {
     const safePath = path.replace(/^\/|\/$/g, ''); // strip leading/trailing slashes
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
 
+    // Ensure we use a consistent Content-Type for the signature
+    const mimeType = contentType || 'application/octet-stream';
+
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
-      ContentType: contentType || 'application/octet-stream',
+      ContentType: mimeType,
     });
 
     // Generate signed URL (expires in 1 hour)
+    // The signature will include the Content-Type, so the client MUST send the same header.
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     const publicDomain = getPublicDomain();
 
