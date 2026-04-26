@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github, Linkedin, Twitter } from 'lucide-react';
+import { Github, Linkedin, Twitter, Instagram } from 'lucide-react';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
 
@@ -13,17 +13,28 @@ const Footer = () => {
               <Logo className="h-8" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
-              The world's most expressive AI text-to-speech platform. Empowering developers and creators with natural, multi-lingual voices.
+              The world&apos;s most expressive AI text-to-speech platform. Empowering developers and creators with natural, multi-lingual voices.
             </p>
             <div className="flex gap-4">
-              <Button variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white" aria-label="Twitter">
-                <Twitter className="h-5 w-5" />
+              <Button asChild variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white transition-all" aria-label="Twitter">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+                  <Twitter className="h-5 w-5" />
+                </a>
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white" aria-label="GitHub">
-                <Github className="h-5 w-5" />
+              <Button asChild variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white transition-all" aria-label="GitHub">
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                  <Github className="h-5 w-5" />
+                </a>
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white" aria-label="LinkedIn">
-                <Linkedin className="h-5 w-5" />
+              <Button asChild variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white transition-all" aria-label="LinkedIn">
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+                  <Linkedin className="h-5 w-5" />
+                </a>
+              </Button>
+              <Button asChild variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white transition-all" aria-label="Instagram">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                  <Instagram className="h-5 w-5" />
+                </a>
               </Button>
             </div>
           </div>
