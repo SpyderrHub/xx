@@ -7,7 +7,8 @@ import { adminAuth } from '@/lib/firebase-admin';
 
 /**
  * Generates a presigned URL for secure client-side upload to R2.
- * Enforces a path structure of: {path}/{uid}/{uuid}-{fileName}
+ * Enforces a Firebase-style path structure: {root}/{uid}/{uuid}-{fileName}
+ * Roots allowed: voices, avatars, users
  */
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     if (!s3Client || !BUCKET_NAME) {
       return NextResponse.json({ 
-        message: 'Storage configuration missing. Please set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_BUCKET_NAME in .env.local' 
+        message: 'Storage configuration missing. Please check your .env.local file.' 
       }, { status: 500 });
     }
 
@@ -34,8 +35,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Bad Request: Path and fileName required' }, { status: 400 });
     }
 
-    // Enforce isolation: category/uid/random-file
-    const safePath = path.replace(/^\/|\/$/g, ''); // strip leading/trailing slashes
+    // Standardize root folders like Firebase
+    const safePath = path.replace(/^\/|\/$/g, '').toLowerCase();
+    const allowedRoots = ['voices', 'avatars', 'users'];
+    
+    if (!allowedRoots.includes(safePath)) {
+      return NextResponse.json({ message: 'Invalid storage root. Must be one of: voices, avatars, users' }, { status: 400 });
+    }
+
+    // Enforce isolation: {root}/{uid}/{random-uuid}-{name}
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
 
     // Ensure we use a consistent Content-Type for the signature
@@ -48,7 +56,6 @@ export async function POST(request: NextRequest) {
     });
 
     // Generate signed URL (expires in 1 hour)
-    // The signature will include the Content-Type, so the client MUST send the same header.
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     const publicDomain = getPublicDomain();
 

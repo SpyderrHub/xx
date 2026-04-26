@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { 
   User, 
@@ -14,7 +14,9 @@ import {
   Calendar,
   Sparkles,
   AlertTriangle,
-  Trash2
+  Trash2,
+  Upload,
+  CheckCircle2
 } from 'lucide-react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { updateProfile, deleteUser } from 'firebase/auth';
@@ -43,10 +45,12 @@ export default function SettingsPage() {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Form State
   const [displayName, setDisplayName] = useState('');
   const [photoURL, setPhotoURL] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch Firestore User Data
   const userDocRef = useMemoFirebase(() => {
@@ -63,6 +67,55 @@ export default function SettingsPage() {
       setPhotoURL(user.photoURL || '');
     }
   }, [user]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Invalid file", description: "Please upload an image file.", variant: "destructive" });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const idToken = await user.getIdToken();
+      
+      // 1. Get Presigned URL for 'users' root
+      const presignRes = await fetch('/api/r2/presign', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          contentType: file.type,
+          path: 'users',
+        }),
+      });
+
+      const presignData = await presignRes.json();
+      if (!presignRes.ok) throw new Error(presignData.message);
+
+      // 2. Upload to R2
+      const uploadRes = await fetch(presignData.presignedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+
+      if (!uploadRes.ok) throw new Error("Upload failed. Check CORS settings.");
+
+      setPhotoURL(presignData.publicUrl);
+      toast({ title: "Image Uploaded", description: "Click 'Save Changes' to update your profile permanently." });
+    } catch (error: any) {
+      toast({ title: "Upload Error", description: error.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +163,7 @@ export default function SettingsPage() {
       const userRef = doc(firestore, 'users', user.uid);
       await deleteDoc(userRef);
 
-      // 2. Delete Auth User (Note: may require recent login)
+      // 2. Delete Auth User
       await deleteUser(user);
 
       toast({
@@ -120,20 +173,14 @@ export default function SettingsPage() {
       
       router.push('/login');
     } catch (error: any) {
-      console.error("Account deletion failed:", error);
-      
       if (error.code === 'auth/requires-recent-login') {
         toast({
-          title: "Security Re-authentication Required",
-          description: "Please log out and log back in before deleting your account for security purposes.",
+          title: "Re-authentication Required",
+          description: "Please log out and log back in before deleting your account.",
           variant: "destructive"
         });
       } else {
-        toast({
-          title: "Deletion Error",
-          description: error.message || "Could not complete account deletion.",
-          variant: "destructive"
-        });
+        toast({ title: "Deletion Error", description: error.message, variant: "destructive" });
       }
     } finally {
       setIsDeleting(false);
@@ -141,17 +188,13 @@ export default function SettingsPage() {
   };
 
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase();
   };
 
   if (isDocLoading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
+        <Loader2 className="h-10 w-10 animate-spin text-primary/50" />
       </div>
     );
   }
@@ -164,20 +207,29 @@ export default function SettingsPage() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Profile Summary Sidebar */}
         <div className="md:col-span-1 space-y-6">
           <Card className="bg-white/[0.02] border-white/5 overflow-hidden">
             <CardContent className="p-6 flex flex-col items-center text-center">
-              <div className="relative group mb-4">
+              <div 
+                className="relative group mb-4 cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <Avatar className="h-24 w-24 ring-4 ring-primary/10 transition-all group-hover:ring-primary/30">
                   <AvatarImage src={photoURL} className="object-cover" />
                   <AvatarFallback className="text-2xl bg-primary/10 text-primary font-black">
                     {displayName ? getInitials(displayName) : 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-full transition-opacity cursor-pointer backdrop-blur-[2px]">
-                  <Camera className="h-6 w-6 text-white" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-full transition-opacity backdrop-blur-[2px]">
+                  {isUploading ? <Loader2 className="h-6 w-6 text-white animate-spin" /> : <Upload className="h-6 w-6 text-white" />}
                 </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleAvatarUpload} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
               </div>
               <h3 className="font-bold text-white text-lg">{displayName || 'Anonymous User'}</h3>
               <p className="text-xs text-muted-foreground uppercase tracking-widest font-black mt-1">
@@ -186,25 +238,25 @@ export default function SettingsPage() {
               
               <div className="w-full h-px bg-white/5 my-6" />
               
-              <div className="w-full space-y-4">
-                <div className="flex items-center gap-3 text-left">
-                  <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+              <div className="w-full space-y-4 text-left">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <div className="min-w-0">
+                  <div>
                     <p className="text-[10px] text-muted-foreground uppercase font-black">Member Since</p>
-                    <p className="text-xs text-white/80 font-medium truncate">
+                    <p className="text-xs text-white/80 font-medium">
                       {userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-left">
-                  <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center">
                     <ShieldCheck className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black">Account Status</p>
-                    <p className="text-xs text-white/80 font-medium truncate">Verified & Active</p>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase font-black">Status</p>
+                    <p className="text-xs text-white/80 font-medium">Verified & Active</p>
                   </div>
                 </div>
               </div>
@@ -214,31 +266,29 @@ export default function SettingsPage() {
           <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/10">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-xs font-black uppercase tracking-widest text-white">Pro Tip</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white">Identity Studio</span>
             </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Using a high-resolution avatar helps you stand out in the community and voice library.
+              Profile images are securely stored in Cloudflare R2 under your unique user directory.
             </p>
           </div>
         </div>
 
-        {/* Main Editor Form */}
         <div className="md:col-span-2 space-y-8">
           <form onSubmit={handleSaveProfile}>
             <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
               <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
                 <CardTitle className="text-xl font-bold">Public Profile</CardTitle>
-                <CardDescription>This information will be visible to other users in the studio.</CardDescription>
+                <CardDescription>Managed via Cloudflare R2 Storage integration.</CardDescription>
               </CardHeader>
               
               <CardContent className="p-8 space-y-8">
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="displayName" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Display Name</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Display Name</Label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="displayName"
                         placeholder="John Doe" 
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
@@ -248,36 +298,29 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address (Primary)</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</Label>
                     <div className="relative group">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
                       <Input 
-                        id="email"
                         value={user?.email || ''} 
                         readOnly 
                         className="h-12 pl-11 bg-black/20 border-white/5 rounded-xl text-muted-foreground cursor-not-allowed italic"
                       />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                        <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Verified</span>
-                      </div>
                     </div>
-                    <p className="text-[10px] text-muted-foreground ml-1 italic">Contact support to change your primary email.</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="avatarUrl" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Profile Image URL</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Avatar Source (R2 Public URL)</Label>
                     <div className="relative">
                       <Camera className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="avatarUrl"
-                        placeholder="https://images.unsplash.com/..." 
+                        placeholder="Automatic after upload" 
                         value={photoURL}
-                        onChange={(e) => setPhotoURL(e.target.value)}
-                        className="h-12 pl-11 bg-white/5 border-white/10 rounded-xl focus:ring-primary/20 transition-all font-medium"
+                        readOnly
+                        className="h-12 pl-11 bg-white/5 border-white/10 rounded-xl font-mono text-[10px] text-muted-foreground truncate"
                       />
                     </div>
-                    <p className="text-[10px] text-muted-foreground ml-1 italic">Paste a link to a public image (PNG, JPG, or GIF).</p>
+                    <p className="text-[10px] text-muted-foreground ml-1 italic">Click your avatar in the sidebar to upload a new image.</p>
                   </div>
                 </div>
               </CardContent>
@@ -295,7 +338,6 @@ export default function SettingsPage() {
             </Card>
           </form>
 
-          {/* Danger Zone */}
           <Card className="border-red-500/20 bg-red-500/[0.02] rounded-[2rem] overflow-hidden">
             <CardHeader className="p-8 border-b border-red-500/10 bg-red-500/[0.01]">
               <div className="flex items-center gap-2 mb-1">
@@ -309,7 +351,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="font-bold text-white mb-1">Delete Account</h4>
                   <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                    Permanently remove your QuantisAI account, subscription data, and all generated audio history. This action is irreversible.
+                    Permanently remove your account, character balance, and all R2 assets (voices, avatars).
                   </p>
                 </div>
                 
@@ -327,7 +369,7 @@ export default function SettingsPage() {
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-white">Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription className="text-muted-foreground">
-                        This will permanently delete your QuantisAI account and remove all your data from our servers. You will lose access to your character balance and history.
+                        This will permanently delete your QuantisAI account and all your stored media in Cloudflare R2.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

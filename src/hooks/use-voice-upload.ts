@@ -30,6 +30,7 @@ export function useVoiceUpload() {
     const contentType = file.type || 'application/octet-stream';
     
     // 1. Get Presigned URL
+    // Roots are strictly: voices, avatars, users
     const presignRes = await fetch('/api/r2/presign', {
       method: 'POST',
       headers: {
@@ -39,7 +40,7 @@ export function useVoiceUpload() {
       body: JSON.stringify({
         fileName: file.name,
         contentType: contentType,
-        path: path, // 'avatars' or 'voices'
+        path: path, 
       }),
     });
 
@@ -55,7 +56,7 @@ export function useVoiceUpload() {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', presignedUrl, true);
       
-      // Crucial: Send exactly the same Content-Type as defined in the signature
+      // Ensure Content-Type matches exactly between signature and request
       xhr.setRequestHeader('Content-Type', contentType);
 
       xhr.upload.onprogress = (event) => {
@@ -69,14 +70,13 @@ export function useVoiceUpload() {
         if (xhr.status === 200 || xhr.status === 204) {
           resolve({ url: publicUrl, key });
         } else {
-          console.error('R2 Upload Error Response:', xhr.responseText);
-          reject(new Error(`Storage server rejected upload (Status: ${xhr.status}). This is usually a CORS or signature mismatch issue.`));
+          console.error('R2 Error:', xhr.responseText);
+          reject(new Error(`Storage server rejected upload. Ensure CORS is configured for your domain.`));
         }
       };
 
       xhr.onerror = () => {
-        console.error('XHR Network Error during R2 upload. URL:', presignedUrl);
-        reject(new Error('Network error during upload. Please ensure Cloudflare R2 CORS is configured for your domain.'));
+        reject(new Error('Network error during R2 upload. Check bucket CORS configuration.'));
       };
 
       xhr.send(file);
@@ -88,15 +88,7 @@ export function useVoiceUpload() {
     audioFile: File,
     formData: VoiceUploadData
   ) => {
-    if (!user) {
-      toast({ title: "Authentication required", description: "You must be logged in to upload.", variant: "destructive" });
-      return false;
-    }
-
-    if (!firestore) {
-      toast({ title: "Service Unavailable", description: "Firestore is not ready.", variant: "destructive" });
-      return false;
-    }
+    if (!user || !firestore) return false;
 
     setIsUploading(true);
     setProgress(0);
@@ -106,7 +98,7 @@ export function useVoiceUpload() {
       let avatarUrl = "";
       let avatarKey = "";
 
-      // 1. Handle Avatar (Weight: 20%, Base: 0%)
+      // 1. Upload Avatar (Weight: 20%) to 'avatars' root
       if (avatarFile) {
         const res = await uploadFileToR2(avatarFile, 'avatars', 20, 0);
         avatarUrl = res.url;
@@ -116,15 +108,15 @@ export function useVoiceUpload() {
         setProgress(20);
       }
 
-      // 2. Upload Audio (Weight: 70%, Base: 20%)
+      // 2. Upload Audio (Weight: 70%) to 'voices' root
       const audioRes = await uploadFileToR2(audioFile, 'voices', 70, 20);
       const audioUrl = audioRes.url;
       const audioKey = audioRes.key;
 
-      // 3. Calculate Audio Duration
+      // 3. Audio Metadata
       const audioDuration = await getAudioDuration(audioFile);
 
-      // 4. Save metadata to Firestore (Base: 90%)
+      // 4. Save to Firestore
       setProgress(95);
       const voiceDocRef = doc(firestore, 'voices', voiceId);
       const voiceData = {
@@ -146,19 +138,10 @@ export function useVoiceUpload() {
       await setDoc(voiceDocRef, voiceData);
       setProgress(100);
 
-      toast({ 
-        title: "Upload Successful", 
-        description: "Your voice profile has been saved to the library.",
-      });
-      
+      toast({ title: "Upload Successful", description: "Voice profile saved to R2 library." });
       return true;
     } catch (error: any) {
-      console.error("Upload process failed:", error);
-      toast({ 
-        title: "Upload Failed", 
-        description: error.message || "An unexpected error occurred during asset upload.", 
-        variant: "destructive" 
-      });
+      toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
       return false;
     } finally {
       setTimeout(() => {
