@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Mic, Trash2, CheckCircle2, Loader2, Sparkles, X, Globe, Plus, Palette, FileText } from 'lucide-react';
+import { Upload, Mic, Trash2, CheckCircle2, Loader2, Sparkles, X, Globe, Plus, Palette } from 'lucide-react';
 import { AudioPreviewPlayer } from './audio-preview-player';
 import { AvatarUpload, WEAVY_PRESETS } from './avatar-upload';
 import { VoiceStudioTextarea } from './voice-studio-textarea';
@@ -46,7 +46,6 @@ export function VoiceUploadCard() {
     referenceText: ''
   });
 
-  // Randomize initial gradient
   useEffect(() => {
     setSelectedGradientIndex(Math.floor(Math.random() * WEAVY_PRESETS.length));
   }, []);
@@ -164,7 +163,7 @@ export function VoiceUploadCard() {
             Create Your AI Voice Profile
           </CardTitle>
           <CardDescription>
-            Provide high-quality details to help users discover your voice.
+            High-quality details help users discover your voice. Assets will be stored in Cloudflare R2.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8 relative">
@@ -206,29 +205,26 @@ export function VoiceUploadCard() {
                 <Globe className="h-3 w-3 text-primary" />
                 <span>Supported Languages</span>
               </div>
-              <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
             <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl min-h-[100px] max-h-40 overflow-y-auto scrollbar-hide">
               {PREDEFINED_LANGUAGES.map(lang => (
                 <Badge
                   key={lang}
                   variant={formData.languages.includes(lang) ? "default" : "outline"}
-                  className="cursor-pointer transition-all hover:scale-105"
+                  className="cursor-pointer transition-all"
                   onClick={() => handleToggleLanguage(lang)}
                 >
                   {lang}
-                  {formData.languages.includes(lang) && <X className="ml-1 h-3 w-3" />}
                 </Badge>
               ))}
               {formData.languages.filter(l => !PREDEFINED_LANGUAGES.includes(l)).map(lang => (
                 <Badge
                   key={lang}
                   variant="default"
-                  className="cursor-pointer transition-all hover:scale-105 bg-indigo-600"
+                  className="cursor-pointer bg-indigo-600"
                   onClick={() => handleToggleLanguage(lang)}
                 >
                   {lang}
-                  <X className="ml-1 h-3 w-3" />
                 </Badge>
               ))}
             </div>
@@ -237,10 +233,9 @@ export function VoiceUploadCard() {
                 placeholder="Add other language..." 
                 value={customLanguage}
                 onChange={(e) => setCustomLanguage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddCustomLanguage()}
                 className="h-9 rounded-lg bg-white/5 border-white/10 text-xs"
               />
-              <Button variant="secondary" size="sm" onClick={handleAddCustomLanguage} className="h-9 rounded-lg">
+              <Button variant="secondary" size="sm" onClick={handleAddCustomLanguage}>
                 <Plus className="h-3 w-3 mr-1" /> Add
               </Button>
             </div>
@@ -252,29 +247,16 @@ export function VoiceUploadCard() {
                 <Palette className="h-3 w-3 text-primary" />
                 <span>Voice Styles</span>
               </div>
-              <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
             <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl min-h-[100px] max-h-40 overflow-y-auto scrollbar-hide">
               {STYLES.map(style => (
                 <Badge
                   key={style}
                   variant={formData.styles.includes(style) ? "default" : "outline"}
-                  className="cursor-pointer transition-all hover:scale-105"
+                  className="cursor-pointer transition-all"
                   onClick={() => handleToggleStyle(style)}
                 >
                   {style}
-                  {formData.styles.includes(style) && <X className="ml-1 h-3 w-3" />}
-                </Badge>
-              ))}
-              {formData.styles.filter(s => !STYLES.includes(s)).map(style => (
-                <Badge
-                  key={style}
-                  variant="default"
-                  className="cursor-pointer transition-all hover:scale-105 bg-indigo-600"
-                  onClick={() => handleToggleStyle(style)}
-                >
-                  {style}
-                  <X className="ml-1 h-3 w-3" />
                 </Badge>
               ))}
             </div>
@@ -283,10 +265,9 @@ export function VoiceUploadCard() {
                 placeholder="Add custom style..." 
                 value={customStyle}
                 onChange={(e) => setCustomStyle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddCustomStyle()}
                 className="h-9 rounded-lg bg-white/5 border-white/10 text-xs"
               />
-              <Button variant="secondary" size="sm" onClick={handleAddCustomStyle} className="h-9 rounded-lg">
+              <Button variant="secondary" size="sm" onClick={handleAddCustomStyle}>
                 <Plus className="h-3 w-3 mr-1" /> Add
               </Button>
             </div>
@@ -297,21 +278,18 @@ export function VoiceUploadCard() {
               label="Voice Description"
               value={formData.description} 
               onChange={(v) => setFormData({...formData, description: v})} 
-              placeholder="Describe your voice tone, speaking style, and emotional range..."
-              hint="Helps users understand your voice strengths."
+              placeholder="Describe your voice tone..."
             />
             <VoiceStudioTextarea 
               label="Reference Text"
               value={formData.referenceText} 
               onChange={(v) => setFormData({...formData, referenceText: v})} 
-              placeholder="Provide a sample script that perfectly demonstrates this voice's character..."
-              hint="Shows exactly how the voice performs."
-              minLength={10}
+              placeholder="Provide a sample script..."
             />
           </div>
 
           <div className="space-y-4">
-            <Label className="text-sm font-medium">30-Second Voice Sample</Label>
+            <Label className="text-sm font-medium">30-Second Voice Sample (Cloudflare R2 Upload)</Label>
             <div 
               onClick={() => !file && fileInputRef.current?.click()}
               className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all ${file ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-primary/50 cursor-pointer'}`}
@@ -359,7 +337,7 @@ export function VoiceUploadCard() {
             onClick={handleUpload}
           >
             {isUploading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Upload className="mr-2 h-5 w-5" />}
-            {isUploading ? 'Uploading Profile...' : 'Submit Voice Profile'}
+            {isUploading ? 'Uploading to R2...' : 'Submit Voice Profile'}
           </Button>
         </CardContent>
       </Card>

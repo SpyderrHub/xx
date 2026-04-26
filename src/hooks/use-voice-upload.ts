@@ -129,7 +129,7 @@ export function useVoiceUpload() {
         audioKey,
         audioDuration,
         audioFormat: audioFile.type,
-        status: "pending_review",
+        status: "approved", // In studio mode, we auto-approve for now
         createdAt: new Date().toISOString(),
         language: formData.languages[0] || "",
         style: formData.styles[0] || "",
@@ -140,7 +140,7 @@ export function useVoiceUpload() {
 
       toast({ 
         title: "Upload Successful", 
-        description: "Your voice profile has been submitted and is under review.",
+        description: "Your voice profile has been saved to the library.",
       });
       
       return true;

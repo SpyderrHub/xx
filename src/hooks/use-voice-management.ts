@@ -22,7 +22,6 @@ export function useVoiceManagement() {
       const idToken = await user.getIdToken();
 
       // 1. Delete Files from Cloudflare R2 via Secure API
-      // The API verifies that the keys belong to the user's UID folder
       const deletePromises = [];
       
       if (audioKey) {
@@ -56,7 +55,7 @@ export function useVoiceManagement() {
         for (const res of results) {
           if (!res.ok) {
             const err = await res.json();
-            throw new Error(err.message || 'Failed to delete one or more assets');
+            throw new Error(err.message || 'Failed to delete one or more assets from R2');
           }
         }
       }
@@ -67,7 +66,7 @@ export function useVoiceManagement() {
 
       toast({ 
         title: "Voice deleted", 
-        description: "The voice profile and associated storage files have been permanently removed.",
+        description: "The voice profile and associated R2 storage files have been permanently removed.",
       });
       
       return true;
