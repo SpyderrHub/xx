@@ -57,7 +57,8 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
   };
 
   const handleDelete = async () => {
-    await deleteVoice(voice.id, voice.avatarUrl, voice.audioUrl);
+    // Pass the storage keys instead of public URLs to ensure server-side verification passes
+    await deleteVoice(voice.id, voice.avatarKey, voice.audioKey);
   };
 
   const languages = Array.isArray(voice.languages) 
@@ -105,7 +106,7 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-white">Delete Voice?</AlertDialogTitle>
                 <AlertDialogDescription className="text-muted-foreground">
-                  This action will permanently delete this voice and all related data. This cannot be undone.
+                  This action will permanently delete this voice and all related data from Cloudflare R2 and Firestore. This cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

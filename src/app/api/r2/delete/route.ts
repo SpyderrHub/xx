@@ -20,18 +20,37 @@ export async function POST(request: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    const { key } = await request.json();
+    const { key: rawKey } = await request.json();
 
-    if (!key) {
+    if (!rawKey) {
       return NextResponse.json({ message: 'Key required' }, { status: 400 });
+    }
+
+    // Extraction: If a full URL was accidentally passed, extract the relative key
+    // R2 URLs usually look like: https://{domain}/{key}
+    let key = rawKey;
+    if (rawKey.startsWith('http')) {
+      try {
+        const url = new URL(rawKey);
+        // Pathname starts with '/', remove it to get the key
+        key = url.pathname.substring(1);
+      } catch (e) {
+        // Not a valid URL, treat as raw key
+      }
     }
 
     // Verification: Ensure key follows path structure and belongs to this user
     // Expected structure: category/uid/...
     const keyParts = key.split('/');
-    if (keyParts.length < 2 || keyParts[1] !== uid) {
+    
+    // Find the UID part. Since our structure is strictly {root}/{uid}/...
+    // keyParts[1] should be the UID.
+    const pathUid = keyParts[1];
+
+    if (keyParts.length < 2 || pathUid !== uid) {
       return NextResponse.json({ 
-        message: 'Forbidden: You can only delete your own assets' 
+        message: 'Forbidden: You can only delete your own assets',
+        debug: { key, expectedUid: uid, foundUid: pathUid }
       }, { status: 403 });
     }
 
