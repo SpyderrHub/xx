@@ -8,6 +8,8 @@ import {
   User,
   LogOut,
   Menu,
+  Users,
+  FileText,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -19,7 +21,6 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
-  SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import Logo from '@/components/logo';
 import { useFirebase } from '@/firebase';
@@ -161,6 +162,22 @@ export default function AuthorLayout({
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Manage Users">
+                  <Link href="/author/users">
+                    <Users />
+                    <span>Manage Users</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Documentation">
+                  <Link href="/author/manage-docs">
+                    <FileText />
+                    <span>Documentation</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
             <SidebarFooter className="px-2">
               <SidebarMenuItem>
@@ -176,7 +193,9 @@ export default function AuthorLayout({
         </Sidebar>
         <SidebarInset>
           <AuthorHeader title="Author Studio" />
-          <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+          <div className="flex-1 overflow-y-auto">
+            <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </div>
