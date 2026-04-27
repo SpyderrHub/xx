@@ -1,16 +1,19 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { X, Save, Loader2, Globe, Plus, Palette, FileText } from 'lucide-react';
+import { X, Save, Loader2, Globe, Plus, Palette, FileText, Sparkles } from 'lucide-react';
 import { VoiceStudioTextarea } from './voice-studio-textarea';
 import { useVoiceUpdate } from '@/hooks/use-voice-update';
+import { AvatarUpload, WEAVY_PRESETS } from './avatar-upload';
+import { useFirebase } from '@/firebase';
+import { toast } from '@/hooks/use-toast';
 
 const PREDEFINED_LANGUAGES = [
   "English, US", "English, UK", "English, India", "Spanish", "Hindi", "Bengali", "Telugu", 
@@ -26,10 +29,21 @@ interface VoiceEditDialogProps {
 }
 
 export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps) {
+  const { user } = useFirebase();
   const { updateVoice, isUpdating } = useVoiceUpdate();
   const [customLanguage, setCustomLanguage] = useState('');
   const [customStyle, setCustomStyle] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
+  // Avatar State
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
+    voice.avatarUrl?.startsWith('http') ? voice.avatarUrl : null
+  );
+  const [selectedGradientIndex, setSelectedGradientIndex] = useState(
+    voice.avatarUrl?.startsWith('weavy:') ? parseInt(voice.avatarUrl.split(':')[1]) : 0
+  );
+
   const [formData, setFormData] = useState({
     voiceName: voice.voiceName || '',
     languages: Array.isArray(voice.languages) ? voice.languages : [voice.language].filter(Boolean),
@@ -38,6 +52,54 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
     description: voice.description || '',
     referenceText: voice.referenceText || ''
   });
+
+  const handleAvatarSelect = (file: File | null) => {
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setAvatarFile(null);
+      setAvatarPreviewUrl(null);
+    }
+  };
+
+  const uploadFileToR2 = async (file: File): Promise<{ url: string; key: string }> => {
+    if (!user) throw new Error('User not authenticated');
+    
+    const idToken = await user.getIdToken();
+    const contentType = file.type || 'application/octet-stream';
+    
+    const presignRes = await fetch('/api/r2/presign', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        contentType: contentType,
+        path: 'avatars', 
+      }),
+    });
+
+    const presignData = await presignRes.json();
+    if (!presignRes.ok) throw new Error(presignData.message || 'Failed to get upload authorization');
+
+    const { presignedUrl, publicUrl, key } = presignData;
+
+    const uploadRes = await fetch(presignedUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+      body: file,
+    });
+
+    if (!uploadRes.ok) throw new Error('Failed to upload image to storage');
+
+    return { url: publicUrl, key };
+  };
 
   const handleToggleLanguage = (lang: string) => {
     setFormData(prev => {
@@ -82,11 +144,39 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
   };
 
   const handleSave = async () => {
-    const success = await updateVoice(voice.id, {
-      ...formData,
-      style: formData.styles[0] || 'Narration', // Keep single field updated too
-    });
-    if (success) onClose();
+    setIsUploadingImage(true);
+    let avatarUrl = voice.avatarUrl;
+    let avatarKey = voice.avatarKey;
+
+    try {
+      // 1. Handle Avatar Change
+      if (avatarFile) {
+        const res = await uploadFileToR2(avatarFile);
+        avatarUrl = res.url;
+        avatarKey = res.key;
+      } else if (!avatarPreviewUrl) {
+        // It's a gradient
+        avatarUrl = `weavy:${selectedGradientIndex}`;
+        avatarKey = ""; 
+      } else if (avatarPreviewUrl === voice.avatarUrl && voice.avatarUrl.startsWith('weavy:')) {
+        // Gradient might have changed index but not mode
+        avatarUrl = `weavy:${selectedGradientIndex}`;
+      }
+
+      // 2. Update Firestore
+      const success = await updateVoice(voice.id, {
+        ...formData,
+        avatarUrl,
+        avatarKey,
+        style: formData.styles[0] || 'Narration',
+      });
+      
+      if (success) onClose();
+    } catch (error: any) {
+      toast({ title: "Update Error", description: error.message, variant: "destructive" });
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   return (
@@ -99,7 +189,17 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-8 py-4">
+          {/* Avatar Section */}
+          <div className="flex justify-center border-b border-white/5 pb-8">
+            <AvatarUpload 
+              onAvatarSelect={handleAvatarSelect} 
+              avatarPreview={avatarPreviewUrl} 
+              onGradientSelect={setSelectedGradientIndex}
+              selectedGradientIndex={selectedGradientIndex}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Voice Name</Label>
@@ -231,13 +331,13 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={onClose} disabled={isUpdating}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose} disabled={isUpdating || isUploadingImage}>Cancel</Button>
           <Button 
             onClick={handleSave} 
-            disabled={isUpdating || formData.languages.length === 0 || formData.styles.length === 0}
+            disabled={isUpdating || isUploadingImage || formData.languages.length === 0 || formData.styles.length === 0}
             className="bg-primary hover:bg-primary/90 min-w-[120px]"
           >
-            {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isUpdating || isUploadingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Save Changes
           </Button>
         </DialogFooter>
