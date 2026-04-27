@@ -99,10 +99,13 @@ export default function SettingsPage() {
       const presignData = await presignRes.json();
       if (!presignRes.ok) throw new Error(presignData.message);
 
-      // 2. Upload to R2
+      // 2. Upload to R2 with cache headers
       const uploadRes = await fetch(presignData.presignedUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type },
+        headers: { 
+          'Content-Type': file.type,
+          'Cache-Control': 'public, max-age=31536000, immutable'
+        },
         body: file,
       });
 
@@ -269,7 +272,7 @@ export default function SettingsPage() {
               <span className="text-xs font-black uppercase tracking-widest text-white">Identity Studio</span>
             </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Profile images are securely stored in Cloudflare R2 under your unique user directory.
+              Profile images are securely stored in Cloudflare R2 under your unique user directory with 1-year immutable caching.
             </p>
           </div>
         </div>

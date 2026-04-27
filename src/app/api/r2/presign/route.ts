@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
       Bucket: BUCKET_NAME,
       Key: key,
       ContentType: mimeType,
+      // Aggressive 1-year immutable caching for all R2 assets
+      CacheControl: 'public, max-age=31536000, immutable',
     });
 
     // Generate signed URL (expires in 1 hour)

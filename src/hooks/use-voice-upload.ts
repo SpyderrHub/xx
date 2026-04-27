@@ -30,7 +30,6 @@ export function useVoiceUpload() {
     const contentType = file.type || 'application/octet-stream';
     
     // 1. Get Presigned URL
-    // Roots are strictly: voices, avatars, users
     const presignRes = await fetch('/api/r2/presign', {
       method: 'POST',
       headers: {
@@ -56,8 +55,9 @@ export function useVoiceUpload() {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', presignedUrl, true);
       
-      // Ensure Content-Type matches exactly between signature and request
+      // Headers must match the presigned command exactly
       xhr.setRequestHeader('Content-Type', contentType);
+      xhr.setRequestHeader('Cache-Control', 'public, max-age=31536000, immutable');
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {

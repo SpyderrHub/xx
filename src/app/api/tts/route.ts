@@ -1,3 +1,4 @@
+
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
@@ -41,7 +42,13 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await res.json();
-    return NextResponse.json(data);
+    
+    // Return with aggressive 1-year caching for the synthesized output
+    return NextResponse.json(data, {
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    });
   } catch (error: any) {
     console.error('TTS Proxy Error:', error);
     return NextResponse.json(
