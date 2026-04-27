@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -7,13 +8,22 @@ import {
   signOut,
   updateProfile,
   UserCredential,
-  GoogleAuthProvider,
-  signInWithPopup,
 } from 'firebase/auth';
-import { doc, Firestore, getDoc, setDoc } from 'firebase/firestore';
+import { doc, Firestore, setDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { toast } from '@/hooks/use-toast';
+
+async function getPublicIp(): Promise<string> {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Failed to capture IP address:', error);
+    return 'unknown';
+  }
+}
 
 export async function signUpWithEmail(
   auth: Auth,
@@ -31,6 +41,7 @@ export async function signUpWithEmail(
     await updateProfile(userCredential.user, { displayName: fullName });
 
     const user = userCredential.user;
+    const userIp = await getPublicIp();
 
     const userData = {
       uid: user.uid,
@@ -38,12 +49,13 @@ export async function signUpWithEmail(
       email: user.email,
       createdAt: new Date().toISOString(),
       plan: 'free',
-      credits: 3000, // 3k initial characters for free plan
+      credits: 3000,
       role: 'user',
       subscriptionId: null,
       paymentStatus: 'inactive',
       currentPeriodStart: new Date().toISOString(),
       currentPeriodEnd: null,
+      lastIp: userIp,
     };
 
     const userDocRef = doc(firestore, 'users', user.uid);
@@ -95,55 +107,6 @@ export async function signInWithEmail(
           ? 'Invalid email or password.'
           : 'An unexpected error occurred.',
     });
-    throw error;
-  }
-}
-
-export async function signInWithGoogle(auth: Auth, firestore: Firestore): Promise<UserCredential> {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    // Check if user already exists in Firestore
-    const userDocRef = doc(firestore, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      // Create new user entry with default credits
-      const userData = {
-        uid: user.uid,
-        name: user.displayName || 'Anonymous User',
-        email: user.email,
-        createdAt: new Date().toISOString(),
-        plan: 'free',
-        credits: 3000, // 3k initial characters for free plan
-        role: 'user',
-        subscriptionId: null,
-        paymentStatus: 'inactive',
-        currentPeriodStart: new Date().toISOString(),
-        currentPeriodEnd: null,
-      };
-      await setDoc(userDocRef, userData);
-    }
-
-    return result;
-  } catch (error: any) {
-    console.error('Google Sign-In failed:', error);
-    
-    if (error.code === 'auth/unauthorized-domain') {
-      toast({
-        variant: 'destructive',
-        title: 'Domain not authorized',
-        description: 'Please ensure your custom domain is added to Authorized Domains in the Firebase Console.',
-      });
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication failed',
-        description: error.message || 'Failed to sign in with Google.',
-      });
-    }
     throw error;
   }
 }

@@ -20,7 +20,8 @@
         "dailyMusicGenerationsCount": { "type": "number" },
         "lastMusicGenerationDate": { "type": "string" },
         "dailyVoiceDesignCount": { "type": "number" },
-        "lastVoiceDesignDate": { "type": "string" }
+        "lastVoiceDesignDate": { "type": "string" },
+        "lastIp": { "type": "string", "description": "Stored for multi-account detection." }
       },
       "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role"]
     },
