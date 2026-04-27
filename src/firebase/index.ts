@@ -2,9 +2,9 @@
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, Firestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, Firestore, getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 /**
@@ -14,34 +14,33 @@ import { getStorage } from 'firebase/storage';
  * Equivalent to: Cache-Control: public, max-age=31536000, immutable
  */
 export function initializeFirebase() {
-  if (!getApps().length) {
-    const firebaseApp = initializeApp(firebaseConfig);
-    
-    // Initialize Firestore with persistent local caching
-    const firestore = initializeFirestore(firebaseApp, {
+  const apps = getApps();
+  const firebaseApp = apps.length ? apps[0] : initializeApp(firebaseConfig);
+  
+  const auth = getAuth(firebaseApp);
+  const storage = getStorage(firebaseApp);
+  
+  let firestore: Firestore;
+  
+  try {
+    // Attempt to initialize Firestore with persistent local caching
+    // Note: initializeFirestore can only be called once per app instance.
+    firestore = initializeFirestore(firebaseApp, {
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager(),
       }),
     });
-
-    return {
-      firebaseApp,
-      auth: getAuth(firebaseApp),
-      firestore,
-      storage: getStorage(firebaseApp)
-    };
+  } catch (error: any) {
+    // If initializeFirestore fails (e.g. it was already initialized), 
+    // we fallback to getFirestore to return the existing instance.
+    firestore = getFirestore(firebaseApp);
   }
 
-  const app = getApp();
   return {
-    firebaseApp: app,
-    auth: getAuth(app),
-    firestore: initializeFirestore(app, {
-      localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager(),
-      }),
-    }),
-    storage: getStorage(app)
+    firebaseApp,
+    auth,
+    firestore,
+    storage
   };
 }
 
