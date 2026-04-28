@@ -22,7 +22,12 @@ const PREDEFINED_LANGUAGES = [
   "English (IN)", "Japanese", "Korean", "German", "French", "Russian", "Portuguese", "Spanish", "Italian"
 ];
 
-const STYLES = ["Narration", "Conversational", "Emotional", "News Style", "Storytelling", "Friendly", "Whispering", "Authoritative", "Dramatic"];
+const STYLES = [
+  "Advertisement", "Sales", "Promo / Trailer", "Anime", "Cartoon", 
+  "Motivational Speaker", "Storytelling", "Dramatic", "Podcast Host", 
+  "Narration", "Professional", "Conversational", "Neutral", 
+  "Friendly", "Whispering", "Emotional", "News Style"
+];
 
 export function VoiceUploadCard() {
   const { uploadVoice, isUploading, progress } = useVoiceUpload();
@@ -307,7 +312,7 @@ export function VoiceUploadCard() {
           </div>
 
           <div className="space-y-4">
-            <Label className="text-sm font-medium">30-Second Voice Sample</Label>
+            <Label className="text-sm font-medium">Voice Sample</Label>
             <div 
               onClick={() => !file && fileInputRef.current?.click()}
               className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all ${file ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-primary/50 cursor-pointer'}`}

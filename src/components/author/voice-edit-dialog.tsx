@@ -20,7 +20,12 @@ const PREDEFINED_LANGUAGES = [
   "English (IN)", "Japanese", "Korean", "German", "French", "Russian", "Portuguese", "Spanish", "Italian"
 ];
 
-const STYLES = ["Narration", "Conversational", "Emotional", "News Style", "Storytelling", "Friendly", "Whispering", "Authoritative", "Dramatic"];
+const STYLES = [
+  "Advertisement", "Sales", "Promo / Trailer", "Anime", "Cartoon", 
+  "Motivational Speaker", "Storytelling", "Dramatic", "Podcast Host", 
+  "Narration", "Professional", "Conversational", "Neutral", 
+  "Friendly", "Whispering", "Emotional", "News Style"
+];
 
 interface VoiceEditDialogProps {
   voice: any;
