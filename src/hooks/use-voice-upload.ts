@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -27,8 +28,6 @@ export function useVoiceUpload() {
     
     const idToken = await user.getIdToken();
     const contentType = file.type || 'application/octet-stream';
-    
-    // Fix: Generate unique filename to avoid cache collision
     const uniqueFileName = `${crypto.randomUUID()}-${file.name}`;
 
     // 1. Get Presigned URL
@@ -52,12 +51,12 @@ export function useVoiceUpload() {
 
     const { presignedUrl, publicUrl, key } = presignData;
 
-    // 2. Perform XHR upload for progress tracking
+    // 2. Perform XHR upload with Cache-Control enforcement
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', presignedUrl, true);
       
-      // Headers must match the presigned command exactly
+      // Headers must match the presigned command exactly for the signature to be valid
       xhr.setRequestHeader('Content-Type', contentType);
       xhr.setRequestHeader('Cache-Control', 'public, max-age=31536000, immutable');
 
@@ -72,13 +71,12 @@ export function useVoiceUpload() {
         if (xhr.status === 200 || xhr.status === 204) {
           resolve({ url: publicUrl, key });
         } else {
-          console.error('R2 Error:', xhr.responseText);
-          reject(new Error(`Storage server rejected upload. Ensure CORS is configured for your domain.`));
+          reject(new Error(`Storage server error: ${xhr.status}`));
         }
       };
 
       xhr.onerror = () => {
-        reject(new Error('Network error during R2 upload. Check bucket CORS configuration.'));
+        reject(new Error('Network error during R2 upload.'));
       };
 
       xhr.send(file);
@@ -100,7 +98,6 @@ export function useVoiceUpload() {
       let avatarUrl = "";
       let avatarKey = "";
 
-      // 1. Upload Avatar (Weight: 20%) to 'avatars' root
       if (avatarFile) {
         const res = await uploadFileToR2(avatarFile, 'avatars', 20, 0);
         avatarUrl = res.url;
@@ -110,15 +107,12 @@ export function useVoiceUpload() {
         setProgress(20);
       }
 
-      // 2. Upload Audio (Weight: 70%) to 'voices' root
       const audioRes = await uploadFileToR2(audioFile, 'voices', 70, 20);
       const audioUrl = audioRes.url;
       const audioKey = audioRes.key;
 
-      // 3. Audio Metadata
       const audioDuration = await getAudioDuration(audioFile);
 
-      // 4. Save to Firestore
       setProgress(95);
       const voiceDocRef = doc(firestore, 'voices', voiceId);
       const voiceData = {
@@ -140,7 +134,7 @@ export function useVoiceUpload() {
       await setDoc(voiceDocRef, voiceData);
       setProgress(100);
 
-      toast({ title: "Upload Successful", description: "Voice profile saved to R2 library." });
+      toast({ title: "Success", description: "Voice profile published with immutable caching." });
       return true;
     } catch (error: any) {
       toast({ title: "Upload Failed", description: error.message, variant: "destructive" });

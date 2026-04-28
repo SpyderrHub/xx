@@ -7,8 +7,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 
 /**
  * Generates a presigned URL for secure client-side upload to R2.
- * Enforces a Firebase-style path structure: {root}/{uid}/{uuid}-{fileName}
- * Roots allowed: voices, avatars, users
+ * Enforces a unique, versioned path and aggressive 1-year immutable caching.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -16,37 +15,34 @@ export async function POST(request: NextRequest) {
     const idToken = authHeader?.split('Bearer ')[1];
     
     if (!idToken || !adminAuth) {
-      return NextResponse.json({ message: 'Unauthorized: Missing token' }, { status: 401 });
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     if (!s3Client || !BUCKET_NAME) {
       return NextResponse.json({ 
-        message: 'Storage configuration missing. Please check your .env.local file.' 
+        message: 'Storage configuration missing.' 
       }, { status: 500 });
     }
 
-    // Verify user and get UID
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
     const { fileName, contentType, path } = await request.json();
     
     if (!path || !fileName) {
-      return NextResponse.json({ message: 'Bad Request: Path and fileName required' }, { status: 400 });
+      return NextResponse.json({ message: 'Path and fileName required' }, { status: 400 });
     }
 
-    // Standardize root folders like Firebase
     const safePath = path.replace(/^\/|\/$/g, '').toLowerCase();
     const allowedRoots = ['voices', 'avatars', 'users'];
     
     if (!allowedRoots.includes(safePath)) {
-      return NextResponse.json({ message: 'Invalid storage root. Must be one of: voices, avatars, users' }, { status: 400 });
+      return NextResponse.json({ message: 'Invalid storage root.' }, { status: 400 });
     }
 
-    // Enforce isolation: {root}/{uid}/{random-uuid}-{name}
+    // Cache System: Every file gets a unique path via UUID. 
+    // This allows us to use 'immutable' safely as a new version will always have a new URL.
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
-
-    // Ensure we use a consistent Content-Type for the signature
     const mimeType = contentType || 'application/octet-stream';
 
     const command = new PutObjectCommand({
@@ -57,7 +53,6 @@ export async function POST(request: NextRequest) {
       CacheControl: 'public, max-age=31536000, immutable',
     });
 
-    // Generate signed URL (expires in 1 hour)
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     const publicDomain = getPublicDomain();
 
