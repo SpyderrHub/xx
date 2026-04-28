@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -29,6 +28,9 @@ export function useVoiceUpload() {
     const idToken = await user.getIdToken();
     const contentType = file.type || 'application/octet-stream';
     
+    // Fix: Generate unique filename to avoid cache collision
+    const uniqueFileName = `${crypto.randomUUID()}-${file.name}`;
+
     // 1. Get Presigned URL
     const presignRes = await fetch('/api/r2/presign', {
       method: 'POST',
@@ -37,7 +39,7 @@ export function useVoiceUpload() {
         'Authorization': `Bearer ${idToken}`,
       },
       body: JSON.stringify({
-        fileName: file.name,
+        fileName: uniqueFileName,
         contentType: contentType,
         path: path, 
       }),

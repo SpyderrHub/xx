@@ -84,6 +84,9 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
     const idToken = await user.getIdToken();
     const contentType = file.type || 'application/octet-stream';
     
+    // Fix: Generate unique filename to avoid cache collision
+    const uniqueFileName = `${crypto.randomUUID()}-${file.name}`;
+
     const presignRes = await fetch('/api/r2/presign', {
       method: 'POST',
       headers: {
@@ -91,7 +94,7 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
         'Authorization': `Bearer ${idToken}`,
       },
       body: JSON.stringify({
-        fileName: file.name,
+        fileName: uniqueFileName,
         contentType: contentType,
         path: 'avatars', 
       }),

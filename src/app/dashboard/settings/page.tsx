@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -82,6 +81,9 @@ export default function SettingsPage() {
     try {
       const idToken = await user.getIdToken();
       
+      // Fix: Generate unique filename to avoid cache collision
+      const uniqueFileName = `${crypto.randomUUID()}-${file.name}`;
+
       // 1. Get Presigned URL for 'users' root
       const presignRes = await fetch('/api/r2/presign', {
         method: 'POST',
@@ -90,7 +92,7 @@ export default function SettingsPage() {
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          fileName: file.name,
+          fileName: uniqueFileName,
           contentType: file.type,
           path: 'users',
         }),
