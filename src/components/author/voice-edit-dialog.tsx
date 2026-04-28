@@ -30,7 +30,7 @@ const STYLES = [
 interface VoiceEditDialogProps {
   voice: any;
   isOpen: boolean;
-  onClose: void;
+  onClose: () => void;
 }
 
 export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps) {
@@ -58,10 +58,20 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
     referenceText: voice.referenceText || ''
   });
 
+  // Memory Leak Fix: Revoke Object URL
+  useEffect(() => {
+    return () => {
+      if (avatarPreviewUrl && avatarFile) {
+        URL.revokeObjectURL(avatarPreviewUrl);
+      }
+    };
+  }, [avatarPreviewUrl, avatarFile]);
+
   const handleAvatarSelect = (file: File | null) => {
     if (file) {
       setAvatarFile(file);
-      setAvatarPreviewUrl(URL.createObjectURL(file));
+      const url = URL.createObjectURL(file);
+      setAvatarPreviewUrl(url);
     } else {
       setAvatarFile(null);
       setAvatarPreviewUrl(null);
@@ -185,7 +195,7 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-2xl bg-card/95 backdrop-blur-2xl border-white/10 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
