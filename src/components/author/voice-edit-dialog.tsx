@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,8 +15,9 @@ import { useFirebase } from '@/firebase';
 import { toast } from '@/hooks/use-toast';
 
 const PREDEFINED_LANGUAGES = [
-  "English, US", "English, UK", "English, India", "Spanish", "Hindi", "Bengali", "Telugu", 
-  "Marathi", "Tamil", "Gujarati", "Kannada", "Malayalam", "Punjabi", "French", "German", "Japanese"
+  "Assamese", "Bengali", "Gujarati", "Hindi", "Kannada", "Malayalam", "Marathi", "Odia", 
+  "Punjabi", "Tamil", "Telugu", "Chinese", "English", "English (UK)", "English (US)", 
+  "English (IN)", "Japanese", "Korean", "German", "French", "Russian", "Portuguese", "Spanish", "Italian"
 ];
 
 const STYLES = ["Narration", "Conversational", "Emotional", "News Style", "Storytelling", "Friendly", "Whispering", "Authoritative", "Dramatic"];
@@ -25,7 +25,7 @@ const STYLES = ["Narration", "Conversational", "Emotional", "News Style", "Story
 interface VoiceEditDialogProps {
   voice: any;
   isOpen: boolean;
-  onClose: () => void;
+  onClose: void;
 }
 
 export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps) {

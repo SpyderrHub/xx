@@ -17,8 +17,9 @@ import { useVoiceUpload } from '@/hooks/use-voice-upload';
 import { UploadProgressModal } from './upload-progress-modal';
 
 const PREDEFINED_LANGUAGES = [
-  "English, US", "English, UK", "English, India", "Spanish", "Hindi", "Bengali", "Telugu", 
-  "Marathi", "Tamil", "Gujarati", "Kannada", "Malayalam", "Punjabi", "French", "German", "Japanese"
+  "Assamese", "Bengali", "Gujarati", "Hindi", "Kannada", "Malayalam", "Marathi", "Odia", 
+  "Punjabi", "Tamil", "Telugu", "Chinese", "English", "English (UK)", "English (US)", 
+  "English (IN)", "Japanese", "Korean", "German", "French", "Russian", "Portuguese", "Spanish", "Italian"
 ];
 
 const STYLES = ["Narration", "Conversational", "Emotional", "News Style", "Storytelling", "Friendly", "Whispering", "Authoritative", "Dramatic"];
@@ -329,7 +330,7 @@ export function VoiceUploadCard() {
                   <motion.div key="file" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full space-y-4">
                     <div className="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                        <div className="h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
                         </div>
                         <div className="min-w-0">
