@@ -2,13 +2,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
- * Proxy route for the TTS API to bypass browser CORS and SSL restrictions
- * associated with raw IP addresses and non-standard ports.
+ * Proxy route for the TTS API to bypass browser CORS and SSL restrictions.
+ * Supports both GET and POST methods for flexible integration and caching.
  * Uses NEXT_PUBLIC_API_URL from environment variables.
  */
-export async function POST(request: NextRequest) {
+
+async function handleSynthesis(request: NextRequest, body: any) {
   try {
-    const body = await request.json();
     const authHeader = request.headers.get('authorization');
     
     // Get URL from env or fallback to provided IP
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
     
     // Return with aggressive 1-year caching for the synthesized output
+    // max-age=31536000 is exactly 1 year.
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'public, max-age=31536000, immutable',
@@ -56,4 +57,21 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  return handleSynthesis(request, body);
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const body = Object.fromEntries(searchParams.entries());
+  
+  // Basic validation: ensure we have required synthesis params
+  if (!body.text || !body.voice_id) {
+    return NextResponse.json({ message: 'Missing required query parameters: text and voice_id' }, { status: 400 });
+  }
+
+  return handleSynthesis(request, body);
 }
