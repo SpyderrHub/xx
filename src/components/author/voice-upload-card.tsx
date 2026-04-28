@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -307,7 +306,7 @@ export function VoiceUploadCard() {
           </div>
 
           <div className="space-y-4">
-            <Label className="text-sm font-medium">30-Second Voice Sample (Cloudflare R2 Upload)</Label>
+            <Label className="text-sm font-medium">30-Second Voice Sample</Label>
             <div 
               onClick={() => !file && fileInputRef.current?.click()}
               className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all ${file ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-primary/50 cursor-pointer'}`}
