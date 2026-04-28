@@ -205,6 +205,7 @@ export function VoiceUploadCard() {
                 <Globe className="h-3 w-3 text-primary" />
                 <span>Supported Languages</span>
               </div>
+              <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
             <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl min-h-[100px] max-h-40 overflow-y-auto scrollbar-hide">
               {PREDEFINED_LANGUAGES.map(lang => (
@@ -215,16 +216,18 @@ export function VoiceUploadCard() {
                   onClick={() => handleToggleLanguage(lang)}
                 >
                   {lang}
+                  {formData.languages.includes(lang) && <X className="ml-1 h-3 w-3" />}
                 </Badge>
               ))}
               {formData.languages.filter(l => !PREDEFINED_LANGUAGES.includes(l)).map(lang => (
                 <Badge
                   key={lang}
                   variant="default"
-                  className="cursor-pointer bg-indigo-600"
+                  className="cursor-pointer bg-indigo-600 transition-all"
                   onClick={() => handleToggleLanguage(lang)}
                 >
                   {lang}
+                  <X className="ml-1 h-3 w-3" />
                 </Badge>
               ))}
             </div>
@@ -233,6 +236,7 @@ export function VoiceUploadCard() {
                 placeholder="Add other language..." 
                 value={customLanguage}
                 onChange={(e) => setCustomLanguage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddCustomLanguage()}
                 className="h-9 rounded-lg bg-white/5 border-white/10 text-xs"
               />
               <Button variant="secondary" size="sm" onClick={handleAddCustomLanguage}>
@@ -247,6 +251,7 @@ export function VoiceUploadCard() {
                 <Palette className="h-3 w-3 text-primary" />
                 <span>Voice Styles</span>
               </div>
+              <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
             <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl min-h-[100px] max-h-40 overflow-y-auto scrollbar-hide">
               {STYLES.map(style => (
@@ -257,6 +262,18 @@ export function VoiceUploadCard() {
                   onClick={() => handleToggleStyle(style)}
                 >
                   {style}
+                  {formData.styles.includes(style) && <X className="ml-1 h-3 w-3" />}
+                </Badge>
+              ))}
+              {formData.styles.filter(s => !STYLES.includes(s)).map(style => (
+                <Badge
+                  key={style}
+                  variant="default"
+                  className="cursor-pointer bg-indigo-600 transition-all"
+                  onClick={() => handleToggleStyle(style)}
+                >
+                  {style}
+                  <X className="ml-1 h-3 w-3" />
                 </Badge>
               ))}
             </div>
@@ -265,6 +282,7 @@ export function VoiceUploadCard() {
                 placeholder="Add custom style..." 
                 value={customStyle}
                 onChange={(e) => setCustomStyle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddCustomStyle()}
                 className="h-9 rounded-lg bg-white/5 border-white/10 text-xs"
               />
               <Button variant="secondary" size="sm" onClick={handleAddCustomStyle}>

@@ -224,7 +224,10 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
 
           <div className="space-y-3">
             <Label className="flex items-center justify-between">
-              <span>Supported Languages</span>
+              <div className="flex items-center gap-2">
+                <Globe className="h-3 w-3 text-primary" />
+                <span>Supported Languages</span>
+              </div>
               <span className="text-[10px] text-muted-foreground uppercase font-black">Select Multiple</span>
             </Label>
             <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/10 rounded-xl max-h-32 overflow-y-auto scrollbar-hide">
