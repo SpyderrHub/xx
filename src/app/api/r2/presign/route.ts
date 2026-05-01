@@ -1,5 +1,5 @@
 
-import { NextResponse, type NextRequest } from 'next/request';
+import { NextResponse, type NextRequest } from 'next/server';
 import { s3Client, BUCKET_NAME, getPublicDomain } from '@/lib/s3-client';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
