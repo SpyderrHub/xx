@@ -85,7 +85,7 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
     const idToken = await user.getIdToken();
     const contentType = file.type || 'application/octet-stream';
     
-    // Fix: Generate unique filename to avoid cache collision
+    // Unique filename to avoid cache collision and ensure robust update
     const uniqueFileName = `${crypto.randomUUID()}-${file.name}`;
 
     const presignRes = await fetch('/api/r2/presign', {
@@ -110,7 +110,7 @@ export function VoiceEditDialog({ voice, isOpen, onClose }: VoiceEditDialogProps
       method: 'PUT',
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Cache-Control': 'public, max-age=31536000, immutable', // Enforce 1-year immutable cache
       },
       body: file,
     });

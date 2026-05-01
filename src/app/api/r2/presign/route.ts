@@ -1,5 +1,5 @@
 
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/request';
 import { s3Client, BUCKET_NAME, getPublicDomain } from '@/lib/s3-client';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -8,6 +8,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 /**
  * Generates a presigned URL for secure client-side upload to R2.
  * Enforces a unique, versioned path and aggressive 1-year immutable caching.
+ * This metadata is signed and must be sent by the client during upload.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
       CacheControl: 'public, max-age=31536000, immutable',
     });
 
+    // The signature will now require the Cache-Control header to be present in the PUT request
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     const publicDomain = getPublicDomain();
 

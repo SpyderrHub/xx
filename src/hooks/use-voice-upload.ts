@@ -57,6 +57,7 @@ export function useVoiceUpload() {
       xhr.open('PUT', presignedUrl, true);
       
       // Headers must match the presigned command exactly for the signature to be valid
+      // We explicitly set the 1-year immutable cache header here
       xhr.setRequestHeader('Content-Type', contentType);
       xhr.setRequestHeader('Cache-Control', 'public, max-age=31536000, immutable');
 

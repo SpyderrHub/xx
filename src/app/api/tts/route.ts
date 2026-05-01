@@ -44,7 +44,7 @@ async function handleSynthesis(request: NextRequest, body: any) {
     const data = await res.json();
     
     // Return with aggressive 1-year caching for the synthesized output
-    // max-age=31536000 is exactly 1 year.
+    // This allows Cloudflare and browsers to cache the result for exactly 1 year.
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'public, max-age=31536000, immutable',

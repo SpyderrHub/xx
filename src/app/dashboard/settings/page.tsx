@@ -78,6 +78,7 @@ export default function SettingsPage() {
 
     try {
       const idToken = await user.getIdToken();
+      // Use unique filename to ensure the 1-year immutable cache works correctly on new versions
       const uniqueFileName = `${crypto.randomUUID()}-${file.name}`;
 
       // 1. Get Presigned URL
@@ -98,6 +99,7 @@ export default function SettingsPage() {
       if (!presignRes.ok) throw new Error(presignData.message);
 
       // 2. Upload to R2 with Immutable Cache System Headers
+      // We must send the Cache-Control header as signed in the presign route
       const uploadRes = await fetch(presignData.presignedUrl, {
         method: 'PUT',
         headers: { 
