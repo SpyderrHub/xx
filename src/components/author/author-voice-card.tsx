@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -128,7 +127,7 @@ export function AuthorVoiceCard({ voice }: AuthorVoiceCardProps) {
               {isGradient ? (
                 <WeavyPattern presetIndex={gradientIndex} />
               ) : voice.avatarUrl ? (
-                <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+                <Image src={voice.avatarUrl} alt={voice.voiceName} fill unoptimized className="object-cover" />
               ) : (
                 <User className="h-5 w-5 sm:h-7 sm:w-7 text-muted-foreground/50" />
               )}

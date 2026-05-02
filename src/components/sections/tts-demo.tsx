@@ -141,7 +141,7 @@ export default function TtsDemoSection() {
                             {isGradient ? (
                               <WeavyPattern presetIndex={gradientIndex} />
                             ) : voice.avatarUrl ? (
-                              <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+                              <Image src={voice.avatarUrl} alt={voice.voiceName} fill unoptimized className="object-cover" />
                             ) : (
                               <div className="h-full w-full bg-white/10 flex items-center justify-center">
                                 <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />

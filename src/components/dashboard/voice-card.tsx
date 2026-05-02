@@ -1,4 +1,3 @@
-
 'use client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ interface VoiceCardProps {
 export default function VoiceCard({ name, language, avatarUrl }: VoiceCardProps) {
   return (
     <Card className="bg-card/80 overflow-hidden group relative">
-      <Image src={avatarUrl} alt={name} width={400} height={250} className="w-full object-cover aspect-[16/10] group-hover:scale-105 transition-transform duration-300"/>
+      <Image src={avatarUrl} alt={name} width={400} height={250} unoptimized className="w-full object-cover aspect-[16/10] group-hover:scale-105 transition-transform duration-300"/>
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
       <CardContent className="absolute bottom-0 left-0 right-0 p-4">
         <p className="font-semibold text-white">{name}</p>
