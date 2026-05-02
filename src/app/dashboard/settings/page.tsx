@@ -40,6 +40,44 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
+/**
+ * Converts any image to WebP format for optimal caching (Content-Type: image/webp)
+ */
+async function convertToWebP(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context failed'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+              type: 'image/webp',
+              lastModified: Date.now()
+            });
+            resolve(webpFile);
+          } else {
+            reject(new Error('Conversion failed'));
+          }
+        }, 'image/webp', 0.85);
+      };
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function SettingsPage() {
   const { user, firestore, auth } = useFirebase();
   const router = useRouter();
@@ -77,9 +115,10 @@ export default function SettingsPage() {
     setIsUploading(true);
 
     try {
+      const webpFile = await convertToWebP(file);
       const idToken = await user.getIdToken();
       // Use unique filename to ensure the 1-year immutable cache works correctly on new versions
-      const uniqueFileName = `${crypto.randomUUID()}-${file.name}`;
+      const uniqueFileName = `${crypto.randomUUID()}-${webpFile.name}`;
 
       // 1. Get Presigned URL
       const presignRes = await fetch('/api/r2/presign', {
@@ -90,7 +129,7 @@ export default function SettingsPage() {
         },
         body: JSON.stringify({
           fileName: uniqueFileName,
-          contentType: file.type,
+          contentType: webpFile.type,
           path: 'users',
         }),
       });
@@ -99,14 +138,13 @@ export default function SettingsPage() {
       if (!presignRes.ok) throw new Error(presignData.message);
 
       // 2. Upload to R2 with Immutable Cache System Headers
-      // We must send the Cache-Control header as signed in the presign route
       const uploadRes = await fetch(presignData.presignedUrl, {
         method: 'PUT',
         headers: { 
-          'Content-Type': file.type,
+          'Content-Type': webpFile.type,
           'Cache-Control': 'public, max-age=31536000, immutable'
         },
-        body: file,
+        body: webpFile,
       });
 
       if (!uploadRes.ok) throw new Error("Upload rejected by storage server.");

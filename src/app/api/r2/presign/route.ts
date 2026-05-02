@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
     
     // For avatars, we enforce image/webp Content-Type for maximum compatibility with the cache request.
-    const mimeType = safePath === 'avatars' ? 'image/webp' : (contentType || 'application/octet-stream');
+    const mimeType = (safePath === 'avatars' || safePath === 'users') ? 'image/webp' : (contentType || 'application/octet-stream');
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,

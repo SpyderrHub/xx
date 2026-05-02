@@ -24,6 +24,7 @@ import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { WeavyPattern } from '@/components/author/avatar-upload';
 import { Skeleton } from '@/components/ui/skeleton';
+import Image from 'next/image';
 
 const featureCards = [
   { title: 'Text to Speech', icon: <MessageSquare className="h-6 w-6 text-purple-400" />, href: '/dashboard/text-to-speech' },
@@ -181,7 +182,13 @@ export default function DashboardPage() {
                             <WeavyPattern presetIndex={gradientIndex} />
                           ) : (
                             <>
-                              <AvatarImage src={voice.avatarUrl} className="object-cover" />
+                              <Image 
+                                src={voice.avatarUrl} 
+                                alt={voice.voiceName}
+                                fill
+                                unoptimized
+                                className="object-cover" 
+                              />
                               <AvatarFallback className="bg-white/5 text-xs">{voice.voiceName[0]}</AvatarFallback>
                             </>
                           )}

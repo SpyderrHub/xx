@@ -1,9 +1,11 @@
+
 'use client';
 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Play, ArrowRight, Zap, Check } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const ComparisonCard = () => (
   <div className="glass-card rounded-[2rem] p-8 space-y-6 relative overflow-hidden group">
@@ -113,8 +115,14 @@ const HeroSection = () => {
             <div className="mt-16 flex items-center gap-10">
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-10 w-10 rounded-full border-2 border-background bg-secondary flex items-center justify-center text-[10px] font-bold overflow-hidden">
-                    <img src={`https://picsum.photos/seed/${i+10}/100/100`} alt="User" className="object-cover" />
+                  <div key={i} className="h-10 w-10 rounded-full border-2 border-background bg-secondary flex items-center justify-center text-[10px] font-bold overflow-hidden relative">
+                    <Image 
+                      src={`https://picsum.photos/seed/${i+10}/100/100`} 
+                      alt="User" 
+                      fill
+                      unoptimized
+                      className="object-cover" 
+                    />
                   </div>
                 ))}
               </div>
