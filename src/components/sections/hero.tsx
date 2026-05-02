@@ -101,35 +101,17 @@ const HeroSection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
-              <Button asChild size="lg" className="h-16 rounded-2xl px-10 text-lg font-black bg-primary btn-glow">
-                <Link href="/sign-up">Get Started Free</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="h-16 rounded-2xl px-10 text-lg font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10">
-                <Link href="/#voice-samples">
-                  <Play className="mr-2 h-5 w-5 fill-current" />
-                  Listen Demo
-                </Link>
-              </Button>
-            </div>
-
-            <div className="mt-16 flex items-center gap-10">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-10 w-10 rounded-full border-2 border-background bg-secondary flex items-center justify-center text-[10px] font-bold overflow-hidden relative">
-                    <Image 
-                      src={`https://picsum.photos/seed/${i+10}/100/100`} 
-                      alt="User" 
-                      fill
-                      unoptimized
-                      className="object-cover" 
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="text-sm">
-                <span className="font-bold text-white block">Trusted by 2,000+ Startups</span>
-                <span className="text-muted-foreground text-xs italic">"Cut our costs by 90% overnight."</span>
-              </div>
+              <Link href="/sign-up" className="w-full sm:w-auto">
+                <Button size="lg" className="h-16 w-full rounded-2xl px-10 text-lg font-black bg-primary btn-glow">
+                  Get Started Free
+                </Button>
+              </Link>
+              <Link href="/#voice-samples" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="h-16 w-full rounded-2xl px-10 text-lg font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10">
+                    <Play className="mr-2 h-5 w-5 fill-current" />
+                    Listen Demo
+                </Button>
+              </Link>
             </div>
           </motion.div>
 
