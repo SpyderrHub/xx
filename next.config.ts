@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'pub-64f17ada5eb44c81841333ce82896264.r2.dev',
+        hostname: 'cdn.quantisai.org',
         port: '',
         pathname: '/**',
       },

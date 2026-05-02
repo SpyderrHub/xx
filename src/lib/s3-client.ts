@@ -1,4 +1,3 @@
-
 import { S3Client } from '@aws-sdk/client-s3';
 
 /**
@@ -34,9 +33,9 @@ export const BUCKET_NAME = process.env.R2_BUCKET_NAME;
 
 /**
  * Sanitizes and returns the public domain for R2 assets.
+ * Fallback to the new custom CDN domain if the env var is missing.
  */
 export const getPublicDomain = () => {
-  const domain = process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN;
-  if (!domain) return '';
+  const domain = process.env.NEXT_PUBLIC_R2_PUBLIC_DOMAIN || 'https://cdn.quantisai.org';
   return domain.replace(/\/$/, ''); // Remove trailing slash
 };
