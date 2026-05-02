@@ -1,4 +1,3 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
@@ -44,9 +43,10 @@ async function handleSynthesis(request: NextRequest, body: any) {
     const data = await res.json();
     
     // Return with aggressive 1-year caching for the synthesized output
-    // This allows Cloudflare and browsers to cache the result for exactly 1 year.
+    // Enforce audio/mpeg as the primary delivery format
     return NextResponse.json(data, {
       headers: {
+        'Content-Type': 'audio/mpeg',
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });

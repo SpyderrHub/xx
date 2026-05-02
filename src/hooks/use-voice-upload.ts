@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -49,16 +48,16 @@ export function useVoiceUpload() {
       throw new Error(presignData.message || 'Failed to get upload authorization');
     }
 
-    const { presignedUrl, publicUrl, key } = presignData;
+    const { presignedUrl, publicUrl, key, enforcedMimeType } = presignData;
 
-    // 2. Perform XHR upload with Cache-Control enforcement
+    // 2. Perform XHR upload with Cache-Control and Content-Type enforcement
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', presignedUrl, true);
       
       // Headers must match the presigned command exactly for the signature to be valid
-      // We explicitly set the 1-year immutable cache header here
-      xhr.setRequestHeader('Content-Type', contentType);
+      // We explicitly set the 1-year immutable cache header and the enforced MIME type
+      xhr.setRequestHeader('Content-Type', enforcedMimeType || contentType);
       xhr.setRequestHeader('Cache-Control', 'public, max-age=31536000, immutable');
 
       xhr.upload.onprogress = (event) => {
@@ -125,7 +124,7 @@ export function useVoiceUpload() {
         audioUrl,
         audioKey,
         audioDuration,
-        audioFormat: audioFile.type,
+        audioFormat: 'audio/mpeg',
         status: "approved",
         createdAt: new Date().toISOString(),
         language: formData.languages[0] || "",

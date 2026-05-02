@@ -44,8 +44,13 @@ export async function POST(request: NextRequest) {
     // This allows us to use 'immutable' safely as a new version will always have a new URL.
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
     
-    // For avatars, we enforce image/webp Content-Type for maximum compatibility with the cache request.
-    const mimeType = (safePath === 'avatars' || safePath === 'users') ? 'image/webp' : (contentType || 'application/octet-stream');
+    // Enforcement: Map paths to specific MIME types for cache consistency
+    let mimeType = contentType || 'application/octet-stream';
+    if (safePath === 'avatars' || safePath === 'users') {
+      mimeType = 'image/webp';
+    } else if (safePath === 'voices') {
+      mimeType = 'audio/mpeg';
+    }
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
