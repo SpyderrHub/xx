@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -61,7 +60,13 @@ const VoiceCard = ({ voice }: { voice: any }) => {
           {isGradient ? (
             <WeavyPattern presetIndex={gradientIndex} />
           ) : voice.avatarUrl ? (
-            <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+            <Image 
+              src={voice.avatarUrl} 
+              alt={voice.voiceName} 
+              fill 
+              unoptimized
+              className="object-cover" 
+            />
           ) : (
             <User className="h-6 w-6 text-white/20" />
           )}

@@ -148,7 +148,13 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
                     {isGradient ? (
                       <WeavyPattern presetIndex={gradientIndex} />
                     ) : voice.avatarUrl ? (
-                      <Image src={voice.avatarUrl} alt={voice.voiceName} fill className="object-cover" />
+                      <Image 
+                        src={voice.avatarUrl} 
+                        alt={voice.voiceName} 
+                        fill 
+                        unoptimized
+                        className="object-cover" 
+                      />
                     ) : (
                       <User className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground/50" />
                     )}

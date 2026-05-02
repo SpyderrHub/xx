@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
@@ -119,6 +118,7 @@ const VoiceQualitySection = () => {
                               src={voice.avatarUrl} 
                               alt={voice.voiceName} 
                               fill 
+                              unoptimized
                               className={cn(
                                 "object-cover transition-opacity",
                                 playingId === voice.id ? "opacity-40" : "group-hover/avatar:opacity-40"

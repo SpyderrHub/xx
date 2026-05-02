@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, RotateCw, Sparkles } from 'lucide-react';
+import { Camera, RotateCw, Sparkles, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
@@ -25,10 +25,7 @@ export function WeavyPattern({ presetIndex, className }: { presetIndex: number, 
   
   return (
     <div className={cn("relative w-full h-full overflow-hidden", preset.base, className)}>
-      {/* Radial Center Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]" />
-
-      {/* Fluid Liquid Blob 1 - Deep Radial */}
       <motion.div 
         animate={{ 
           scale: [1, 1.4, 1],
@@ -38,8 +35,6 @@ export function WeavyPattern({ presetIndex, className }: { presetIndex: number, 
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
         className={cn("absolute -top-1/4 -left-1/4 w-full h-full rounded-full blur-[100px] opacity-60", preset.blob1)} 
       />
-      
-      {/* Fluid Liquid Blob 2 - Counter Motion */}
       <motion.div 
         animate={{ 
           scale: [1.3, 0.8, 1.3],
@@ -49,8 +44,6 @@ export function WeavyPattern({ presetIndex, className }: { presetIndex: number, 
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         className={cn("absolute -bottom-1/4 -right-1/4 w-full h-full rounded-full blur-[110px] opacity-50", preset.blob2)} 
       />
-
-      {/* Fluid Liquid Blob 3 - Central Morph */}
       <motion.div 
         animate={{ 
           scale: [0.8, 1.5, 0.8],
@@ -61,8 +54,6 @@ export function WeavyPattern({ presetIndex, className }: { presetIndex: number, 
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         className={cn("absolute top-1/4 right-1/4 w-[90%] h-[90%] rounded-full blur-[90px]", preset.blob3)} 
       />
-
-      {/* Fluid Liquid Blob 4 - Detail Layer */}
       <motion.div 
         animate={{ 
           opacity: [0.1, 0.3, 0.1],
@@ -71,11 +62,7 @@ export function WeavyPattern({ presetIndex, className }: { presetIndex: number, 
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         className={cn("absolute bottom-1/4 left-1/4 w-[70%] h-[70%] rounded-full blur-[80px]", preset.blob4)} 
       />
-      
-      {/* Noise Texture Overlay */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-      
-      {/* Glass & Border Highlight */}
       <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 pointer-events-none" />
     </div>
   );
@@ -88,6 +75,44 @@ interface AvatarUploadProps {
   selectedGradientIndex: number;
 }
 
+/**
+ * Converts any image to WebP format for optimal caching (Content-Type: image/webp)
+ */
+async function convertToWebP(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context failed'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+              type: 'image/webp',
+              lastModified: Date.now()
+            });
+            resolve(webpFile);
+          } else {
+            reject(new Error('Conversion failed'));
+          }
+        }, 'image/webp', 0.85);
+      };
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function AvatarUpload({ 
   onAvatarSelect, 
   avatarPreview, 
@@ -95,28 +120,22 @@ export function AvatarUpload({
   selectedGradientIndex 
 }: AvatarUploadProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload a PNG, JPG, or WEBP image.",
-          variant: "destructive",
-        });
-        return;
+      setIsConverting(true);
+      try {
+        const webpFile = await convertToWebP(file);
+        onAvatarSelect(webpFile);
+      } catch (err) {
+        console.error("WebP conversion failed", err);
+        toast({ title: "Image Error", description: "Failed to optimize image format.", variant: "destructive" });
+      } finally {
+        setIsConverting(false);
       }
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Avatar image must be less than 2MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-      onAvatarSelect(file);
     }
   };
 
@@ -125,7 +144,7 @@ export function AvatarUpload({
     const nextIndex = (selectedGradientIndex + 1) % WEAVY_PRESETS.length;
     onGradientSelect(nextIndex);
     if (avatarPreview) {
-      onAvatarSelect(null); // Clear image if randomizing color
+      onAvatarSelect(null);
     }
   };
 
@@ -135,7 +154,7 @@ export function AvatarUpload({
         className="relative group cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => !isConverting && fileInputRef.current?.click()}
       >
         <motion.div 
           whileHover={{ scale: 1.05 }}
@@ -155,6 +174,7 @@ export function AvatarUpload({
                   src={avatarPreview} 
                   alt="Speaker Avatar" 
                   fill 
+                  unoptimized
                   className="object-cover"
                 />
               </motion.div>
@@ -173,7 +193,7 @@ export function AvatarUpload({
           </AnimatePresence>
 
           <AnimatePresence>
-            {isHovered && (
+            {(isHovered || isConverting) && (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -181,15 +201,20 @@ export function AvatarUpload({
                 className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-10"
               >
                 <div className="text-center">
-                  <Camera className="h-6 w-6 text-white mx-auto mb-1" />
-                  <p className="text-[10px] font-black uppercase text-white tracking-widest">Change Photo</p>
+                  {isConverting ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin mx-auto mb-1" />
+                  ) : (
+                    <Camera className="h-6 w-6 text-white mx-auto mb-1" />
+                  )}
+                  <p className="text-[10px] font-black uppercase text-white tracking-widest">
+                    {isConverting ? 'Optimizing...' : 'Change Photo'}
+                  </p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
         
-        {/* Randomize Action */}
         <button 
           onClick={handleRandomize}
           className="absolute -bottom-2 -right-2 h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/20 border border-white/10 hover:scale-110 active:scale-95 transition-all z-20 group/btn"
@@ -202,7 +227,7 @@ export function AvatarUpload({
           type="file" 
           ref={fileInputRef} 
           onChange={handleFileChange} 
-          accept="image/png,image/jpeg,image/webp" 
+          accept="image/*" 
           className="hidden" 
         />
       </div>
@@ -212,7 +237,7 @@ export function AvatarUpload({
           <Sparkles className="h-3 w-3 text-primary" />
           <p className="text-xs font-black uppercase tracking-widest text-white">Identity Studio</p>
         </div>
-        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Fluid Radial Mesh Gradients</p>
+        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">1-Year Immutable WebP Caching</p>
       </div>
     </div>
   );

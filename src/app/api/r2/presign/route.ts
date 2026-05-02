@@ -1,4 +1,3 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import { s3Client, BUCKET_NAME, getPublicDomain } from '@/lib/s3-client';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
@@ -44,17 +43,19 @@ export async function POST(request: NextRequest) {
     // Cache System: Every file gets a unique path via UUID. 
     // This allows us to use 'immutable' safely as a new version will always have a new URL.
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
-    const mimeType = contentType || 'application/octet-stream';
+    
+    // For avatars, we enforce image/webp Content-Type for maximum compatibility with the cache request.
+    const mimeType = safePath === 'avatars' ? 'image/webp' : (contentType || 'application/octet-stream');
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
       ContentType: mimeType,
       // Aggressive 1-year immutable caching for all R2 assets
+      // This header is signed and MUST be provided by the client during PUT.
       CacheControl: 'public, max-age=31536000, immutable',
     });
 
-    // The signature will now require the Cache-Control header to be present in the PUT request
     const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     const publicDomain = getPublicDomain();
 
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
       presignedUrl,
       key,
       publicUrl: publicDomain ? `${publicDomain}/${key}` : key,
+      enforcedMimeType: mimeType
     });
   } catch (error: any) {
     console.error('Presign error:', error);
