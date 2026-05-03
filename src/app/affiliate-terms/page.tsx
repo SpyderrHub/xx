@@ -1,10 +1,10 @@
-
 'use client';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import Footer from '@/components/layout/footer';
 import { 
   ChevronLeft, 
