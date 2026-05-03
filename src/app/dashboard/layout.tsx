@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useEffect } from 'react';
@@ -200,10 +199,10 @@ const DashboardSidebar = () => {
     { href: '/dashboard/voice-cloning', label: 'AI Voice Cloning', icon: Mic2 },
     { href: '/dashboard/voice-designer', label: 'AI Voice Designer', icon: Sparkles },
     { href: '/dashboard/voice-library', label: 'AI Voice Library', icon: Library },
-    { href: '/dashboard/referrals', label: 'Refer & Earn', icon: Gift },
   ], []);
 
   const footerNav = useMemo(() => [
+    { href: '/dashboard/referrals', label: 'Refer & Earn', icon: Gift },
     { href: '/dashboard/credits', label: 'Credits', icon: Coins },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
     { href: '#', label: 'API Docs', icon: Code2 },
@@ -268,7 +267,7 @@ const DashboardSidebar = () => {
                 <Link href={item.href}>
                   <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
-                  {(item.label === "AI Voice Designer" || item.label === "AI Music Generator" || item.label === "Refer & Earn") && !isCollapsed && (
+                  {(item.label === "AI Voice Designer" || item.label === "AI Music Generator") && !isCollapsed && (
                     <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
                       Pro
                     </span>
@@ -297,6 +296,11 @@ const DashboardSidebar = () => {
                 <Link href={item.href}>
                   <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
+                  {item.label === "Refer & Earn" && !isCollapsed && (
+                    <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
+                      New
+                    </span>
+                  )}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
