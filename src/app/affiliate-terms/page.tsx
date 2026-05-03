@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -15,7 +16,10 @@ import {
   List,
   AlertTriangle,
   History,
-  Coins
+  Coins,
+  Cookie,
+  UserPlus,
+  Rocket
 } from 'lucide-react';
 
 const Section = ({ id, title, icon: Icon, children }: { id: string; title: string; icon: any; children: React.ReactNode }) => (
@@ -34,10 +38,10 @@ const Section = ({ id, title, icon: Icon, children }: { id: string; title: strin
 
 const tocItems = [
   { id: 'program-basics', title: '1. Program Basics', icon: Gift },
-  { id: 'how-it-works', title: '2. Invitation Mechanics', icon: UserCheck },
-  { id: 'rewards', title: '3. Reward Structure', icon: Coins },
-  { id: 'eligibility', title: '4. Verification Rules', icon: ShieldCheck },
-  { id: 'prohibited', title: '5. Prohibited Conduct', icon: AlertTriangle },
+  { id: 'invitation-mechanics', title: '2. Invitation Mechanics', icon: UserCheck },
+  { id: 'reward-structure', title: '3. Reward Structure', icon: Coins },
+  { id: 'verification-fraud', title: '4. Verification & Anti-Fraud', icon: ShieldCheck },
+  { id: 'usage-policy', title: '5. Credit Usage Policy', icon: Rocket },
 ];
 
 export default function AffiliateTermsPage() {
@@ -75,10 +79,10 @@ export default function AffiliateTermsPage() {
               <header className="space-y-6 text-center lg:text-left">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4">
                   <Gift className="h-3.5 w-3.5 fill-current" />
-                  <span>Affiliate Studio Policy</span>
+                  <span>Affiliate Studio Policy v2.0</span>
                 </div>
                 <h1 className="text-4xl lg:text-6xl font-black tracking-tight leading-tight">
-                  Refer & Earn <span className="text-primary">Program</span>
+                  Refer & Earn <br /><span className="text-primary">Detailed Terms</span>
                 </h1>
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground font-bold uppercase tracking-widest">
                   <div className="flex items-center gap-2">
@@ -87,86 +91,124 @@ export default function AffiliateTermsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-primary" />
-                    Instant Rewards
+                    Instant Crediting
                   </div>
                 </div>
               </header>
 
-              <div className="prose prose-invert max-w-none space-y-16">
+              <div className="prose prose-invert max-w-none space-y-20">
                 <Section id="program-basics" title="1. Program Basics" icon={Gift}>
                   <p>
-                    The QuantisAI Refer & Earn program is designed to reward our active community members for spreading the word about our studio-quality AI synthesis. By participating, you help build a network of creators while earning characters to fuel your own projects.
+                    The QuantisAI Refer & Earn program (the "Program") is designed to reward our active creators for expanding the community. By participating, you become an authorized affiliate of the platform, eligible to earn character credits through verified user acquisition.
                   </p>
                   <p>
-                    Participation in the program is currently limited to users with an <strong>active paid subscription</strong> (Starter, Creator, or Pro). Free-tier users can track successful invites but will only receive rewards upon upgrading their own account.
+                    <strong>Eligibility:</strong> Participation is currently restricted to users with an active paid subscription (Starter, Creator, or Pro). Free-tier users can generate a referral code but will only unlock the reward distribution mechanism upon their first subscription activation.
                   </p>
                 </Section>
 
-                <Section id="how-it-works" title="2. Invitation Mechanics" icon={UserCheck}>
+                <Section id="invitation-mechanics" title="2. Invitation Mechanics" icon={UserCheck}>
                   <p>
-                    Each eligible user is provided with a <strong>Unique Invitation Link</strong> containing a fixed referral code (e.g., <code>ref=ABC12345</code>). When a new visitor clicks this link, a secure cookie is placed in their browser for 30 days to attribute their activity to you.
+                    Each affiliate is assigned a unique, fixed referral code (e.g., <code>ref=ABC12345</code>). This code is used to generate your <strong>Invitation Link</strong>.
                   </p>
-                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                    <p className="font-bold text-white mb-2">The Attribution Process:</p>
-                    <ul className="list-disc pl-6 space-y-2 text-sm">
-                      <li>The invitee must sign up while the referral session is active.</li>
-                      <li>Our system automatically pairs the new account with your UID (Unique Identifier).</li>
-                      <li>You can track the status of these invites in real-time via your <strong>Affiliate Dashboard</strong>.</li>
-                    </ul>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                      <Cookie className="h-6 w-6 text-primary mb-3" />
+                      <h4 className="text-white font-bold mb-2">Tracking Cookie</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        When a visitor clicks your link, a 30-day attribution cookie is stored. If they sign up within this window, the account is permanently linked to your UID.
+                      </p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                      <UserPlus className="h-6 w-6 text-primary mb-3" />
+                      <h4 className="text-white font-bold mb-2">Attribution</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Attribution is based on a "Last Click" model. The most recent referral link clicked by the user before registration will receive the credit.
+                      </p>
+                    </div>
                   </div>
                 </Section>
 
-                <Section id="rewards" title="3. Reward Structure" icon={Coins}>
+                <Section id="reward-structure" title="3. Reward Structure" icon={Coins}>
                   <p>
-                    We believe in rewarding high-quality referrals that contribute to the platform's growth. Our current reward is:
+                    We provide a fixed reward for every high-quality referral that contributes to the growth of the QuantisAI ecosystem.
                   </p>
-                  <div className="bg-primary/10 border-2 border-primary/20 p-8 rounded-3xl text-center">
-                    <h3 className="text-3xl font-black text-white mb-2">5,000 Characters</h3>
-                    <p className="text-primary font-bold uppercase tracking-widest text-sm">Per Verified Referral</p>
+                  <div className="bg-primary/10 border-2 border-primary/20 p-8 rounded-[2.5rem] text-center my-8">
+                    <h3 className="text-4xl font-black text-white mb-2">5,000 Characters</h3>
+                    <p className="text-primary font-bold uppercase tracking-[0.2em] text-sm">Per Verified Purchase</p>
                   </div>
-                  <p className="mt-6">
-                    <strong>When is the reward given?</strong> Rewards are credited to your account <strong>immediately</strong> after your referred friend completes their first successful purchase of any paid plan (Starter, Creator, or Pro).
-                  </p>
-                  <p>
-                    Unlike standard monthly credits, Referral Rewards are added to your <strong>Permanent Balance</strong>. They do not expire at the end of the billing cycle and are only consumed after your monthly plan allowance is exhausted.
-                  </p>
-                </Section>
-
-                <Section id="eligibility" title="4. Verification Rules" icon={ShieldCheck}>
-                  <p>
-                    To ensure a fair environment for all users, every referral goes through an automated verification process:
-                  </p>
-                  <ul className="list-disc pl-6 space-y-3">
-                    <li><strong>New Users Only:</strong> The referred user must be a new person who has never had a QuantisAI account previously.</li>
-                    <li><strong>First Purchase:</strong> Rewards are only triggered on the invitee's first purchase. Subsequent renewals or plan upgrades do not trigger additional rewards.</li>
-                    <li><strong>IP Verification:</strong> Our multi-account detection system verifies that the referrer and the invitee are distinct individuals using unique IP addresses and payment methods.</li>
+                  <ul className="space-y-4 text-lg">
+                    <li className="flex items-start gap-3">
+                      <div className="h-2 w-2 rounded-full bg-primary mt-2.5 shrink-0" />
+                      <span><strong>The Trigger:</strong> Rewards are only issued when your referred friend completes their <strong>first successful purchase</strong> of any paid plan.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="h-2 w-2 rounded-full bg-primary mt-2.5 shrink-0" />
+                      <span><strong>Instant Crediting:</strong> Credits are added to your balance automatically the second the payment is verified by our gateway.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="h-2 w-2 rounded-full bg-primary mt-2.5 shrink-0" />
+                      <span><strong>Permanent Balance:</strong> Unlike monthly plan credits, Referral Rewards are added to your permanent character pool. They <strong>never expire</strong> and carry over indefinitely.</span>
+                    </li>
                   </ul>
                 </Section>
 
-                <Section id="prohibited" title="5. Prohibited Conduct" icon={AlertTriangle}>
+                <Section id="verification-fraud" title="4. Verification & Anti-Fraud" icon={ShieldCheck}>
                   <p>
-                    QuantisAI maintains a zero-tolerance policy for program abuse. Prohibited actions include, but are not limited to:
+                    To maintain a fair ecosystem, every referral is subjected to our automated <strong>Integrity Engine</strong>.
                   </p>
-                  <ul className="list-disc pl-6 space-y-2 text-sm">
-                    <li><strong>Self-Referral:</strong> Creating multiple accounts to refer yourself for credits.</li>
-                    <li><strong>Spamming:</strong> Posting your link on coupon sites, review aggregators, or through unsolicited emails.</li>
-                    <li><strong>Misrepresentation:</strong> Making false claims about QuantisAI features or pricing to lure sign-ups.</li>
-                  </ul>
-                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-xs text-red-400 font-bold uppercase tracking-wider">
-                    Violation of these terms will result in immediate forfeiture of all referral credits and permanent suspension of your QuantisAI account.
+                  <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 space-y-6">
+                    <div className="space-y-2">
+                      <h4 className="text-white font-bold">What counts as a "Verified Referral"?</h4>
+                      <p className="text-sm text-muted-foreground">A new user with a unique IP address, unique payment method, and no prior QuantisAI accounts who successfully activates a paid plan.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-red-400 font-bold flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        Prohibited Conduct
+                      </h4>
+                      <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-2">
+                        <li><strong>Self-Referral:</strong> Creating secondary accounts to refer yourself.</li>
+                        <li><strong>Incentivized Traffic:</strong> Offering cash or "bounties" to users for clicking your link.</li>
+                        <li><strong>Link Spamming:</strong> Posting links on coupon sites, deal aggregators, or through automated bot comments.</li>
+                      </ul>
+                    </div>
                   </div>
+                </Section>
+
+                <Section id="usage-policy" title="5. Credit Usage Policy" icon={Rocket}>
+                  <p>
+                    QuantisAI prioritizes the consumption of credits in a specific order to maximize user benefit:
+                  </p>
+                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                      <span className="text-sm font-bold text-white">Consumption Priority 1</span>
+                      <Badge variant="outline" className="text-[10px]">Monthly Plan Credits</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-white">Consumption Priority 2</span>
+                      <Badge variant="secondary" className="text-[10px] bg-primary/20 text-primary">Permanent Referral Credits</Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm italic">
+                    Note: Referral credits are only used after your current monthly plan allowance has been fully exhausted for the cycle.
+                  </p>
                 </Section>
               </div>
 
               <div className="pt-12 border-t border-white/5 space-y-8">
-                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                  <h3 className="text-white font-bold mb-2">Questions?</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    If you believe a referral wasn't tracked correctly or have questions about your balance, contact our affiliate team at <a href="mailto:affiliates@quantisai.com" className="text-primary hover:underline font-bold">affiliates@quantisai.com</a>.
-                  </p>
+                <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] flex flex-col md:flex-row items-center gap-8">
+                  <div className="flex-1 space-y-2">
+                    <h3 className="text-white font-bold text-xl">Ready to grow your studio?</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Head over to your affiliate dashboard to copy your link and start inviting your network today.
+                    </p>
+                  </div>
+                  <Button asChild className="rounded-2xl h-14 px-8 bg-primary font-black btn-glow">
+                    <Link href="/dashboard/referrals">Open Affiliate Studio</Link>
+                  </Button>
                 </div>
-                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
-                  © {new Date().getFullYear()} QuantisAI Affiliate Systems
+                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em] text-center">
+                  © {new Date().getFullYear()} QuantisAI Billing & Affiliate Systems
                 </p>
               </div>
             </motion.div>
@@ -175,10 +217,10 @@ export default function AffiliateTermsPage() {
           {/* Sidebar TOC */}
           <aside className="hidden lg:block lg:col-span-4">
             <div className="sticky top-24 space-y-8">
-              <div className="p-8 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-md">
+              <div className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 backdrop-blur-md">
                 <div className="flex items-center gap-3 mb-6">
                   <List className="h-5 w-5 text-primary" />
-                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Table of Contents</h3>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-white">Notice Sections</h3>
                 </div>
                 <nav className="space-y-1">
                   {tocItems.map((item) => (
@@ -194,14 +236,14 @@ export default function AffiliateTermsPage() {
                 </nav>
               </div>
 
-              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/10">
-                <Zap className="h-8 w-8 text-primary mb-4" />
-                <h4 className="text-lg font-bold text-white mb-2">Growth Leaderboard</h4>
+              <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/10">
+                <ShieldCheck className="h-8 w-8 text-primary mb-4" />
+                <h4 className="text-lg font-bold text-white mb-2">Safe & Fair</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Join the top 1% of referrers to unlock exclusive beta access and priority voice cloning features.
+                  We verify every purchase to ensure that our creators are rewarded for bringing real value to the platform.
                 </p>
                 <Button variant="link" asChild className="p-0 h-auto text-primary text-[10px] font-black uppercase tracking-widest mt-4">
-                  <Link href="/dashboard/referrals">View Leaderboard →</Link>
+                  <Link href="mailto:affiliates@quantisai.com">Contact Affiliate Support →</Link>
                 </Button>
               </div>
             </div>

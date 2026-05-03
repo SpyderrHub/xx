@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -18,7 +19,8 @@ import {
   Linkedin,
   MessageCircle,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -308,8 +310,11 @@ export default function ReferralsPage() {
                 </div>
 
                 <div className="pt-4 border-t border-white/5">
-                  <Button variant="outline" className="w-full h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs" asChild>
-                    <Link href="/affiliate-terms">Affiliate Terms →</Link>
+                  <Button variant="outline" className="w-full h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs group" asChild>
+                    <Link href="/affiliate-terms">
+                      Affiliate Terms
+                      <ExternalLink className="ml-2 h-3 w-3 group-hover:text-primary transition-colors" />
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -362,7 +367,7 @@ export default function ReferralsPage() {
                   )}
                 </div>
                 <Button variant="link" className="w-full mt-6 text-primary text-[10px] font-black uppercase tracking-widest p-0 h-auto" asChild>
-                  <Link href="/dashboard/referrals/leaderboard">Community Stats →</Link>
+                  <Link href="/dashboard/referrals">Community Stats →</Link>
                 </Button>
               </CardContent>
             </Card>
