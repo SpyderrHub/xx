@@ -243,7 +243,7 @@ export default function AffiliateTermsPage() {
                   We verify every purchase to ensure that our creators are rewarded for bringing real value to the platform.
                 </p>
                 <Button variant="link" asChild className="p-0 h-auto text-primary text-[10px] font-black uppercase tracking-widest mt-4">
-                  <Link href="mailto:affiliates@quantisai.com">Contact Affiliate Support →</Link>
+                  <Link href="mailto:support@quantisai.org">Contact Affiliate Support →</Link>
                 </Button>
               </div>
             </div>
