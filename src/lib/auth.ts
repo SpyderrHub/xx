@@ -25,6 +25,15 @@ async function getPublicIp(): Promise<string> {
   }
 }
 
+function generateReferralCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 export async function signUpWithEmail(
   auth: Auth,
   firestore: Firestore,
@@ -42,6 +51,7 @@ export async function signUpWithEmail(
 
     const user = userCredential.user;
     const userIp = await getPublicIp();
+    const referralCode = generateReferralCode();
 
     const userData = {
       uid: user.uid,
@@ -56,6 +66,7 @@ export async function signUpWithEmail(
       currentPeriodStart: new Date().toISOString(),
       currentPeriodEnd: null,
       lastIp: userIp,
+      referralCode: referralCode,
     };
 
     const userDocRef = doc(firestore, 'users', user.uid);

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useEffect } from 'react';
@@ -18,6 +19,7 @@ import {
   Ear,
   Music,
   Coins,
+  Gift,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -198,6 +200,7 @@ const DashboardSidebar = () => {
     { href: '/dashboard/voice-cloning', label: 'AI Voice Cloning', icon: Mic2 },
     { href: '/dashboard/voice-designer', label: 'AI Voice Designer', icon: Sparkles },
     { href: '/dashboard/voice-library', label: 'AI Voice Library', icon: Library },
+    { href: '/dashboard/referrals', label: 'Refer & Earn', icon: Gift },
   ], []);
 
   const footerNav = useMemo(() => [
@@ -265,7 +268,7 @@ const DashboardSidebar = () => {
                 <Link href={item.href}>
                   <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
-                  {(item.label === "AI Voice Designer" || item.label === "AI Music Generator") && !isCollapsed && (
+                  {(item.label === "AI Voice Designer" || item.label === "AI Music Generator" || item.label === "Refer & Earn") && !isCollapsed && (
                     <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
                       Pro
                     </span>
@@ -399,6 +402,7 @@ export default function DashboardLayout({
     if (pathname === '/dashboard/subscription') return 'Plan & Billing';
     if (pathname === '/dashboard/settings') return 'Account Settings';
     if (pathname === '/dashboard/credits') return 'Credits & Usage';
+    if (pathname === '/dashboard/referrals') return 'Refer & Earn';
     return 'Dashboard';
   };
 

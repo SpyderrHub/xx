@@ -21,6 +21,12 @@ service cloud.firestore {
       match /generations/{genId} {
         allow read, write: if isSignedIn() && request.auth.uid == userId;
       }
+
+      match /referrals/{refId} {
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        // Creation of referral record usually happens via a function or signup logic
+        allow write: if isSignedIn(); 
+      }
     }
 
     match /subscriptions/{subId} {

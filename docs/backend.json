@@ -21,9 +21,23 @@
         "lastMusicGenerationDate": { "type": "string" },
         "dailyVoiceDesignCount": { "type": "number" },
         "lastVoiceDesignDate": { "type": "string" },
-        "lastIp": { "type": "string", "description": "Stored for multi-account detection." }
+        "lastIp": { "type": "string", "description": "Stored for multi-account detection." },
+        "referralCode": { "type": "string", "description": "Unique code for referring others." }
       },
-      "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role"]
+      "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role", "referralCode"]
+    },
+    "Referral": {
+      "title": "Referral",
+      "type": "object",
+      "properties": {
+        "referredUserId": { "type": "string" },
+        "referredUserName": { "type": "string" },
+        "referredUserEmail": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "rewardClaimed": { "type": "boolean" }
+      },
+      "required": ["referredUserId", "status", "createdAt"]
     },
     "Voice": {
       "title": "Voice",
@@ -89,6 +103,10 @@
     "/users/{userId}/generations/{genId}": {
       "schema": { "$ref": "#/entities/Generation" },
       "description": "Individual synthesis history records."
+    },
+    "/users/{userId}/referrals/{refId}": {
+      "schema": { "$ref": "#/entities/Referral" },
+      "description": "Log of users referred by this user."
     },
     "/voices/{voiceId}": {
       "schema": { "$ref": "#/entities/Voice" },
