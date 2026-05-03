@@ -13,7 +13,9 @@ import {
   BarChart3, 
   Fingerprint, 
   User as UserIcon,
-  Loader2
+  Loader2,
+  ExternalLink,
+  Code
 } from 'lucide-react';
 import { 
   Table, 
@@ -76,24 +78,24 @@ export default function ManageReferralsPage() {
   const topReferrers = useMemo(() => {
     if (!users) return [];
     return users
-      .filter(u => u.referralCount > 0)
+      .filter(u => (u.referralCount || 0) > 0)
       .slice(0, 5);
   }, [users]);
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-20">
+    <div className="space-y-8 max-w-6xl mx-auto pb-20 px-4 md:px-0">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
             <Gift className="h-8 w-8 text-primary" />
-            Affiliate Management
+            Manage Referrals
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Monitor account performance and invite volume across all {stats.totalUsers} platform users.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Audit account identities and invitation performance across {stats.totalUsers} users.</p>
         </div>
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search Name, Email, or UID..." 
+            placeholder="Search Name, Email, or Code..." 
             className="pl-9 bg-white/5 border-white/10 rounded-xl h-11"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -109,7 +111,7 @@ export default function ManageReferralsPage() {
               <CheckCircle2 className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Verified</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Global Invites</p>
               <p className="text-2xl font-bold text-white">{stats.totalVerified.toLocaleString()}</p>
             </div>
           </CardContent>
@@ -120,8 +122,8 @@ export default function ManageReferralsPage() {
               <TrendingUp className="h-6 w-6 text-indigo-400" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Credits Issued</p>
-              <p className="text-2xl font-bold text-white">{stats.totalEarned.toLocaleString()}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Payouts</p>
+              <p className="text-2xl font-bold text-white">{stats.totalEarned.toLocaleString()} Chars</p>
             </div>
           </CardContent>
         </Card>
@@ -131,7 +133,7 @@ export default function ManageReferralsPage() {
               <Users className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active Referrers</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active Affiliates</p>
               <p className="text-2xl font-bold text-white">{stats.activeReferrers}</p>
             </div>
           </CardContent>
@@ -142,7 +144,7 @@ export default function ManageReferralsPage() {
               <Trophy className="h-6 w-6 text-amber-400" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total User Pool</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Conversion Pool</p>
               <p className="text-2xl font-bold text-white">{stats.totalUsers}</p>
             </div>
           </CardContent>
@@ -150,12 +152,12 @@ export default function ManageReferralsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main Referrers List with Account Details (Similar to Manage Users) */}
+        {/* Main Referrals Table */}
         <div className="lg:col-span-8">
           <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
             <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
               <CardTitle className="text-lg font-bold">Affiliate Directory</CardTitle>
-              <CardDescription>Comprehensive audit of user participation and lifetime invitation metrics.</CardDescription>
+              <CardDescription>Track every user's unique referral code and invitation volume.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
@@ -170,9 +172,9 @@ export default function ManageReferralsPage() {
                     <TableHeader className="bg-white/[0.02]">
                       <TableRow className="border-white/5 hover:bg-transparent">
                         <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 h-12">Account Identity</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Invitation Code</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-center">Verified Refers</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Credits Earned</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Referral Code</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-center">Invites</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Credits Issued</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -181,44 +183,39 @@ export default function ManageReferralsPage() {
                           <TableCell className="px-8 py-5">
                             <div className="flex items-center gap-4">
                               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xs ring-1 ring-primary/20 shrink-0">
-                                <UserIcon className="h-5 w-5" />
+                                {user.name ? user.name[0].toUpperCase() : <UserIcon className="h-5 w-5" />}
                               </div>
                               <div className="flex flex-col min-w-0">
                                 <span className="text-sm font-bold text-white truncate">{user.name || 'Anonymous User'}</span>
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                  <Mail className="h-2.5 w-2.5" />
+                                <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                  <Mail className="h-3 w-3" />
                                   {user.email}
-                                </span>
-                                <span className="text-[9px] text-white/20 flex items-center gap-1 font-mono uppercase mt-0.5">
-                                  <Fingerprint className="h-2 w-2" />
-                                  {user.id}
                                 </span>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            {user.referralCode ? (
-                              <code className="text-[11px] bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5 text-primary/90 font-mono font-black">
-                                {user.referralCode}
-                              </code>
-                            ) : (
-                              <span className="text-[10px] text-white/20 italic">No code assigned</span>
-                            )}
+                            <div className="flex items-center gap-2">
+                                <Code className="h-3 w-3 text-primary/40" />
+                                <code className="text-[11px] bg-white/5 px-2 py-1 rounded-lg border border-white/5 text-primary font-mono font-black">
+                                {user.referralCode || (user.id?.substring(0, 8).toUpperCase())}
+                                </code>
+                            </div>
                           </TableCell>
                           <TableCell className="text-center">
                             {user.referralCount > 0 ? (
-                              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold px-3">
+                              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-black px-3">
                                 {user.referralCount}
                               </Badge>
                             ) : (
-                              <span className="text-[10px] text-white/10 font-bold">0</span>
+                              <span className="text-[11px] text-white/10 font-bold">0</span>
                             )}
                           </TableCell>
                           <TableCell className="text-right px-8">
                             <div className="flex flex-col items-end">
                               <span className={cn(
                                 "text-sm font-black",
-                                user.referralCount > 0 ? "text-white" : "text-white/20"
+                                (user.referralCount || 0) > 0 ? "text-white" : "text-white/20"
                               )}>
                                 {((user.referralCount || 0) * REWARD_VALUE).toLocaleString()}
                               </span>
@@ -240,13 +237,13 @@ export default function ManageReferralsPage() {
           </Card>
         </div>
 
-        {/* Top Referrers Leaderboard Sidebar */}
+        {/* Top Performers Sidebar */}
         <div className="lg:col-span-4 space-y-6">
           <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary/20 rounded-[2rem] overflow-hidden">
             <CardHeader className="p-8 pb-4">
               <div className="flex items-center justify-between mb-4">
                 <Trophy className="h-6 w-6 text-primary" />
-                <Badge variant="outline" className="border-primary/30 text-primary uppercase font-black text-[9px]">Global Rankings</Badge>
+                <Badge variant="outline" className="border-primary/30 text-primary uppercase font-black text-[9px]">Platform Top 5</Badge>
               </div>
               <CardTitle className="text-xl font-bold">Top Partners</CardTitle>
               <CardDescription>Users generating the most verified volume.</CardDescription>
@@ -274,12 +271,12 @@ export default function ManageReferralsPage() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-[10px] font-black text-white">#{leader.referralCode || '...'}</p>
+                        <p className="text-[10px] font-black text-white">#{leader.referralCode || leader.id?.substring(0, 4)}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-muted-foreground italic text-center py-4">No rankings data available.</p>
+                  <p className="text-xs text-muted-foreground italic text-center py-4">No volume data available yet.</p>
                 )}
               </div>
             </CardContent>
@@ -291,9 +288,9 @@ export default function ManageReferralsPage() {
                 <BarChart3 className="h-5 w-5 text-indigo-400" />
               </div>
               <div className="space-y-2">
-                <h4 className="text-sm font-bold text-white">Program Insights</h4>
+                <h4 className="text-sm font-bold text-white">Reward Economy</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  The directory lists <span className="text-primary font-bold">all registered users</span> to help you track individual account conversion potential.
+                  Referral rewards are issued as <span className="text-primary font-bold">permanent credits</span>. They do not expire and are consumed after monthly plan credits.
                 </p>
               </div>
             </div>
