@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Gift, 
@@ -8,13 +8,17 @@ import {
   Check, 
   Users, 
   Zap, 
-  ArrowUpRight, 
   Share2, 
   Trophy,
   Loader2,
   Lock,
   Mail,
-  Calendar
+  Calendar,
+  Twitter,
+  Linkedin,
+  MessageCircle,
+  TrendingUp,
+  BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -26,6 +30,8 @@ import { toast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+
+const REWARD_PER_REFERRAL = 5000;
 
 export default function ReferralsPage() {
   const { user, firestore } = useFirebase();
@@ -47,18 +53,37 @@ export default function ReferralsPage() {
 
   const isSubscribed = userData?.plan && userData.plan !== 'free';
   
-  // Logic: Use assigned referralCode, fallback to UID fragment if missing (for legacy users), 
-  // or a default placeholder only during initial boot.
   const referralCode = userData?.referralCode || (user?.uid ? user.uid.substring(0, 8).toUpperCase() : 'QUANTIS');
-  
-  // Construct the fixed invitation link using the user's assigned code
   const referralLink = `https://www.quantisai.org/sign-up?ref=${referralCode}`;
+
+  // Stats Calculations
+  const verifiedReferrals = useMemo(() => 
+    referrals?.filter(r => r.status === 'completed') || [], 
+  [referrals]);
+
+  const totalEarned = verifiedReferrals.length * REWARD_PER_REFERRAL;
+  const conversionRate = referrals?.length 
+    ? Math.round((verifiedReferrals.length / referrals.length) * 100) 
+    : 0;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
     toast({ title: "Link Copied!", description: "Share this link with your network." });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = (platform: 'twitter' | 'linkedin' | 'whatsapp') => {
+    const text = `Join me on QuantisAI and experience studio-quality AI voice synthesis! Use my link to get started: ${referralLink}`;
+    const encodedText = encodeURIComponent(text);
+    
+    const urls = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodedText}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(referralLink)}`,
+      whatsapp: `https://api.whatsapp.com/send?text=${encodedText}`
+    };
+
+    window.open(urls[platform], '_blank');
   };
 
   if (isUserLoading) {
@@ -70,24 +95,23 @@ export default function ReferralsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-12 pb-32">
+    <div className="max-w-6xl mx-auto space-y-12 pb-32">
       {/* Header Section */}
       <header className="px-2 space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em]">
           <Gift className="h-3.5 w-3.5" />
-          <span>Affiliate Network</span>
+          <span>Affiliate Studio</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white">
           Invite Friends. <br />
-          <span className="text-primary">Earn Rewards.</span>
+          <span className="text-primary">Earn Credits.</span>
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
-          Help others discover the power of AI voice synthesis and earn character credits for every friend who joins.
+          Help your network discover studio-quality AI synthesis. Earn {REWARD_PER_REFERRAL.toLocaleString()} characters for every friend who joins a paid plan.
         </p>
       </header>
 
       {!isSubscribed ? (
-        /* Locked State for Non-Subscribed Users */
         <Card className="bg-white/[0.02] border-primary/20 rounded-[2.5rem] overflow-hidden relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
           <CardContent className="p-12 flex flex-col items-center text-center space-y-6">
@@ -96,8 +120,8 @@ export default function ReferralsPage() {
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-white">Unlock Referral Program</h2>
-              <p className="text-muted-foreground max-sm mx-auto">
-                The QuantisAI Refer & Earn program is available exclusively for our Starter, Creator, and Pro subscribers.
+              <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                The QuantisAI Refer & Earn program is available exclusively for our active subscribers. Upgrade to get your invitation link.
               </p>
             </div>
             <Button asChild size="lg" className="h-14 px-10 rounded-2xl bg-primary font-black text-lg btn-glow">
@@ -106,24 +130,22 @@ export default function ReferralsPage() {
           </CardContent>
         </Card>
       ) : (
-        /* Active State for Subscribed Users */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Main Referral Action */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-8 space-y-8">
             <Card className="bg-white/[0.02] border-white/5 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
               <div className="absolute top-0 right-0 p-8">
                 <Share2 className="h-6 w-6 text-white/10" />
               </div>
               <CardHeader className="p-10 pb-0">
-                <CardTitle className="text-2xl font-black text-white">Your Referral Studio</CardTitle>
+                <CardTitle className="text-2xl font-black text-white">Your Invitation Link</CardTitle>
                 <CardDescription className="text-base text-muted-foreground mt-2">
-                  Share your link below. Rewards will be automatically credited to your balance.
+                  Every time someone joins using this link and upgrades, you get {REWARD_PER_REFERRAL.toLocaleString()} credits.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-10 space-y-8">
+              <CardContent className="p-10 space-y-10">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary ml-1">Your Personal Invitation Link</label>
                   <div className="flex gap-3">
                     <Input 
                       value={referralLink} 
@@ -142,27 +164,56 @@ export default function ReferralsPage() {
                   </div>
                 </div>
 
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Quick Share</p>
+                  <div className="flex flex-wrap gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleShare('whatsapp')}
+                      className="rounded-xl border-white/10 bg-white/5 h-12 gap-2 hover:bg-green-500/10 hover:border-green-500/20"
+                    >
+                      <MessageCircle className="h-4 w-4 text-green-500" />
+                      WhatsApp
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleShare('twitter')}
+                      className="rounded-xl border-white/10 bg-white/5 h-12 gap-2 hover:bg-sky-500/10 hover:border-sky-500/20"
+                    >
+                      <Twitter className="h-4 w-4 text-sky-400" />
+                      Twitter
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleShare('linkedin')}
+                      className="rounded-xl border-white/10 bg-white/5 h-12 gap-2 hover:bg-blue-500/10 hover:border-blue-500/20"
+                    >
+                      <Linkedin className="h-4 w-4 text-blue-400" />
+                      LinkedIn
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-2">
                     <Zap className="h-5 w-5 text-amber-400" />
-                    <h4 className="font-bold text-white">Instant Rewards</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Earn character credits as soon as your referral signs up and verifies.</p>
+                    <h4 className="font-bold text-white">Instant Credit</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">Credits are added to your balance as soon as your referral upgrades.</p>
                   </div>
                   <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-2">
-                    <Users className="h-5 w-5 text-indigo-400" />
-                    <h4 className="font-bold text-white">Lifetime Affiliate</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Earn commissions on every subscription renewal your referred users make.</p>
+                    <TrendingUp className="h-5 w-5 text-indigo-400" />
+                    <h4 className="font-bold text-white">No Cap</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">There is no limit to how many credits you can earn via referrals.</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Referrals List */}
             <div className="space-y-6">
               <div className="flex items-center justify-between px-2">
-                <h3 className="text-xl font-bold text-white">Successful Invites</h3>
+                <h3 className="text-xl font-bold text-white">Invite History</h3>
                 <Badge variant="outline" className="bg-white/5 border-white/10 text-[10px] font-black uppercase px-3 py-1">
-                  {referrals?.length || 0} People
+                  {referrals?.length || 0} Total
                 </Badge>
               </div>
 
@@ -189,9 +240,12 @@ export default function ReferralsPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-primary mb-1">
-                          <Check className="h-3 w-3" />
-                          Verified
+                        <div className={cn(
+                          "flex items-center gap-1.5 text-[10px] font-black uppercase mb-1",
+                          ref.status === 'completed' ? "text-primary" : "text-muted-foreground"
+                        )}>
+                          {ref.status === 'completed' ? <Check className="h-3 w-3" /> : <Loader2 className="h-3 w-3 animate-spin" />}
+                          {ref.status === 'completed' ? 'Verified' : 'Pending'}
                         </div>
                         <p className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
                           <Calendar className="h-2.5 w-2.5" />
@@ -210,45 +264,90 @@ export default function ReferralsPage() {
             </div>
           </div>
 
-          {/* Stats Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar Stats & Leaderboard */}
+          <div className="lg:col-span-4 space-y-6">
             <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
               <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
-                <CardTitle className="text-lg font-bold">Network Stats</CardTitle>
+                <div className="flex items-center gap-2 mb-1">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-lg font-bold">Network Stats</CardTitle>
+                </div>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Earned</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Credits Earned</p>
                   <div className="flex items-end gap-1">
-                    <span className="text-4xl font-black text-white">0</span>
-                    <span className="text-sm font-bold text-muted-foreground mb-1.5">Credits</span>
+                    <span className="text-4xl font-black text-white">{totalEarned.toLocaleString()}</span>
+                    <Badge variant="outline" className="mb-2 border-primary/20 text-primary bg-primary/5 text-[9px] uppercase font-black">Chars</Badge>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Conversion Rate</p>
-                  <div className="flex items-end gap-1">
-                    <span className="text-4xl font-black text-white">0%</span>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Verified</p>
+                    <p className="text-xl font-bold text-white">{verifiedReferrals.length}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Conv. Rate</p>
+                    <p className="text-xl font-bold text-white">{conversionRate}%</p>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs" asChild>
-                  <Link href="/docs/affiliate">Read Terms →</Link>
+
+                <div className="pt-4 border-t border-white/5">
+                  <Button variant="outline" className="w-full h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs" asChild>
+                    <Link href="/docs/affiliate">Affiliate Terms →</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Leaderboard Module */}
+            <Card className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-8 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                    <Trophy className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Global Rank</span>
+                </div>
+                <CardTitle className="text-xl font-black text-white">Monthly Leaders</CardTitle>
+                <CardDescription className="text-xs text-primary/70 font-bold uppercase tracking-wider">Top referrers this cycle</CardDescription>
+              </CardHeader>
+              <CardContent className="p-8 pt-2">
+                <div className="space-y-4">
+                  {[
+                    { name: 'Alex M.', refs: 142, crown: true },
+                    { name: 'Sarah K.', refs: 98 },
+                    { name: 'Jason D.', refs: 76 },
+                  ].map((leader, i) => (
+                    <div key={i} className="flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-black text-white/20 w-4">{i + 1}</span>
+                        <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[10px] font-bold text-white group-hover:border-primary/30 transition-colors">
+                          {leader.name[0]}
+                        </div>
+                        <span className="text-sm font-bold text-white/90">{leader.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-primary">{leader.refs}</span>
+                        {leader.crown && <Trophy className="h-3 w-3 text-amber-400 fill-current" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button variant="link" className="w-full mt-6 text-primary text-[10px] font-black uppercase tracking-widest p-0 h-auto" asChild>
+                  <Link href="/dashboard/referrals/leaderboard">Full Leaderboard →</Link>
                 </Button>
               </CardContent>
             </Card>
 
-            <div className="p-8 rounded-[2rem] bg-gradient-to-br from-primary/20 to-transparent border border-primary/20 space-y-6">
-              <div className="h-12 w-12 rounded-2xl bg-primary/20 flex items-center justify-center">
-                <Trophy className="h-6 w-6 text-primary" />
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-bold text-white">Referral Leaderboard</h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Refer 10+ people this month to enter our monthly synthesis sweepstakes and win 1,000,000 extra credits.
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+              <div className="flex gap-3 items-start">
+                <div className="mt-1 h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <p className="text-[10px] text-muted-foreground leading-relaxed italic">
+                  Rewards are verified by our anti-fraud system. Self-referrals will result in account suspension.
                 </p>
               </div>
-              <Button variant="link" className="p-0 h-auto text-primary text-[10px] font-black uppercase tracking-widest" asChild>
-                <Link href="/dashboard/referrals/leaderboard">View Leaderboard →</Link>
-              </Button>
             </div>
           </div>
 
