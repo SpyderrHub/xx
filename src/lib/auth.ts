@@ -25,6 +25,9 @@ async function getPublicIp(): Promise<string> {
   }
 }
 
+/**
+ * Generates a unique 8-character fixed referral code for a new user.
+ */
 function generateReferralCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
@@ -51,6 +54,7 @@ export async function signUpWithEmail(
 
     const user = userCredential.user;
     const userIp = await getPublicIp();
+    // Assign a fixed referral code at sign up
     const referralCode = generateReferralCode();
 
     const userData = {

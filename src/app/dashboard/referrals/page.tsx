@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -48,7 +49,7 @@ export default function ReferralsPage() {
   const isSubscribed = userData?.plan && userData.plan !== 'free';
   const referralCode = userData?.referralCode || 'SIGNUP_PENDING';
   
-  // Use requested production domain for invitation links
+  // Construct the fixed invitation link using the user's assigned code
   const referralLink = `https://www.quantisai.org/sign-up?ref=${referralCode}`;
 
   const handleCopy = () => {
