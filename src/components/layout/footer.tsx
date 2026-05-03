@@ -64,6 +64,7 @@ const Footer = () => {
               <li><Link href="/gdpr" className="hover:text-primary transition-colors">GDPR Policy</Link></li>
               <li><Link href="/ccpa" className="hover:text-primary transition-colors">CCPA Notice</Link></li>
               <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/affiliate-terms" className="hover:text-primary transition-colors">Affiliate Terms</Link></li>
               <li><Link href="/refund-policy" className="hover:text-primary transition-colors">Refund & Cancellation</Link></li>
             </ul>
           </div>
@@ -78,6 +79,7 @@ const Footer = () => {
              <Link href="/gdpr" className="hover:text-white">GDPR</Link>
              <Link href="/ccpa" className="hover:text-white">CCPA</Link>
              <Link href="/terms" className="hover:text-white">Terms</Link>
+             <Link href="/affiliate-terms" className="hover:text-white">Affiliate</Link>
              <Link href="/refund-policy" className="hover:text-white">Refunds</Link>
           </div>
         </div>

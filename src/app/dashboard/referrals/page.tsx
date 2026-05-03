@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -310,7 +309,7 @@ export default function ReferralsPage() {
 
                 <div className="pt-4 border-t border-white/5">
                   <Button variant="outline" className="w-full h-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-xs" asChild>
-                    <Link href="/docs/affiliate">Affiliate Terms →</Link>
+                    <Link href="/affiliate-terms">Affiliate Terms →</Link>
                   </Button>
                 </div>
               </CardContent>
