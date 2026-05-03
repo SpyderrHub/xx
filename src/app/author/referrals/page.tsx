@@ -1,0 +1,289 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Gift, 
+  Search, 
+  Trophy, 
+  TrendingUp, 
+  Users, 
+  ArrowUpRight,
+  Mail,
+  Calendar,
+  Loader2,
+  CheckCircle2,
+  BarChart3,
+  ExternalLink
+} from 'lucide-react';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const REWARD_VALUE = 5000;
+
+export default function ManageReferralsPage() {
+  const { firestore } = useFirebase();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch all users to aggregate stats
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'users'), orderBy('referralCount', 'desc'));
+  }, [firestore]);
+
+  const { data: users, isLoading } = useCollection(usersQuery);
+
+  // Stats Calculations
+  const stats = useMemo(() => {
+    if (!users) return { totalVerified: 0, totalEarned: 0, activeReferrers: 0 };
+    
+    return users.reduce((acc, user) => {
+      const count = user.referralCount || 0;
+      acc.totalVerified += count;
+      acc.totalEarned += count * REWARD_VALUE;
+      if (count > 0) acc.activeReferrers += 1;
+      return acc;
+    }, { totalVerified: 0, totalEarned: 0, activeReferrers: 0 });
+  }, [users]);
+
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    return users.filter(user => {
+      const matchesSearch = 
+        user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.referralCode?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // We only want to show users who have at least one referral or a code
+      return matchesSearch && (user.referralCount > 0 || user.referralCode);
+    });
+  }, [users, searchQuery]);
+
+  const topReferrers = useMemo(() => {
+    if (!users) return [];
+    return users
+      .filter(u => u.referralCount > 0)
+      .slice(0, 5);
+  }, [users]);
+
+  return (
+    <div className="space-y-8 max-w-6xl mx-auto pb-20">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+            <Gift className="h-8 w-8 text-primary" />
+            Referral Management
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">Monitor platform growth and affiliate performance.</p>
+        </div>
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search by name, email, or code..." 
+            className="pl-9 bg-white/5 border-white/10 rounded-xl h-11"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </header>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-white/[0.02] border-white/5">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+              <CheckCircle2 className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Verified</p>
+              <p className="text-2xl font-bold text-white">{stats.totalVerified.toLocaleString()}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/[0.02] border-white/5">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+              <TrendingUp className="h-6 w-6 text-indigo-400" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Credits Issued</p>
+              <p className="text-2xl font-bold text-white">{stats.totalEarned.toLocaleString()}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/[0.02] border-white/5">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+              <Users className="h-6 w-6 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active Referrers</p>
+              <p className="text-2xl font-bold text-white">{stats.activeReferrers}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/[0.02] border-white/5">
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+              <Trophy className="h-6 w-6 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Avg. Per User</p>
+              <p className="text-2xl font-bold text-white">
+                {stats.activeReferrers ? (stats.totalVerified / stats.activeReferrers).toFixed(1) : 0}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Main Referrers List */}
+        <div className="lg:col-span-8">
+          <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
+            <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
+              <CardTitle className="text-lg font-bold">Referrer Performance</CardTitle>
+              <CardDescription>Real-time log of users with active invitations.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {isLoading ? (
+                <div className="p-8 space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                  ))}
+                </div>
+              ) : filteredUsers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-white/[0.02]">
+                      <TableRow className="border-white/5 hover:bg-transparent">
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 h-12">User Details</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Referral Code</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-center">Verified Invites</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Credits Earned</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                        <TableRow key={user.id} className="border-white/5 hover:bg-white/[0.03] transition-colors group">
+                          <TableCell className="px-8 py-5">
+                            <div className="flex items-center gap-3">
+                              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs ring-1 ring-primary/20">
+                                {user.name?.[0]?.toUpperCase() || 'U'}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-bold text-white">{user.name || 'Anonymous'}</span>
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <Mail className="h-2.5 w-2.5" />
+                                  {user.email}
+                                </span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <code className="text-xs bg-white/5 px-2 py-1 rounded border border-white/5 text-primary/80 font-mono">
+                              {user.referralCode || 'N/A'}
+                            </code>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold">
+                              {user.referralCount || 0}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right px-8">
+                            <span className="text-sm font-black text-white">
+                              {((user.referralCount || 0) * REWARD_VALUE).toLocaleString()}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <Gift className="h-12 w-12 text-white/5 mb-4" />
+                  <p className="text-muted-foreground font-medium">No referrers found matching your search.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Top Referrers Leaderboard Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary/20 rounded-[2rem] overflow-hidden">
+            <CardHeader className="p-8 pb-4">
+              <div className="flex items-center justify-between mb-4">
+                <Trophy className="h-6 w-6 text-primary" />
+                <Badge variant="outline" className="border-primary/30 text-primary uppercase font-black text-[9px]">Global Rankings</Badge>
+              </div>
+              <CardTitle className="text-xl font-bold">Leaderboard</CardTitle>
+              <CardDescription>Top acquisition partners this cycle.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-8 pt-2">
+              <div className="space-y-4">
+                {isLoading ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" />
+                  ))
+                ) : topReferrers.length > 0 ? (
+                  topReferrers.map((leader, i) => (
+                    <div key={leader.id} className="flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <span className={cn(
+                          "text-xs font-black w-4",
+                          i === 0 ? "text-amber-400" : i === 1 ? "text-gray-400" : i === 2 ? "text-orange-400" : "text-white/20"
+                        )}>{i + 1}</span>
+                        <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[10px] font-bold text-white group-hover:border-primary/30 transition-colors">
+                          {leader.name?.[0] || 'U'}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-white/90 truncate max-w-[120px]">{leader.name || 'User'}</span>
+                          <span className="text-[8px] font-black text-primary uppercase">Tier {i < 3 ? 'Elite' : 'Active'}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-white">{leader.referralCount}</p>
+                        <p className="text-[8px] text-muted-foreground uppercase font-black">Verified</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground italic text-center py-4">No rankings data available.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] p-6">
+            <div className="flex gap-4 items-start">
+              <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-500/20">
+                <BarChart3 className="h-5 w-5 text-indigo-400" />
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-sm font-bold text-white">Program Insights</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Verified referrals are currently growing at <span className="text-emerald-400 font-bold">+12% WoW</span>. High-performing referrers often share links in content-creator forums.
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

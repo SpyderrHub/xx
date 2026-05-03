@@ -10,6 +10,7 @@ import {
   Menu,
   Users,
   FileText,
+  Gift,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -167,6 +168,14 @@ export default function AuthorLayout({
                   <Link href="/author/users">
                     <Users />
                     <span>Manage Users</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Manage Referrals">
+                  <Link href="/author/referrals">
+                    <Gift />
+                    <span>Manage Referrals</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
