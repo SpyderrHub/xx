@@ -23,9 +23,10 @@
         "lastVoiceDesignDate": { "type": "string" },
         "lastIp": { "type": "string", "description": "Stored for multi-account detection." },
         "referralCode": { "type": "string", "description": "Unique code for referring others." },
-        "referredBy": { "type": "string", "description": "UID of the user who referred this user." }
+        "referredBy": { "type": "string", "description": "UID of the user who referred this user." },
+        "referralCount": { "type": "number", "description": "Total number of successfully verified referrals." }
       },
-      "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role", "referralCode"]
+      "required": ["uid", "name", "email", "createdAt", "plan", "credits", "role", "referralCode", "referralCount"]
     },
     "Referral": {
       "title": "Referral",

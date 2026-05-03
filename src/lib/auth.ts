@@ -107,6 +107,7 @@ export async function signUpWithEmail(
       lastIp: userIp,
       referralCode: referralCode,
       referredBy: referredByUid,
+      referralCount: 0,
     };
 
     const userDocRef = doc(firestore, 'users', user.uid);

@@ -86,10 +86,12 @@ export async function POST(request: NextRequest) {
 
         if (referrerDoc.exists) {
           const currentReferrerCredits = referrerDoc.data()?.credits || 0;
+          const currentReferralCount = referrerDoc.data()?.referralCount || 0;
           
-          // Add 5000 credits to referrer
+          // Add 5000 credits to referrer and increment count
           transaction.update(referrerRef, {
             credits: currentReferrerCredits + REFERRAL_REWARD_CREDITS,
+            referralCount: currentReferralCount + 1,
             updatedAt: new Date().toISOString()
           });
 

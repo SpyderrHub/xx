@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -25,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useFirebase, useDoc, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, orderBy } from 'firebase/firestore';
+import { doc, collection, query, orderBy, limit } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ export default function ReferralsPage() {
   const { user, firestore } = useFirebase();
   const [copied, setCopied] = useState(false);
 
+  // User Profile
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
@@ -44,12 +46,25 @@ export default function ReferralsPage() {
 
   const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
 
+  // User's own Referrals
   const referralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(collection(firestore, 'users', user.uid, 'referrals'), orderBy('createdAt', 'desc'));
   }, [user, firestore]);
 
   const { data: referrals, isLoading: isRefsLoading } = useCollection(referralsQuery);
+
+  // Global Leaderboard (Top 10 users by referralCount)
+  const leaderboardQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'users'),
+      orderBy('referralCount', 'desc'),
+      limit(10)
+    );
+  }, [firestore]);
+
+  const { data: topReferrers, isLoading: isLeaderboardLoading } = useCollection(leaderboardQuery);
 
   const isSubscribed = userData?.plan && userData.plan !== 'free';
   
@@ -301,7 +316,7 @@ export default function ReferralsPage() {
               </CardContent>
             </Card>
 
-            {/* Leaderboard Module */}
+            {/* Real-time Leaderboard Module */}
             <Card className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-[2rem] overflow-hidden">
               <CardHeader className="p-8 pb-4">
                 <div className="flex items-center justify-between mb-4">
@@ -310,33 +325,45 @@ export default function ReferralsPage() {
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Global Rank</span>
                 </div>
-                <CardTitle className="text-xl font-black text-white">Monthly Leaders</CardTitle>
-                <CardDescription className="text-xs text-primary/70 font-bold uppercase tracking-wider">Top referrers this cycle</CardDescription>
+                <CardTitle className="text-xl font-black text-white">Top Referrers</CardTitle>
+                <CardDescription className="text-xs text-primary/70 font-bold uppercase tracking-wider">Most verified invites</CardDescription>
               </CardHeader>
               <CardContent className="p-8 pt-2">
                 <div className="space-y-4">
-                  {[
-                    { name: 'Alex M.', refs: 142, crown: true },
-                    { name: 'Sarah K.', refs: 98 },
-                    { name: 'Jason D.', refs: 76 },
-                  ].map((leader, i) => (
-                    <div key={i} className="flex items-center justify-between group">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-black text-white/20 w-4">{i + 1}</span>
-                        <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[10px] font-bold text-white group-hover:border-primary/30 transition-colors">
-                          {leader.name[0]}
+                  {isLeaderboardLoading ? (
+                    [...Array(3)].map((_, i) => (
+                      <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" />
+                    ))
+                  ) : topReferrers && topReferrers.length > 0 ? (
+                    topReferrers.map((leader, i) => (
+                      <div key={leader.id} className={cn(
+                        "flex items-center justify-between group",
+                        leader.id === user?.uid && "bg-primary/5 -mx-4 px-4 py-2 rounded-xl"
+                      )}>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-black text-white/20 w-4">{i + 1}</span>
+                          <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[10px] font-bold text-white group-hover:border-primary/30 transition-colors">
+                            {leader.name?.[0] || 'U'}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-white/90 truncate max-w-[100px]">{leader.name || 'User'}</span>
+                            {leader.id === user?.uid && <span className="text-[8px] font-black text-primary uppercase">You</span>}
+                          </div>
                         </div>
-                        <span className="text-sm font-bold text-white/90">{leader.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-primary">{leader.referralCount || 0}</span>
+                          {i === 0 && <Trophy className="h-3 w-3 text-amber-400 fill-current" />}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-primary">{leader.refs}</span>
-                        {leader.crown && <Trophy className="h-3 w-3 text-amber-400 fill-current" />}
-                      </div>
+                    ))
+                  ) : (
+                    <div className="py-4 text-center">
+                       <p className="text-[10px] text-muted-foreground italic">No rankings available yet.</p>
                     </div>
-                  ))}
+                  )}
                 </div>
                 <Button variant="link" className="w-full mt-6 text-primary text-[10px] font-black uppercase tracking-widest p-0 h-auto" asChild>
-                  <Link href="/dashboard/referrals/leaderboard">Full Leaderboard →</Link>
+                  <Link href="/dashboard/referrals/leaderboard">Community Stats →</Link>
                 </Button>
               </CardContent>
             </Card>
