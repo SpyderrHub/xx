@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -47,7 +46,10 @@ export default function ReferralsPage() {
   const { data: referrals, isLoading: isRefsLoading } = useCollection(referralsQuery);
 
   const isSubscribed = userData?.plan && userData.plan !== 'free';
-  const referralCode = userData?.referralCode || 'SIGNUP_PENDING';
+  
+  // Logic: Use assigned referralCode, fallback to UID fragment if missing (for legacy users), 
+  // or a default placeholder only during initial boot.
+  const referralCode = userData?.referralCode || (user?.uid ? user.uid.substring(0, 8).toUpperCase() : 'QUANTIS');
   
   // Construct the fixed invitation link using the user's assigned code
   const referralLink = `https://www.quantisai.org/sign-up?ref=${referralCode}`;
