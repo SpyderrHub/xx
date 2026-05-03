@@ -16,7 +16,8 @@ import {
   BarChart3,
   ExternalLink,
   Fingerprint,
-  User as UserIcon
+  User as UserIcon,
+  UserMinus
 } from 'lucide-react';
 import { 
   Table, 
@@ -51,19 +52,19 @@ export default function ManageReferralsPage() {
 
   // Stats Calculations
   const stats = useMemo(() => {
-    if (!users) return { totalVerified: 0, totalEarned: 0, activeReferrers: 0 };
+    if (!users) return { totalVerified: 0, totalEarned: 0, activeReferrers: 0, totalUsers: 0 };
     
     return users.reduce((acc, user) => {
       const count = user.referralCount || 0;
       acc.totalVerified += count;
       acc.totalEarned += count * REWARD_VALUE;
+      acc.totalUsers += 1;
       if (count > 0) acc.activeReferrers += 1;
       return acc;
-    }, { totalVerified: 0, totalEarned: 0, activeReferrers: 0 });
+    }, { totalVerified: 0, totalEarned: 0, activeReferrers: 0, totalUsers: 0 });
   }, [users]);
 
-  // Filter users who have a referral link (effectively all users in this system)
-  // but prioritize those who are actually using it or have a name/email match.
+  // Comprehensive filter: Show all users, prioritize those with referral codes or matching search
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     return users.filter(user => {
@@ -73,8 +74,7 @@ export default function ManageReferralsPage() {
         user.referralCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.uid?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // We show everyone with a code, prioritized by search
-      return matchesSearch && user.referralCode;
+      return matchesSearch;
     });
   }, [users, searchQuery]);
 
@@ -93,7 +93,7 @@ export default function ManageReferralsPage() {
             <Gift className="h-8 w-8 text-primary" />
             Affiliate Management
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Monitor account details and invite performance across the platform.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Monitor account performance and invite volume across all {stats.totalUsers} platform users.</p>
         </div>
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -147,10 +147,8 @@ export default function ManageReferralsPage() {
               <Trophy className="h-6 w-6 text-amber-400" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Avg. Conversion</p>
-              <p className="text-2xl font-bold text-white">
-                {stats.activeReferrers ? (stats.totalVerified / stats.activeReferrers).toFixed(1) : 0}
-              </p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">User Pool</p>
+              <p className="text-2xl font-bold text-white">{stats.totalUsers}</p>
             </div>
           </CardContent>
         </Card>
@@ -161,8 +159,8 @@ export default function ManageReferralsPage() {
         <div className="lg:col-span-8">
           <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
             <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
-              <CardTitle className="text-lg font-bold">Affiliate Directory</CardTitle>
-              <CardDescription>Accounts with active referral links and their current performance.</CardDescription>
+              <CardTitle className="text-lg font-bold">Comprehensive Affiliate Directory</CardTitle>
+              <CardDescription>Full audit of all user accounts and their lifetime invitation metrics.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
@@ -204,18 +202,29 @@ export default function ManageReferralsPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <code className="text-[11px] bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5 text-primary/90 font-mono font-black">
-                              {user.referralCode}
-                            </code>
+                            {user.referralCode ? (
+                              <code className="text-[11px] bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5 text-primary/90 font-mono font-black">
+                                {user.referralCode}
+                              </code>
+                            ) : (
+                              <span className="text-[10px] text-white/20 italic">No code assigned</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-center">
-                            <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold px-3">
-                              {user.referralCount || 0}
-                            </Badge>
+                            {user.referralCount > 0 ? (
+                              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold px-3">
+                                {user.referralCount}
+                              </Badge>
+                            ) : (
+                              <span className="text-[10px] text-white/10 font-bold">0</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-right px-8">
                             <div className="flex flex-col items-end">
-                              <span className="text-sm font-black text-white">
+                              <span className={cn(
+                                "text-sm font-black",
+                                user.referralCount > 0 ? "text-white" : "text-white/20"
+                              )}>
                                 {((user.referralCount || 0) * REWARD_VALUE).toLocaleString()}
                               </span>
                               <span className="text-[8px] text-muted-foreground uppercase font-black tracking-tighter">Characters</span>
@@ -270,7 +279,7 @@ export default function ManageReferralsPage() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-[10px] font-black text-white">#{leader.referralCode}</p>
+                        <p className="text-[10px] font-black text-white">#{leader.referralCode || '...'}</p>
                       </div>
                     </div>
                   ))
@@ -289,7 +298,7 @@ export default function ManageReferralsPage() {
               <div className="space-y-2">
                 <h4 className="text-sm font-bold text-white">Program Insights</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Real-time reward issuing is enabled. You are currently providing <span className="text-primary font-bold">5,000 characters</span> per verified purchase.
+                  The directory now lists <span className="text-primary font-bold">all registered users</span> to help you track individual account conversion potential.
                 </p>
               </div>
             </div>
