@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -48,7 +47,9 @@ export default function ReferralsPage() {
 
   const isSubscribed = userData?.plan && userData.plan !== 'free';
   const referralCode = userData?.referralCode || 'SIGNUP_PENDING';
-  const referralLink = `${window.location.origin}/sign-up?ref=${referralCode}`;
+  
+  // Use requested production domain for invitation links
+  const referralLink = `https://www.quantisai.org/sign-up?ref=${referralCode}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
@@ -92,7 +93,7 @@ export default function ReferralsPage() {
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-white">Unlock Referral Program</h2>
-              <p className="text-muted-foreground max-w-sm mx-auto">
+              <p className="text-muted-foreground max-sm mx-auto">
                 The QuantisAI Refer & Earn program is available exclusively for our Starter, Creator, and Pro subscribers.
               </p>
             </div>
