@@ -8,16 +8,12 @@ import {
   Trophy, 
   TrendingUp, 
   Users, 
-  ArrowUpRight,
-  Mail,
-  Calendar,
-  Loader2,
-  CheckCircle2,
-  BarChart3,
-  ExternalLink,
-  Fingerprint,
+  Mail, 
+  CheckCircle2, 
+  BarChart3, 
+  Fingerprint, 
   User as UserIcon,
-  UserMinus
+  Loader2
 } from 'lucide-react';
 import { 
   Table, 
@@ -31,8 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
-import { format } from 'date-fns';
+import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +59,7 @@ export default function ManageReferralsPage() {
     }, { totalVerified: 0, totalEarned: 0, activeReferrers: 0, totalUsers: 0 });
   }, [users]);
 
-  // Comprehensive filter: Show all users, prioritize those with referral codes or matching search
+  // Comprehensive filter: Search by Name, Email, Code or UID
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     return users.filter(user => {
@@ -147,7 +142,7 @@ export default function ManageReferralsPage() {
               <Trophy className="h-6 w-6 text-amber-400" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">User Pool</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total User Pool</p>
               <p className="text-2xl font-bold text-white">{stats.totalUsers}</p>
             </div>
           </CardContent>
@@ -155,12 +150,12 @@ export default function ManageReferralsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main Referrers List with Account Details */}
+        {/* Main Referrers List with Account Details (Similar to Manage Users) */}
         <div className="lg:col-span-8">
           <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
             <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
-              <CardTitle className="text-lg font-bold">Comprehensive Affiliate Directory</CardTitle>
-              <CardDescription>Full audit of all user accounts and their lifetime invitation metrics.</CardDescription>
+              <CardTitle className="text-lg font-bold">Affiliate Directory</CardTitle>
+              <CardDescription>Comprehensive audit of user participation and lifetime invitation metrics.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
@@ -176,7 +171,7 @@ export default function ManageReferralsPage() {
                       <TableRow className="border-white/5 hover:bg-transparent">
                         <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 h-12">Account Identity</TableHead>
                         <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Invitation Code</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-center">Verified</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-center">Verified Refers</TableHead>
                         <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Credits Earned</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -298,7 +293,7 @@ export default function ManageReferralsPage() {
               <div className="space-y-2">
                 <h4 className="text-sm font-bold text-white">Program Insights</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  The directory now lists <span className="text-primary font-bold">all registered users</span> to help you track individual account conversion potential.
+                  The directory lists <span className="text-primary font-bold">all registered users</span> to help you track individual account conversion potential.
                 </p>
               </div>
             </div>
