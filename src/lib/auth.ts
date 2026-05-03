@@ -9,7 +9,16 @@ import {
   updateProfile,
   UserCredential,
 } from 'firebase/auth';
-import { doc, Firestore, setDoc } from 'firebase/firestore';
+import { 
+  doc, 
+  Firestore, 
+  setDoc, 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  limit 
+} from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { toast } from '@/hooks/use-toast';
@@ -42,7 +51,8 @@ export async function signUpWithEmail(
   firestore: Firestore,
   fullName: string,
   email: string,
-  password: string
+  password: string,
+  referralCodeFromUrl?: string | null
 ): Promise<UserCredential> {
   try {
     const userCredential = await createUserWithEmailAndPassword(
@@ -54,8 +64,33 @@ export async function signUpWithEmail(
 
     const user = userCredential.user;
     const userIp = await getPublicIp();
-    // Assign a fixed referral code at sign up
     const referralCode = generateReferralCode();
+
+    let referredByUid: string | null = null;
+    
+    // Check if the user was referred by someone
+    if (referralCodeFromUrl) {
+      const referrersQuery = query(
+        collection(firestore, 'users'), 
+        where('referralCode', '==', referralCodeFromUrl), 
+        limit(1)
+      );
+      const referrerSnapshot = await getDocs(referrersQuery);
+      if (!referrerSnapshot.empty) {
+        referredByUid = referrerSnapshot.docs[0].id;
+        
+        // Log the referral in the referrer's list as pending
+        const referralRecordRef = doc(firestore, 'users', referredByUid, 'referrals', user.uid);
+        await setDoc(referralRecordRef, {
+          referredUserId: user.uid,
+          referredUserName: fullName,
+          referredUserEmail: email,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          rewardClaimed: false
+        });
+      }
+    }
 
     const userData = {
       uid: user.uid,
@@ -71,6 +106,7 @@ export async function signUpWithEmail(
       currentPeriodEnd: null,
       lastIp: userIp,
       referralCode: referralCode,
+      referredBy: referredByUid,
     };
 
     const userDocRef = doc(firestore, 'users', user.uid);

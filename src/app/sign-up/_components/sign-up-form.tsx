@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -44,6 +45,8 @@ export function SignUpForm() {
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const { auth, firestore } = useFirebase();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const referralCode = searchParams.get('ref');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,7 +67,8 @@ export function SignUpForm() {
         firestore,
         values.fullName,
         values.email,
-        values.password
+        values.password,
+        referralCode
       );
       router.push('/dashboard');
     } catch (error) {
@@ -109,7 +113,11 @@ export function SignUpForm() {
             Create account
           </h2>
           <p className="text-sm text-muted-foreground font-medium">
-            Start generating studio-quality voices today.
+            {referralCode ? (
+              <span className="text-primary font-bold">You were invited! Join and get started.</span>
+            ) : (
+              "Start generating studio-quality voices today."
+            )}
           </p>
         </div>
 
