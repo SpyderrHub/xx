@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw } from 'lucide-react';
 
