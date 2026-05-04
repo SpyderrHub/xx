@@ -19,8 +19,6 @@ import {
   getDocs, 
   limit 
 } from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 import { toast } from '@/hooks/use-toast';
 
 async function getPublicIp(): Promise<string> {
@@ -47,29 +45,28 @@ function generateReferralCode(): string {
 }
 
 /**
- * Helper to generate and store an OTP for a user.
- * In production, this would also trigger an email service.
+ * Securely triggers OTP generation and email delivery via server-side API.
  */
-async function triggerOtpGeneration(firestore: Firestore, email: string) {
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+async function triggerServerSideOtp(user: any) {
+  try {
+    const idToken = await user.getIdToken();
+    const res = await fetch('/api/auth/resend-otp', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${idToken}`
+      }
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to trigger verification email');
 
-  // Verification document used by API routes
-  const otpRef = doc(firestore, 'verification_otps', email);
-  await setDoc(otpRef, {
-    email,
-    code: otp,
-    expiresAt
-  });
-
-  // Mock: Log to console since we don't have SMTP
-  console.log(`[VERIFICATION] OTP for ${email}: ${otp}`);
-  
-  // Show to user in dev mode
-  toast({
-    title: "Verification Code Sent",
-    description: `A 6-digit code has been sent to ${email}. (Dev Code: ${otp})`,
-  });
+    if (data.debugCode && process.env.NODE_ENV === 'development') {
+      console.log(`[DEV] Verification OTP: ${data.debugCode}`);
+    }
+  } catch (error) {
+    console.error('[AUTH] Failed to trigger server-side OTP:', error);
+    throw error;
+  }
 }
 
 export async function signUpWithEmail(
@@ -81,11 +78,14 @@ export async function signUpWithEmail(
   referralCodeFromUrl?: string | null
 ): Promise<UserCredential> {
   try {
+    // 1. Create the Auth Account
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
+    
+    // 2. Update Display Name
     await updateProfile(userCredential.user, { displayName: fullName });
 
     const user = userCredential.user;
@@ -94,7 +94,7 @@ export async function signUpWithEmail(
 
     let referredByUid: string | null = null;
     
-    // Check if the user was referred by someone
+    // 3. Handle Referral Attribution
     if (referralCodeFromUrl) {
       const referrersQuery = query(
         collection(firestore, 'users'), 
@@ -105,7 +105,7 @@ export async function signUpWithEmail(
       if (!referrerSnapshot.empty) {
         referredByUid = referrerSnapshot.docs[0].id;
         
-        // Log the referral in the referrer's list as pending
+        // Log the referral as pending in the referrer's subcollection
         const referralRecordRef = doc(firestore, 'users', referredByUid, 'referrals', user.uid);
         await setDoc(referralRecordRef, {
           referredUserId: user.uid,
@@ -118,6 +118,7 @@ export async function signUpWithEmail(
       }
     }
 
+    // 4. Create Main User Document
     const userData = {
       uid: user.uid,
       name: fullName,
@@ -138,21 +139,21 @@ export async function signUpWithEmail(
     };
 
     const userDocRef = doc(firestore, 'users', user.uid);
-
     await setDoc(userDocRef, userData);
 
-    // Trigger initial OTP
-    await triggerOtpGeneration(firestore, email);
+    // 5. Trigger Initial SMTP Verification Email (Server-Side)
+    await triggerServerSideOtp(user);
 
     return userCredential;
   } catch (error: any) {
+    console.error('[AUTH] Sign-up sequence failed:', error);
     toast({
       variant: 'destructive',
-      title: 'Sign-up failed',
+      title: 'Registration failed',
       description:
         error.code === 'auth/email-already-in-use'
           ? 'This email is already registered.'
-          : error.message,
+          : error.message || 'Could not complete registration.',
     });
     throw error;
   }

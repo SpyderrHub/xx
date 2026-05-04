@@ -1,9 +1,10 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
+import { sendVerificationEmail } from '@/lib/mail';
 
 /**
- * Resends a 6-digit OTP for email verification.
+ * Securely generates, stores, and sends a 6-digit OTP for email verification.
  * Verifies that the request comes from an authenticated user.
  */
 export async function POST(request: NextRequest) {
@@ -33,12 +34,22 @@ export async function POST(request: NextRequest) {
       expiresAt
     });
 
-    // 3. Mock sending (In production, use SendGrid/NodeMailer)
-    console.log(`[API] Resending OTP ${otp} to ${email}`);
+    // 3. Send via Resend SMTP
+    try {
+      await sendVerificationEmail(email, otp);
+    } catch (mailError: any) {
+      console.error('[API] SMTP Delivery failed:', mailError);
+      // We still return success if stored in DB, but with a warning or debug info in dev
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Code generated, but email delivery failed. Check server logs.',
+        debugCode: process.env.NODE_ENV === 'development' ? otp : undefined 
+      });
+    }
 
     return NextResponse.json({ 
       success: true, 
-      message: 'OTP sent successfully',
+      message: 'Verification email sent successfully.',
       debugCode: process.env.NODE_ENV === 'development' ? otp : undefined 
     });
   } catch (error: any) {
