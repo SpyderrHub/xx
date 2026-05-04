@@ -46,6 +46,32 @@ function generateReferralCode(): string {
   return result;
 }
 
+/**
+ * Helper to generate and store an OTP for a user.
+ * In production, this would also trigger an email service.
+ */
+async function triggerOtpGeneration(firestore: Firestore, email: string) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+  // Verification document used by API routes
+  const otpRef = doc(firestore, 'verification_otps', email);
+  await setDoc(otpRef, {
+    email,
+    code: otp,
+    expiresAt
+  });
+
+  // Mock: Log to console since we don't have SMTP
+  console.log(`[VERIFICATION] OTP for ${email}: ${otp}`);
+  
+  // Show to user in dev mode
+  toast({
+    title: "Verification Code Sent",
+    description: `A 6-digit code has been sent to ${email}. (Dev Code: ${otp})`,
+  });
+}
+
 export async function signUpWithEmail(
   auth: Auth,
   firestore: Firestore,
@@ -108,24 +134,15 @@ export async function signUpWithEmail(
       referralCode: referralCode,
       referredBy: referredByUid,
       referralCount: 0,
+      isVerified: false,
     };
 
     const userDocRef = doc(firestore, 'users', user.uid);
 
-    await setDoc(userDocRef, userData).catch((serverError) => {
-      const permissionError = new FirestorePermissionError({
-        path: userDocRef.path,
-        operation: 'create',
-        requestResourceData: userData,
-      });
-      errorEmitter.emit('permission-error', permissionError);
+    await setDoc(userDocRef, userData);
 
-      toast({
-        variant: 'destructive',
-        title: 'Firestore Error',
-        description: 'Could not save user data. Please try again.',
-      });
-    });
+    // Trigger initial OTP
+    await triggerOtpGeneration(firestore, email);
 
     return userCredential;
   } catch (error: any) {

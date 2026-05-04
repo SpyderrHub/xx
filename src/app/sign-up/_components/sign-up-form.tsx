@@ -7,8 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/form';
 import { useFirebase } from '@/firebase';
 import { signUpWithEmail } from '@/lib/auth';
+import { toast } from '@/hooks/use-toast';
 
 const formSchema = z
   .object({
@@ -39,11 +40,19 @@ const formSchema = z
     path: ['confirmPassword'],
   });
 
+const otpSchema = z.object({
+  code: z.string().length(6, { message: 'Verification code must be 6 digits.' }),
+});
+
+type Step = 'details' | 'otp';
+
 export function SignUpForm() {
+  const [step, setStep] = useState<Step>('details');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [isEmailLoading, setIsEmailLoading] = useState(false);
-  const { auth, firestore } = useFirebase();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const { auth, firestore, user } = useFirebase();
   const router = useRouter();
   const searchParams = useSearchParams();
   const referralCode = searchParams.get('ref');
@@ -58,9 +67,14 @@ export function SignUpForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const otpForm = useForm<z.infer<typeof otpSchema>>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: { code: '' },
+  });
+
+  async function onDetailsSubmit(values: z.infer<typeof formSchema>) {
     if (!auth || !firestore) return;
-    setIsEmailLoading(true);
+    setIsLoading(true);
     try {
       await signUpWithEmail(
         auth,
@@ -70,13 +84,66 @@ export function SignUpForm() {
         values.password,
         referralCode
       );
-      router.push('/dashboard');
+      setStep('otp');
+      toast({ title: "Account Created", description: "Please verify your email to continue." });
     } catch (error) {
       console.error('Sign up failed:', error);
     } finally {
-      setIsEmailLoading(false);
+      setIsLoading(false);
     }
   }
+
+  async function onOtpSubmit(values: z.infer<typeof otpSchema>) {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ code: values.code }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast({ title: "Email Verified", description: "Welcome to QuantisAI!" });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({ title: "Verification Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const handleResendOtp = async () => {
+    if (!user) return;
+    setIsResending(true);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch('/api/auth/resend-otp', {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${idToken}` 
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast({ 
+        title: "Code Resent", 
+        description: `A new 6-digit code has been sent to your email. ${data.debugCode ? `(Dev Code: ${data.debugCode})` : ''}` 
+      });
+    } catch (error: any) {
+      toast({ title: "Resend Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   const PasswordVisibilityToggle = ({
     visible,
@@ -108,142 +175,231 @@ export function SignUpForm() {
       <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 md:p-12 shadow-2xl backdrop-blur-2xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
         
-        <div className="mb-10 text-center md:text-left">
-          <h2 className="text-3xl font-black tracking-tight text-white mb-2">
-            Create account
-          </h2>
-          <p className="text-sm text-muted-foreground font-medium">
-            {referralCode ? (
-              <span className="text-primary font-bold">You were invited! Join and get started.</span>
-            ) : (
-              "Start generating studio-quality voices today."
-            )}
-          </p>
-        </div>
+        <AnimatePresence mode="wait">
+          {step === 'details' ? (
+            <motion.div
+              key="details"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="relative z-10"
+            >
+              <div className="mb-10 text-center md:text-left">
+                <h2 className="text-3xl font-black tracking-tight text-white mb-2">
+                  Create account
+                </h2>
+                <p className="text-sm text-muted-foreground font-medium">
+                  {referralCode ? (
+                    <span className="text-primary font-bold">You were invited! Join and get started.</span>
+                  ) : (
+                    "Start generating studio-quality voices today."
+                  )}
+                </p>
+              </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 relative z-10">
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Full Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="John Doe"
-                      {...field}
-                      className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-[10px] font-bold" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="you@example.com"
-                      {...field}
-                      className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-[10px] font-bold" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={passwordVisible ? 'text' : 'password'}
-                        placeholder="••••••••"
-                        {...field}
-                        className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
-                      />
-                      <PasswordVisibilityToggle
-                        visible={passwordVisible}
-                        onClick={() => setPasswordVisible(!passwordVisible)}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage className="text-[10px] font-bold" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm Password</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={confirmPasswordVisible ? 'text' : 'password'}
-                        placeholder="••••••••"
-                        {...field}
-                        className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
-                      />
-                      <PasswordVisibilityToggle
-                        visible={confirmPasswordVisible}
-                        onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage className="text-[10px] font-bold" />
-                </FormItem>
-              )}
-            />
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onDetailsSubmit)} className="space-y-5">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Full Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="John Doe"
+                            {...field}
+                            className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[10px] font-bold" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="you@example.com"
+                            {...field}
+                            className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[10px] font-bold" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={passwordVisible ? 'text' : 'password'}
+                              placeholder="••••••••"
+                              {...field}
+                              className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                            />
+                            <PasswordVisibilityToggle
+                              visible={passwordVisible}
+                              onClick={() => setPasswordVisible(!passwordVisible)}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-[10px] font-bold" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={confirmPasswordVisible ? 'text' : 'password'}
+                              placeholder="••••••••"
+                              {...field}
+                              className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                            />
+                            <PasswordVisibilityToggle
+                              visible={confirmPasswordVisible}
+                              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-[10px] font-bold" />
+                      </FormItem>
+                    )}
+                  />
 
-            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
-              <Button
-                type="submit"
-                className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
-                disabled={isEmailLoading}
-              >
-                {isEmailLoading ? (
-                  <Loader2 className="animate-spin mr-2" />
-                ) : null}
-                {isEmailLoading ? 'Creating account...' : 'Get Started Free'}
-              </Button>
+                  <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
+                    <Button
+                      type="submit"
+                      className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="animate-spin mr-2" />
+                      ) : <ArrowRight className="mr-2 h-5 w-5" />}
+                      {isLoading ? 'Creating account...' : 'Get Started Free'}
+                    </Button>
+                  </motion.div>
+                </form>
+              </Form>
             </motion.div>
-          </form>
-        </Form>
+          ) : (
+            <motion.div
+              key="otp"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="relative z-10"
+            >
+              <div className="mb-10 text-center">
+                <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 mx-auto mb-6">
+                  <ShieldCheck className="h-8 w-8 text-primary" />
+                </div>
+                <h2 className="text-3xl font-black tracking-tight text-white mb-2">
+                  Verify your email
+                </h2>
+                <p className="text-sm text-muted-foreground font-medium px-4">
+                  We&apos;ve sent a 6-digit verification code to <span className="text-white font-bold">{form.getValues('email')}</span>.
+                </p>
+              </div>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground leading-relaxed font-medium">
-          By signing up, you agree to our{' '}
-          <Link href="/terms" className="underline hover:text-white transition-colors">
-            Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link href="/privacy" className="underline hover:text-white transition-colors">
-            Privacy Policy
-          </Link>
-          .
-        </p>
+              <Form {...otpForm}>
+                <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-6">
+                  <FormField
+                    control={otpForm.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Verification Code</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="000000"
+                            maxLength={6}
+                            {...field}
+                            className="h-16 border-white/10 bg-white/5 text-white text-center text-3xl font-black tracking-[0.5em] rounded-2xl focus:ring-primary/20 transition-all"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[10px] font-bold text-center" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-4">
+                    <Button
+                      type="submit"
+                      className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? <Loader2 className="animate-spin mr-2" /> : <CheckCircle2 className="mr-2 h-5 w-5" />}
+                      Verify Code
+                    </Button>
+                    
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={isResending}
+                        className="text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80 disabled:opacity-50 transition-all flex items-center justify-center gap-2 mx-auto"
+                      >
+                        {isResending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                        Resend Code
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </Form>
+
+              <button 
+                onClick={() => setStep('details')}
+                className="mt-8 w-full text-center text-xs text-muted-foreground hover:text-white transition-colors font-bold uppercase tracking-widest"
+              >
+                ← Back to details
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {step === 'details' && (
+          <p className="mt-8 text-center text-xs text-muted-foreground leading-relaxed font-medium">
+            By signing up, you agree to our{' '}
+            <Link href="/terms" className="underline hover:text-white transition-colors">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="underline hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        )}
       </div>
 
-      <p className="mt-10 text-center text-sm font-medium text-muted-foreground">
-        Already have an account?{' '}
-        <Link
-          href="/login"
-          className="font-black uppercase tracking-widest text-primary hover:underline transition-all ml-1"
-        >
-          Sign in
-        </Link>
-      </p>
+      {step === 'details' && (
+        <p className="mt-10 text-center text-sm font-medium text-muted-foreground">
+          Already have an account?{' '}
+          <Link
+            href="/login"
+            className="font-black uppercase tracking-widest text-primary hover:underline transition-all ml-1"
+          >
+            Sign in
+          </Link>
+        </p>
+      )}
     </motion.div>
   );
 }
