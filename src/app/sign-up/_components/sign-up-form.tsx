@@ -65,6 +65,7 @@ export function SignUpForm() {
   const { data: userData } = useDoc(userDocRef);
 
   useEffect(() => {
+    // If user exists but is not verified, force OTP step
     if (user && userData && !userData.isVerified) {
       setStep('otp');
     } else if (user && userData?.isVerified) {
@@ -100,14 +101,9 @@ export function SignUpForm() {
         referralCode
       );
       setStep('otp');
-      toast({ title: "Account Created", description: "A verification code has been sent to your email." });
+      toast({ title: "Account Created", description: "Verification code sent to your email." });
     } catch (error: any) {
       console.error('Sign up failed:', error);
-      toast({ 
-        title: "Registration Failed", 
-        description: error.message || "Could not create account. Please check your details.", 
-        variant: "destructive" 
-      });
     } finally {
       setIsLoading(false);
     }
@@ -156,7 +152,7 @@ export function SignUpForm() {
 
       toast({ 
         title: "Code Resent", 
-        description: `A new 6-digit code has been sent. ${data.debugCode ? `(Dev Code: ${data.debugCode})` : ''}` 
+        description: `A new 6-digit code has been sent. ${data.debugCode ? `(Dev: ${data.debugCode})` : ''}` 
       });
     } catch (error: any) {
       toast({ title: "Resend Failed", description: error.message, variant: "destructive" });
@@ -186,22 +182,17 @@ export function SignUpForm() {
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="w-full"
-    >
-      <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 md:p-12 shadow-2xl backdrop-blur-2xl relative overflow-hidden group">
+    <div className="w-full">
+      <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 md:p-12 shadow-2xl backdrop-blur-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
         
         <AnimatePresence mode="wait">
           {step === 'details' ? (
             <motion.div
               key="details"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="relative z-10"
             >
               <div className="mb-10 text-center md:text-left">
@@ -210,7 +201,7 @@ export function SignUpForm() {
                 </h2>
                 <p className="text-sm text-muted-foreground font-medium">
                   {referralCode ? (
-                    <span className="text-primary font-bold">You were invited! Join and get started.</span>
+                    <span className="text-primary font-bold">Claim your invited reward.</span>
                   ) : (
                     "Start generating studio-quality voices today."
                   )}
@@ -254,76 +245,74 @@ export function SignUpForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type={passwordVisible ? 'text' : 'password'}
-                              placeholder="••••••••"
-                              {...field}
-                              className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
-                            />
-                            <PasswordVisibilityToggle
-                              visible={passwordVisible}
-                              onClick={() => setPasswordVisible(!passwordVisible)}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage className="text-[10px] font-bold" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              type={confirmPasswordVisible ? 'text' : 'password'}
-                              placeholder="••••••••"
-                              {...field}
-                              className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
-                            />
-                            <PasswordVisibilityToggle
-                              visible={confirmPasswordVisible}
-                              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage className="text-[10px] font-bold" />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={passwordVisible ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                {...field}
+                                className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                              />
+                              <PasswordVisibilityToggle
+                                visible={passwordVisible}
+                                onClick={() => setPasswordVisible(!passwordVisible)}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-[10px] font-bold" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Confirm</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={confirmPasswordVisible ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                {...field}
+                                className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                              />
+                              <PasswordVisibilityToggle
+                                visible={confirmPasswordVisible}
+                                onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-[10px] font-bold" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                  <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} className="pt-4">
-                    <Button
-                      type="submit"
-                      className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="animate-spin mr-2" />
-                      ) : <ArrowRight className="mr-2 h-5 w-5" />}
-                      {isLoading ? 'Creating account...' : 'Get Started Free'}
-                    </Button>
-                  </motion.div>
+                  <Button
+                    type="submit"
+                    className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow mt-4"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <Loader2 className="animate-spin mr-2" /> : <ArrowRight className="mr-2 h-5 w-5" />}
+                    {isLoading ? 'Processing...' : 'Get Started Free'}
+                  </Button>
                 </form>
               </Form>
             </motion.div>
           ) : (
             <motion.div
               key="otp"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="relative z-10"
             >
               <div className="mb-10 text-center">
@@ -334,7 +323,7 @@ export function SignUpForm() {
                   Verify your email
                 </h2>
                 <div className="flex flex-col items-center gap-1 px-4 text-center">
-                  <p className="text-sm text-muted-foreground font-medium">Enter the 6-digit code sent to</p>
+                  <p className="text-sm text-muted-foreground font-medium">Enter code sent to</p>
                   <div className="flex items-center gap-2 text-primary font-bold bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
                     <Mail className="h-3 w-3" />
                     <span className="text-xs truncate max-w-[220px]">{user?.email || form.getValues('email')}</span>
@@ -343,13 +332,12 @@ export function SignUpForm() {
               </div>
 
               <Form {...otpForm}>
-                <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-6">
+                <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-8">
                   <FormField
                     control={otpForm.control}
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Verification Code</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="000000"
@@ -390,40 +378,30 @@ export function SignUpForm() {
 
               <button 
                 onClick={() => setStep('details')}
-                className="mt-8 w-full text-center text-xs text-muted-foreground hover:text-white transition-colors font-bold uppercase tracking-widest"
+                className="mt-10 w-full text-center text-[10px] text-muted-foreground hover:text-white transition-colors font-black uppercase tracking-[0.2em]"
               >
                 ← Back to details
               </button>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {step === 'details' && (
-          <p className="mt-8 text-center text-xs text-muted-foreground leading-relaxed font-medium">
-            By signing up, you agree to our{' '}
-            <Link href="/terms" className="underline hover:text-white transition-colors">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="underline hover:text-white transition-colors">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        )}
       </div>
 
       {step === 'details' && (
-        <p className="mt-10 text-center text-sm font-medium text-muted-foreground">
-          Already have an account?{' '}
-          <Link
-            href="/login"
-            className="font-black uppercase tracking-widest text-primary hover:underline transition-all ml-1"
-          >
-            Sign in
-          </Link>
-        </p>
+        <>
+          <p className="mt-8 text-center text-xs text-muted-foreground leading-relaxed font-medium px-4">
+            By signing up, you agree to our{' '}
+            <Link href="/terms" className="underline hover:text-white transition-colors">Terms</Link> and{' '}
+            <Link href="/privacy" className="underline hover:text-white transition-colors">Privacy Policy</Link>.
+          </p>
+          <p className="mt-10 text-center text-sm font-medium text-muted-foreground">
+            Already have an account?{' '}
+            <Link href="/login" className="font-black uppercase tracking-widest text-primary hover:underline transition-all ml-1">
+              Sign in
+            </Link>
+          </p>
+        </>
       )}
-    </motion.div>
+    </div>
   );
 }
