@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { z } from 'genkit';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw } from 'lucide-react';
 
@@ -20,9 +20,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { signUpWithEmail } from '@/lib/auth';
 import { toast } from '@/hooks/use-toast';
+import { doc } from 'firebase/firestore';
 
 const formSchema = z
   .object({
@@ -57,6 +58,22 @@ export function SignUpForm() {
   const searchParams = useSearchParams();
   const referralCode = searchParams.get('ref');
 
+  // Check user verification status to stay on OTP step if needed
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+  const { data: userData } = useDoc(userDocRef);
+
+  useEffect(() => {
+    if (user && userData && !userData.isVerified) {
+      setStep('otp');
+    } else if (user && userData?.isVerified) {
+      router.push('/dashboard');
+    }
+  }, [user, userData, router]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -85,9 +102,14 @@ export function SignUpForm() {
         referralCode
       );
       setStep('otp');
-      toast({ title: "Account Created", description: "Please verify your email to continue." });
-    } catch (error) {
+      toast({ title: "Account Created", description: "A verification code has been sent to your email." });
+    } catch (error: any) {
       console.error('Sign up failed:', error);
+      toast({ 
+        title: "Registration Failed", 
+        description: error.message || "Could not create account. Please check your details.", 
+        variant: "destructive" 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -314,7 +336,7 @@ export function SignUpForm() {
                   Verify your email
                 </h2>
                 <p className="text-sm text-muted-foreground font-medium px-4">
-                  We&apos;ve sent a 6-digit verification code to <span className="text-white font-bold">{form.getValues('email')}</span>.
+                  We&apos;ve sent a 6-digit verification code to your email.
                 </p>
               </div>
 
@@ -325,7 +347,7 @@ export function SignUpForm() {
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Verification Code</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">6-Digit Code</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="000000"
