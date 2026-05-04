@@ -1,10 +1,11 @@
-
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Logo from '@/components/logo';
 import { SignUpForm } from './_components/sign-up-form';
+import { Loader2 } from 'lucide-react';
 
 const AuthIllustration = () => (
   <div className="relative flex items-center justify-center w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-500/20 to-primary/20 rounded-full border border-white/10 shadow-2xl">
@@ -37,6 +38,12 @@ const WaveformAnimation = () => (
   </div>
 );
 
+const FormFallback = () => (
+  <div className="w-full h-[500px] flex items-center justify-center rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-2xl">
+    <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
+  </div>
+);
+
 export default function SignUpPage() {
   return (
     <div className="min-h-screen w-full bg-[#0B0B0F] text-white flex flex-col items-center justify-center p-6 md:p-10 relative overflow-hidden">
@@ -61,7 +68,9 @@ export default function SignUpPage() {
         <AuthIllustration />
         <WaveformAnimation />
 
-        <SignUpForm />
+        <Suspense fallback={<FormFallback />}>
+          <SignUpForm />
+        </Suspense>
 
         <p className="mt-12 text-sm text-gray-500 font-medium text-center">
           © {new Date().getFullYear()} QuantisAI. All rights reserved.
