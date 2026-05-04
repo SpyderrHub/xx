@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { z } from 'zod'; // Use standard zod for client-side validation to avoid genkit browser errors
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw } from 'lucide-react';
 
@@ -370,7 +370,7 @@ export function SignUpForm() {
                       Verify Code
                     </Button>
                     
-                    <div className="text-center">
+                    <div className="text-center pt-2">
                       <button
                         type="button"
                         onClick={handleResendOtp}
@@ -378,7 +378,7 @@ export function SignUpForm() {
                         className="text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80 disabled:opacity-50 transition-all flex items-center justify-center gap-2 mx-auto"
                       >
                         {isResending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                        Resend Code
+                        Resend Verification Code
                       </button>
                     </div>
                   </div>
@@ -389,7 +389,7 @@ export function SignUpForm() {
                 onClick={() => setStep('details')}
                 className="mt-8 w-full text-center text-xs text-muted-foreground hover:text-white transition-colors font-bold uppercase tracking-widest"
               >
-                ← Back to details
+                ← Back to registration
               </button>
             </motion.div>
           )}
