@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod'; // Use standard zod for client-side validation to avoid genkit browser errors
+import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw, Mail } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,7 +57,6 @@ export function SignUpForm() {
   const searchParams = useSearchParams();
   const referralCode = searchParams.get('ref');
 
-  // Check user verification status to stay on OTP step if needed
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
@@ -157,7 +156,7 @@ export function SignUpForm() {
 
       toast({ 
         title: "Code Resent", 
-        description: `A new 6-digit code has been sent to your email. ${data.debugCode ? `(Dev Code: ${data.debugCode})` : ''}` 
+        description: `A new 6-digit code has been sent. ${data.debugCode ? `(Dev Code: ${data.debugCode})` : ''}` 
       });
     } catch (error: any) {
       toast({ title: "Resend Failed", description: error.message, variant: "destructive" });
@@ -334,9 +333,13 @@ export function SignUpForm() {
                 <h2 className="text-3xl font-black tracking-tight text-white mb-2">
                   Verify your email
                 </h2>
-                <p className="text-sm text-muted-foreground font-medium px-4">
-                  We&apos;ve sent a 6-digit verification code to your email.
-                </p>
+                <div className="flex flex-col items-center gap-1 px-4 text-center">
+                  <p className="text-sm text-muted-foreground font-medium">Enter the 6-digit code sent to</p>
+                  <div className="flex items-center gap-2 text-primary font-bold bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
+                    <Mail className="h-3 w-3" />
+                    <span className="text-xs truncate max-w-[220px]">{user?.email || form.getValues('email')}</span>
+                  </div>
+                </div>
               </div>
 
               <Form {...otpForm}>
@@ -346,7 +349,7 @@ export function SignUpForm() {
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">6-Digit Code</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Verification Code</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="000000"
@@ -367,7 +370,7 @@ export function SignUpForm() {
                       disabled={isLoading}
                     >
                       {isLoading ? <Loader2 className="animate-spin mr-2" /> : <CheckCircle2 className="mr-2 h-5 w-5" />}
-                      Verify Code
+                      Verify & Activate
                     </Button>
                     
                     <div className="text-center pt-2">
@@ -378,7 +381,7 @@ export function SignUpForm() {
                         className="text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80 disabled:opacity-50 transition-all flex items-center justify-center gap-2 mx-auto"
                       >
                         {isResending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                        Resend Verification Code
+                        Resend Code
                       </button>
                     </div>
                   </div>
@@ -389,7 +392,7 @@ export function SignUpForm() {
                 onClick={() => setStep('details')}
                 className="mt-8 w-full text-center text-xs text-muted-foreground hover:text-white transition-colors font-bold uppercase tracking-widest"
               >
-                ← Back to registration
+                ← Back to details
               </button>
             </motion.div>
           )}
