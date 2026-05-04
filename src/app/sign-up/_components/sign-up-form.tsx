@@ -65,10 +65,8 @@ export function SignUpForm() {
   const { data: userData } = useDoc(userDocRef);
 
   useEffect(() => {
-    // If user exists but is not verified, force OTP step
-    if (user && userData && !userData.isVerified) {
-      setStep('otp');
-    } else if (user && userData?.isVerified) {
+    // Only handle automatic redirection for ALREADY verified users
+    if (user && userData?.isVerified) {
       router.push('/dashboard');
     }
   }, [user, userData, router]);
