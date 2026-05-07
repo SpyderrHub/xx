@@ -68,7 +68,7 @@ const AuthorHeader = ({ title }: { title: string }) => {
         </Button>
       )}
       <div className="flex flex-1 items-center gap-4">
-        {isMobile && <Logo className="h-5" />}
+        {isMobile && <Logo className="h-8" />}
         <h1 className="text-xl font-semibold hidden sm:block">{title}</h1>
         <Badge variant="outline" className="border-primary/50 text-primary">Author Studio</Badge>
       </div>
@@ -151,7 +151,7 @@ export default function AuthorLayout({
           <SidebarContent>
             <SidebarHeader className="h-16 justify-center p-4">
               <Link href="/" aria-label="Home">
-                <Logo className="h-7" />
+                <Logo className="h-10" />
               </Link>
             </SidebarHeader>
             <SidebarMenu className="flex-1 px-2">

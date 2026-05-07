@@ -1,22 +1,20 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-// Importing the image directly since it's located in the same folder
-import logoImg from './logo.jpg';
 
 interface LogoProps {
   className?: string;
 }
 
 const Logo = ({ className }: LogoProps) => (
-  <div className={cn("relative h-10 w-40 flex items-center", className)}>
+  <div className={cn("relative h-14 w-auto min-w-[200px] flex items-center", className)}>
     <Image
-      src={logoImg}
+      src="/logo.jpg"
       alt="QuantisAI Logo"
-      className="object-contain"
+      fill
+      className="object-contain object-left"
       priority
       unoptimized
-      style={{ width: 'auto', height: '100%' }}
     />
   </div>
 );
