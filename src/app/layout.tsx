@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: 'QuantisAI',
   description:
     'Generate realistic AI voices with advanced text-to-speech technology.',
+  icons: {
+    icon: '/fevicon.ico',
+  },
 };
 
 export default function RootLayout({
