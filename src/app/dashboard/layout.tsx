@@ -107,7 +107,7 @@ const DashboardHeader = ({ title }: { title: string }) => {
       <div className="flex flex-1 items-center gap-4">
         {isMobile && (
           <Link href="/dashboard" className="mr-2">
-            <Logo className="h-8" />
+            <Logo className="h-10" />
           </Link>
         )}
         {!isMobile && <h1 className="text-xl font-semibold tracking-tight">{title}</h1>}
@@ -220,7 +220,7 @@ const DashboardSidebar = () => {
     <Sidebar variant="sidebar" collapsible="icon" className="border-r border-white/5 bg-background">
       <SidebarHeader className="h-16 justify-center px-6">
         <Link href="/" aria-label="Home" className="flex items-center gap-2">
-          <Logo className="h-10" />
+          <Logo className="h-12" />
         </Link>
       </SidebarHeader>
       

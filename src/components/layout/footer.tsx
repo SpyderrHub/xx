@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { Github, Linkedin, Twitter, Instagram } from 'lucide-react';
 import Logo from '@/components/logo';
@@ -11,7 +10,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" aria-label="Home">
-              <Logo className="h-8" />
+              <Logo className="h-10" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
               The world&apos;s most expressive AI text-to-speech platform. Empowering developers and creators with natural, multi-lingual voices.

@@ -41,7 +41,7 @@ export default function Header() {
       <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
         <div className="flex items-center gap-12">
           <Link href="/" className="flex items-center gap-2 group">
-            <Logo className="h-10 transition-transform group-hover:scale-105" />
+            <Logo className="h-14 transition-transform group-hover:scale-105" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">

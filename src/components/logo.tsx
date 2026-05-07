@@ -7,9 +7,9 @@ interface LogoProps {
 }
 
 const Logo = ({ className }: LogoProps) => (
-  <div className={cn("relative h-14 w-auto min-w-[200px] flex items-center", className)}>
+  <div className={cn("relative h-20 w-auto min-w-[240px] flex items-center", className)}>
     <Image
-      src="/logo.jpg"
+      src="/logo.png"
       alt="QuantisAI Logo"
       fill
       className="object-contain object-left"
