@@ -33,12 +33,13 @@ export default function TransactionHistoryTable() {
     );
   }, [user?.uid, firestore]);
 
-  // Fetch subscriptions - Filtered by userId for security compliance
+  // Fetch subscriptions - Filtered by userId and active status
   const subsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
       collection(firestore, 'user_subscriptions'),
       where('userId', '==', user.uid),
+      where('status', '==', 'active'),
       orderBy('createdAt', 'desc'),
       limit(20)
     );
@@ -83,7 +84,7 @@ export default function TransactionHistoryTable() {
             </div>
             <CardTitle className="text-xl font-bold">Transaction Details</CardTitle>
         </div>
-        <CardDescription>Comprehensive log of account credit movements and plan statuses.</CardDescription>
+        <CardDescription>Comprehensive log of account credit movements and active plan statuses.</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <Table>

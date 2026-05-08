@@ -15,17 +15,23 @@ service cloud.firestore {
     
     // Explicit rules for Top-ups (Root Collection)
     match /user_topups/{id} {
-      // Allow listing if the query is filtered by the user's own UID
-      allow list: if isSignedIn() && request.query.filters.userId == request.auth.uid;
-      // Allow getting a single document if it belongs to the user
-      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // Allow read if the user is signed in and the query filters by their UID,
+      // or if getting a specific document that belongs to them.
+      allow read: if isSignedIn() && (
+        (request.query.filters.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid)
+      );
       allow write: if false; // Only Admin SDK can write
     }
 
     // Explicit rules for Subscriptions (Root Collection)
     match /user_subscriptions/{id} {
-      allow list: if isSignedIn() && request.query.filters.userId == request.auth.uid;
-      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // Allow read if the user is signed in and the query filters by their UID.
+      // For listing, we also allow checking the status filter if provided.
+      allow read: if isSignedIn() && (
+        (request.query.filters.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid)
+      );
       allow write: if false; // Only Admin SDK can write
     }
 
