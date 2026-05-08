@@ -2,6 +2,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // HELPER FUNCTIONS
     function isSignedIn() {
       return request.auth != null;
     }
@@ -9,11 +10,50 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
+
+    // ROOT COLLECTIONS
     
+    // Explicit rules for Top-ups (Root Collection)
+    match /user_topups/{id} {
+      // Allow listing if the query is filtered by the user's own UID
+      allow list: if isSignedIn() && request.query.filters.userId == request.auth.uid;
+      // Allow getting a single document if it belongs to the user
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false; // Only Admin SDK can write
+    }
+
+    // Explicit rules for Subscriptions (Root Collection)
+    match /user_subscriptions/{id} {
+      allow list: if isSignedIn() && request.query.filters.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false; // Only Admin SDK can write
+    }
+
+    // Public Voice Profiles
+    match /voices/{voiceId} {
+      allow read: if true; // Publicly readable for the library
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Public Documentation
+    match /documentation/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // OTP Verification (Internal)
+    match /verification_otps/{email} {
+      allow read, write: if false; // Only Admin SDK
+    }
+
+    // USER-SPECIFIC DATA
     match /users/{userId} {
+      // Users can read any profile (for referral checks), but only write their own
       allow read: if isSignedIn();
       allow write: if isSignedIn() && request.auth.uid == userId;
       
+      // User Subcollections - Using flattened paths for query provability
       match /myVoices/{voiceId} {
         allow read, write: if isSignedIn() && request.auth.uid == userId;
       }
@@ -24,39 +64,8 @@ service cloud.firestore {
 
       match /referrals/{refId} {
         allow read: if isSignedIn() && request.auth.uid == userId;
-        // Creation of referral record usually happens via a function or signup logic
-        allow write: if isSignedIn(); 
+        allow write: if isSignedIn(); // Allow recording new referrals
       }
-    }
-
-    match /subscriptions/{subId} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      // Creation happens via admin SDK backend
-      allow write: if false;
-    }
-
-    match /user_topups/{id} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow write: if false;
-    }
-
-    match /user_subscriptions/{id} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow write: if false;
-    }
-
-    match /voices/{voiceId} {
-      // Allow public read access so unauthenticated users can see demo voices on the landing page
-      allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
-    }
-
-    match /documentation/{docId} {
-      // Public read access for the documentation
-      allow read: if true;
-      // Only admins can manage documentation pages
-      allow write: if isAdmin();
     }
   }
 }

@@ -16,13 +16,13 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
-import { History, ArrowUpCircle, Zap, ShieldCheck } from 'lucide-react';
+import { History, Zap, ShieldCheck, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function TransactionHistoryTable() {
   const { user, firestore } = useFirebase();
 
-  // Fetch top-ups
+  // Fetch top-ups - Filtered by userId for security compliance
   const topupsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
@@ -33,7 +33,7 @@ export default function TransactionHistoryTable() {
     );
   }, [user?.uid, firestore]);
 
-  // Fetch subscriptions
+  // Fetch subscriptions - Filtered by userId for security compliance
   const subsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
@@ -91,7 +91,7 @@ export default function TransactionHistoryTable() {
             <TableRow className="border-white/5 hover:bg-transparent">
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 h-12">Date</TableHead>
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Type</TableHead>
-              <TableHead className="text-[10px) font-black uppercase tracking-widest text-muted-foreground h-12">Description</TableHead>
+              <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Description</TableHead>
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Status</TableHead>
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Credits Added</TableHead>
             </TableRow>
@@ -141,8 +141,11 @@ export default function TransactionHistoryTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-48 text-center text-muted-foreground italic text-xs">
-                  No account transactions recorded yet.
+                <TableCell colSpan={5} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center gap-2 opacity-30">
+                    <History className="h-8 w-8" />
+                    <p className="text-xs italic">No transactions found for your account.</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
