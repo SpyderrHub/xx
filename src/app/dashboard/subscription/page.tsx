@@ -6,6 +6,7 @@ import CurrentPlanCard from '@/components/subscription/current-plan-card';
 import PlanCard from '@/components/subscription/plan-card';
 import UsageStats from '@/components/subscription/usage-stats';
 import PaymentHistoryTable from '@/components/subscription/payment-history-table';
+import TransactionHistoryTable from '@/components/subscription/transaction-history-table';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
@@ -149,7 +150,7 @@ export default function SubscriptionPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-12"
+      className="space-y-12 pb-24"
     >
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       
@@ -203,7 +204,10 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
-      <PaymentHistoryTable />
+      <div className="grid grid-cols-1 gap-12">
+        <PaymentHistoryTable />
+        <TransactionHistoryTable />
+      </div>
     </motion.div>
   );
 }
