@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -12,7 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { History, ArrowUpCircle, Zap, ShieldCheck } from 'lucide-react';
@@ -26,20 +27,22 @@ export default function TransactionHistoryTable() {
     if (!user || !firestore) return null;
     return query(
       collection(firestore, 'user_topups'),
+      where('userId', '==', user.uid),
       orderBy('createdAt', 'desc'),
       limit(20)
     );
-  }, [user, firestore]);
+  }, [user?.uid, firestore]);
 
   // Fetch subscriptions
   const subsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
       collection(firestore, 'user_subscriptions'),
+      where('userId', '==', user.uid),
       orderBy('createdAt', 'desc'),
       limit(20)
     );
-  }, [user, firestore]);
+  }, [user?.uid, firestore]);
 
   const { data: topups, isLoading: isTopupsLoading } = useCollection(topupsQuery);
   const { data: subs, isLoading: isSubsLoading } = useCollection(subsQuery);
@@ -88,7 +91,7 @@ export default function TransactionHistoryTable() {
             <TableRow className="border-white/5 hover:bg-transparent">
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 h-12">Date</TableHead>
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Type</TableHead>
-              <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Description</TableHead>
+              <TableHead className="text-[10px) font-black uppercase tracking-widest text-muted-foreground h-12">Description</TableHead>
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Status</TableHead>
               <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Credits Added</TableHead>
             </TableRow>

@@ -35,6 +35,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /user_topups/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    match /user_subscriptions/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
     match /voices/{voiceId} {
       // Allow public read access so unauthenticated users can see demo voices on the landing page
       allow read: if true;

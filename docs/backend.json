@@ -82,6 +82,29 @@
       },
       "required": ["text", "fullText", "voiceId", "voiceName", "characters", "audioUrl", "createdAt"]
     },
+    "Topup": {
+      "title": "Topup",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "packId": { "type": "string" },
+        "creditsAdded": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "packId", "creditsAdded", "status", "createdAt"]
+    },
+    "UserSubscription": {
+      "title": "UserSubscription",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "planType": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "planType", "status", "createdAt"]
+    },
     "OTP": {
       "title": "OTP",
       "type": "object",
@@ -120,6 +143,14 @@
     "/users/{userId}/referrals/{refId}": {
       "schema": { "$ref": "#/entities/Referral" },
       "description": "Log of users referred by this user."
+    },
+    "/user_topups/{id}": {
+      "schema": { "$ref": "#/entities/Topup" },
+      "description": "Log of user top-up purchases."
+    },
+    "/user_subscriptions/{id}": {
+      "schema": { "$ref": "#/entities/UserSubscription" },
+      "description": "Log of user subscription activations."
     },
     "/voices/{voiceId}": {
       "schema": { "$ref": "#/entities/Voice" },
