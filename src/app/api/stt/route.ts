@@ -2,17 +2,17 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 /**
  * Proxy route for the Speech-to-Text API.
- * Forwards the audio URL from R2 to the external engine.
+ * Forwards the audio URL to the external engine with required headers.
  */
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('authorization');
     const { audio_url } = await request.json();
 
     if (!audio_url) {
       return NextResponse.json({ message: 'No audio URL provided' }, { status: 400 });
     }
 
-    // Get the API URL from environment variables
     const externalApiUrl = process.env.STT_API_URL;
     
     if (!externalApiUrl) {
@@ -20,29 +20,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Server configuration error' }, { status: 500 });
     }
 
-    // Ensure URL has a trailing slash for consistency
     const apiUrl = externalApiUrl.replace(/\/$/, '') + '/';
     
-    // Forward the URL to the external server
+    // Forward the URL to the external server with Auth header
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': authHeader || '',
       },
-      body: JSON.stringify({ audio_url }),
+      body: JSON.stringify({ audio_path: audio_url }),
     });
 
     if (!res.ok) {
-      const errorText = await res.text();
+      const errorData = await res.json();
       return NextResponse.json(
-        { message: errorText || 'Transcription engine returned an error' }, 
+        { message: errorData.detail || errorData.message || 'Transcription engine error' }, 
         { status: res.status }
       );
     }
 
     const data = await res.json();
-    
-    // We return the raw response to the client
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('STT Proxy Error:', error);

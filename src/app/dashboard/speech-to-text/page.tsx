@@ -10,7 +10,7 @@ import {
   X, 
   Loader2, 
   CheckCircle2, 
-  Download,
+  Download, 
   FileText,
   Languages,
   Zap
@@ -86,7 +86,7 @@ export default function SpeechToTextPage() {
       const idToken = await user.getIdToken();
       const fileName = `${crypto.randomUUID()}-${file.name}`;
       
-      // 1. Get Presigned URL for R2
+      // 1. Get Presigned URLs for R2
       const presignRes = await fetch('/api/r2/presign', {
         method: 'POST',
         headers: {
@@ -103,11 +103,11 @@ export default function SpeechToTextPage() {
       const presignData = await presignRes.json();
       if (!presignRes.ok) throw new Error(presignData.message || 'Storage authorization failed');
 
-      // 2. Upload to R2 with Immutable Cache Headers
+      // 2. Upload to R2
       const uploadRes = await fetch(presignData.presignedUrl, {
         method: 'PUT',
         headers: { 
-          'Content-Type': file.type,
+          'Content-Type': presignData.enforcedMimeType || file.type,
           'Cache-Control': 'public, max-age=31536000, immutable'
         },
         body: file,
@@ -115,14 +115,15 @@ export default function SpeechToTextPage() {
 
       if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
 
-      // 3. Send URL to Transcription Proxy
+      // 3. Send Signed Read URL to Transcription Proxy
+      // We use the signedReadUrl to ensure the STT engine can access the private file
       const response = await fetch('/api/stt', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ audio_url: presignData.publicUrl }),
+        body: JSON.stringify({ audio_url: presignData.signedReadUrl }),
       });
 
       if (!response.ok) {
@@ -132,9 +133,8 @@ export default function SpeechToTextPage() {
 
       const data = await response.json();
       
-      // Handle various common API response structures
+      // Handle response structure from engine
       const resultText = data.text || data.transcription || (typeof data === 'string' ? data : JSON.stringify(data));
-      
       setTranscription(resultText);
       
       toast({

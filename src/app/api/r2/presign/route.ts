@@ -1,13 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { s3Client, BUCKET_NAME, getPublicDomain } from '@/lib/s3-client';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { adminAuth } from '@/lib/firebase-admin';
 
 /**
  * Generates a presigned URL for secure client-side upload to R2.
- * Enforces a unique, versioned path and aggressive 1-year immutable caching.
- * This metadata is signed and must be sent by the client during upload.
+ * Also generates a temporary signedReadUrl for secure access by external engines.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -41,34 +40,42 @@ export async function POST(request: NextRequest) {
     }
 
     // Cache System: Every file gets a unique path via UUID. 
-    // This allows us to use 'immutable' safely as a new version will always have a new URL.
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
     
-    // Enforcement: Map paths to specific MIME types for cache consistency
+    // Enforcement: Map paths to specific MIME types
     let mimeType = contentType || 'application/octet-stream';
     if (safePath === 'avatars' || safePath === 'users') {
       mimeType = 'image/webp';
     } else if (safePath === 'voices' || safePath === 'stt') {
-      // Support audio formats for STT and Voices
       if (!contentType?.startsWith('audio/')) {
          mimeType = 'audio/mpeg';
       }
     }
 
-    const command = new PutObjectCommand({
+    // 1. Create Upload URL (PUT)
+    const putCommand = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
       ContentType: mimeType,
-      // Aggressive 1-year immutable caching for all R2 assets
-      // This header is signed and MUST be provided by the client during PUT.
       CacheControl: 'public, max-age=31536000, immutable',
     });
 
-    const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    // 2. Create Read URL (GET) - Valid for 1 hour
+    const getCommand = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+
+    const [presignedUrl, signedReadUrl] = await Promise.all([
+      getSignedUrl(s3Client, putCommand, { expiresIn: 3600 }),
+      getSignedUrl(s3Client, getCommand, { expiresIn: 3600 }),
+    ]);
+
     const publicDomain = getPublicDomain();
 
     return NextResponse.json({
       presignedUrl,
+      signedReadUrl,
       key,
       publicUrl: publicDomain ? `${publicDomain}/${key}` : key,
       enforcedMimeType: mimeType
