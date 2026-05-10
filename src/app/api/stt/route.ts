@@ -14,12 +14,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'No audio file provided' }, { status: 400 });
     }
 
-    // External Transcription API Endpoint
-    const externalApiUrl = 'http://103.13.113.123:20014/';
+    // Get the API URL from environment variables
+    const externalApiUrl = process.env.STT_API_URL;
+    
+    if (!externalApiUrl) {
+      console.error('[STT Proxy] STT_API_URL is not defined in environment variables.');
+      return NextResponse.json({ message: 'Server configuration error' }, { status: 500 });
+    }
+
+    // Ensure URL has a trailing slash for consistency
+    const apiUrl = externalApiUrl.replace(/\/$/, '') + '/';
     
     // Forward the request to the external server
     // Native fetch in Next.js automatically handles FormData boundaries
-    const res = await fetch(externalApiUrl, {
+    const res = await fetch(apiUrl, {
       method: 'POST',
       body: formData,
     });

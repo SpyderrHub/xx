@@ -26,6 +26,7 @@ RAZORPAY_PLAN_PRO_YEARLY=plan_wwwwww
 
 # API Configuration
 NEXT_PUBLIC_API_URL=https://58.224.7.137:45153/v1/text-to-speech
+STT_API_URL=http://103.13.113.123:20014/
 ```
 
 ### 2. Firebase Setup
