@@ -27,6 +27,14 @@ RAZORPAY_PLAN_PRO_YEARLY=plan_wwwwww
 # API Configuration
 NEXT_PUBLIC_API_URL=https://58.224.7.137:45153/v1/text-to-speech
 STT_API_URL=http://103.13.113.123:20014/
+YOUTUBE_STT_API_URL=http://103.13.113.123:20014/v1/youtube-to-text
+
+# Cloudflare R2
+R2_ACCOUNT_ID=your_account_id
+R2_ACCESS_KEY_ID=your_access_key
+R2_SECRET_ACCESS_KEY=your_secret_key
+R2_BUCKET_NAME=your_bucket_name
+NEXT_PUBLIC_R2_PUBLIC_DOMAIN=https://your-custom-domain.com
 ```
 
 ### 2. Firebase Setup

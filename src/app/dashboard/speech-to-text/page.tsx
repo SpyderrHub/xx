@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -151,8 +152,9 @@ export default function SpeechToTextPage() {
     try {
       const idToken = await user.getIdToken();
       let audioSourceUrl = '';
+      const isYoutubeMode = activeTab === 'youtube';
 
-      if (activeTab === 'youtube') {
+      if (isYoutubeMode) {
         if (!youtubeUrl.includes('youtube.com') && !youtubeUrl.includes('youtu.be')) {
           throw new Error('Please enter a valid YouTube URL');
         }
@@ -187,6 +189,7 @@ export default function SpeechToTextPage() {
         });
 
         if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
+        // Use the temporary signedReadUrl so the STT engine can access the private file
         audioSourceUrl = presignData.signedReadUrl;
       }
 
@@ -197,12 +200,15 @@ export default function SpeechToTextPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ audio_url: audioSourceUrl }),
+        body: JSON.stringify({ 
+          audio_url: audioSourceUrl,
+          isYoutube: isYoutubeMode
+        }),
       });
 
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.detail || errData.message || 'Transcription failed');
+        throw new Error(errData.message || 'Transcription failed');
       }
 
       const data = await response.json();
