@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
@@ -75,18 +74,48 @@ export default function SpeechToTextPage() {
     }
   };
 
-  const handleTranscribe = () => {
+  const handleTranscribe = async () => {
     if (!file || isProcessing) return;
     
     setIsProcessing(true);
-    setTimeout(() => {
-      setTranscription("Experience the power of QuantisAI voices. Our advanced speech-to-text engine captures every nuance, punctuation, and speaker transition with studio-grade accuracy. This transcribed text can now be edited or exported for your convenience.");
-      setIsProcessing(false);
+    setTranscription('');
+
+    try {
+      const formData = new FormData();
+      // The API expects the file. We use 'file' as the key.
+      formData.append('file', file);
+      
+      const response = await fetch('/api/stt', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Transcription failed');
+      }
+
+      const data = await response.json();
+      
+      // Handle various common API response structures (text, transcription, etc.)
+      const resultText = data.text || data.transcription || (typeof data === 'string' ? data : JSON.stringify(data));
+      
+      setTranscription(resultText);
+      
       toast({
         title: "Transcription Complete",
         description: "Your audio has been successfully converted to text.",
       });
-    }, 2500);
+    } catch (error: any) {
+      console.error('Transcription error:', error);
+      toast({
+        title: "Transcription Error",
+        description: error.message || "Failed to process audio file.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleExport = () => {
