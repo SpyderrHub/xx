@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const safePath = path.replace(/^\/|\/$/g, '').toLowerCase();
-    const allowedRoots = ['voices', 'avatars', 'users'];
+    const allowedRoots = ['voices', 'avatars', 'users', 'stt'];
     
     if (!allowedRoots.includes(safePath)) {
       return NextResponse.json({ message: 'Invalid storage root.' }, { status: 400 });
@@ -48,8 +48,11 @@ export async function POST(request: NextRequest) {
     let mimeType = contentType || 'application/octet-stream';
     if (safePath === 'avatars' || safePath === 'users') {
       mimeType = 'image/webp';
-    } else if (safePath === 'voices') {
-      mimeType = 'audio/mpeg';
+    } else if (safePath === 'voices' || safePath === 'stt') {
+      // Support audio formats for STT and Voices
+      if (!contentType?.startsWith('audio/')) {
+         mimeType = 'audio/mpeg';
+      }
     }
 
     const command = new PutObjectCommand({

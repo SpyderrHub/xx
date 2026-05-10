@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useFirebase } from '@/firebase';
 
 const TranscriptionEditor = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -55,6 +56,7 @@ const TranscriptionEditor = ({ value, onChange }: { value: string, onChange: (va
 };
 
 export default function SpeechToTextPage() {
+  const { user } = useFirebase();
   const [isProcessing, setIsProcessing] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [transcription, setTranscription] = useState('');
@@ -75,19 +77,52 @@ export default function SpeechToTextPage() {
   };
 
   const handleTranscribe = async () => {
-    if (!file || isProcessing) return;
+    if (!file || isProcessing || !user) return;
     
     setIsProcessing(true);
     setTranscription('');
 
     try {
-      const formData = new FormData();
-      // The API expects the file. We use 'file' as the key.
-      formData.append('file', file);
+      const idToken = await user.getIdToken();
+      const fileName = `${crypto.randomUUID()}-${file.name}`;
       
+      // 1. Get Presigned URL for R2
+      const presignRes = await fetch('/api/r2/presign', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fileName,
+          contentType: file.type,
+          path: 'stt',
+        }),
+      });
+
+      const presignData = await presignRes.json();
+      if (!presignRes.ok) throw new Error(presignData.message || 'Storage authorization failed');
+
+      // 2. Upload to R2 with Immutable Cache Headers
+      const uploadRes = await fetch(presignData.presignedUrl, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': file.type,
+          'Cache-Control': 'public, max-age=31536000, immutable'
+        },
+        body: file,
+      });
+
+      if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
+
+      // 3. Send URL to Transcription Proxy
       const response = await fetch('/api/stt', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ audio_url: presignData.publicUrl }),
       });
 
       if (!response.ok) {
@@ -97,7 +132,7 @@ export default function SpeechToTextPage() {
 
       const data = await response.json();
       
-      // Handle various common API response structures (text, transcription, etc.)
+      // Handle various common API response structures
       const resultText = data.text || data.transcription || (typeof data === 'string' ? data : JSON.stringify(data));
       
       setTranscription(resultText);

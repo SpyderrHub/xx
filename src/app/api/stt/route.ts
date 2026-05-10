@@ -2,16 +2,14 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 /**
  * Proxy route for the Speech-to-Text API.
- * Forwards multipart/form-data from the client to the external engine.
- * Using a proxy prevents CORS and mixed-content (HTTPS -> HTTP) issues.
+ * Forwards the audio URL from R2 to the external engine.
  */
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const file = formData.get('file');
+    const { audio_url } = await request.json();
 
-    if (!file) {
-      return NextResponse.json({ message: 'No audio file provided' }, { status: 400 });
+    if (!audio_url) {
+      return NextResponse.json({ message: 'No audio URL provided' }, { status: 400 });
     }
 
     // Get the API URL from environment variables
@@ -25,11 +23,13 @@ export async function POST(request: NextRequest) {
     // Ensure URL has a trailing slash for consistency
     const apiUrl = externalApiUrl.replace(/\/$/, '') + '/';
     
-    // Forward the request to the external server
-    // Native fetch in Next.js automatically handles FormData boundaries
+    // Forward the URL to the external server
     const res = await fetch(apiUrl, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ audio_url }),
     });
 
     if (!res.ok) {
