@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Server configuration error: API URL missing' }, { status: 500 });
     }
 
-    console.log(`[STT Proxy] Routing to ${isYoutube ? 'YouTube' : 'Standard'} endpoint: ${apiUrl}`);
+    console.log(`[STT Proxy] Waiting for response from ${isYoutube ? 'YouTube' : 'Standard'} endpoint: ${apiUrl}`);
 
     // Forward the request to the external server
     // Note: We use 'audio_path' as the key as required by the backend engine
@@ -70,16 +70,7 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      // If the engine returns HTML (like a refresh page), notify the frontend to poll
-      if (textData.includes('<html')) {
-        return NextResponse.json({ 
-          message: 'The engine is processing...',
-          success: false,
-          stage: 'PROCESSING'
-        });
-      }
-
-      // Fallback for plain text responses
+      // If the engine returns non-JSON text successfully, wrap it
       return NextResponse.json({ text: textData, success: true, stage: 'COMPLETED' });
     }
   } catch (error: any) {

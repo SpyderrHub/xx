@@ -87,7 +87,7 @@ export default function SpeechToTextPage() {
     }
   };
 
-  const handleTranscribe = async (retryCount = 0) => {
+  const handleTranscribe = async () => {
     const isYoutube = activeTab === 'youtube';
     const source = isYoutube ? youtubeUrl : file;
 
@@ -97,17 +97,15 @@ export default function SpeechToTextPage() {
     }
     
     setIsProcessing(true);
-    if (retryCount === 0) {
-      setProcessingStage('INITIALIZING');
-      setTranscription('');
-    }
+    setProcessingStage('INITIALIZING');
+    setTranscription('');
 
     try {
       const idToken = await user.getIdToken();
       let audioSourceUrl = isYoutube ? youtubeUrl : '';
 
-      // 1. If it's a file, we must upload it to R2 first
-      if (!isYoutube && retryCount === 0 && file) {
+      // 1. If it's a file, upload to R2
+      if (!isYoutube && file) {
         setProcessingStage('UPLOADING');
         const fileName = `${crypto.randomUUID()}-${file.name}`;
         const presignRes = await fetch('/api/r2/presign', {
@@ -139,10 +137,9 @@ export default function SpeechToTextPage() {
         audioSourceUrl = presignData.signedReadUrl;
       }
 
-      setProcessingStage(isYoutube ? 'FETCHING VIDEO' : 'TRANSCRIBING');
+      setProcessingStage('PROCESSING');
 
-      // 2. Send Source URL to Transcription Proxy
-      // Note: isYoutube flag ensures the proxy hits YOUTUBE_STT_API_URL
+      // 2. Direct fetch to proxy - Wait until final JSON is returned
       const response = await fetch('/api/stt', {
         method: 'POST',
         headers: {
@@ -161,28 +158,14 @@ export default function SpeechToTextPage() {
         const data = await response.json();
 
         if (!response.ok) {
-          if (data.stage === 'TIMEOUT') {
-             throw new Error("The request timed out. High-volume content takes longer to process.");
-          }
-          throw new Error(data.message || data.detail || 'Transcription failed');
+          throw new Error(data.message || 'Transcription failed');
         }
 
-        // Handle specific stage logic if returned (Processing/Wait state)
-        if (data.stage === 'PROCESSING' || (!data.text && data.success !== false)) {
-          if (retryCount < 10) {
-            setProcessingStage(`STILL PROCESSING (Attempt ${retryCount + 1})`);
-            setTimeout(() => handleTranscribe(retryCount + 1), 5000);
-            return;
-          } else {
-            throw new Error("The engine is still processing your request. Please try again in a few minutes.");
-          }
-        }
-
-        // Prioritize the 'text' field as per user specification
+        // Prioritize 'text' field from the returned JSON
         const resultText = data.text || data.transcription || data.output || "";
           
         if (!resultText) {
-          throw new Error("The engine completed successfully but returned no readable text.");
+          throw new Error("The engine returned a response but no transcription text was found.");
         }
 
         setTranscription(resultText);
@@ -195,9 +178,10 @@ export default function SpeechToTextPage() {
         });
       } else {
         if (response.status === 504 || response.status === 502) {
-          throw new Error("The request timed out. Long videos or large files take more time.");
+          throw new Error("The request timed out. Processing very long content can exceed the 10-minute limit.");
         }
-        throw new Error(`Server returned unexpected format (${response.status}). This usually indicates a timeout or internal error.`);
+        const rawText = await response.text();
+        throw new Error(`Unexpected response format. Server returned: ${rawText.substring(0, 100)}`);
       }
     } catch (error: any) {
       console.error('Transcription error:', error);
@@ -250,7 +234,7 @@ export default function SpeechToTextPage() {
               <Download className="mr-2 h-3.5 w-3.5 md:h-4 md:w-4" /> Export
             </Button>
             <Button 
-              onClick={() => handleTranscribe(0)}
+              onClick={handleTranscribe}
               disabled={(activeTab === 'upload' ? !file : !youtubeUrl) || isProcessing}
               className="flex-[1.5] sm:flex-none rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
