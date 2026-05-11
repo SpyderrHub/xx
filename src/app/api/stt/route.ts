@@ -1,10 +1,8 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 
 /**
  * Proxy route for the Speech-to-Text API.
  * Forwards the audio URL to the external engine with required headers.
- * Supports standard STT and specialized YouTube-to-text endpoints.
  * 
  * Increased maxDuration to 600s (10 minutes) to allow for very long transcription tasks.
  */
@@ -13,30 +11,20 @@ export const maxDuration = 600;
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
-    const { audio_url, isYoutube } = await request.json();
+    const { audio_url } = await request.json();
 
     if (!audio_url) {
       return NextResponse.json({ message: 'No audio source provided' }, { status: 400 });
     }
 
-    // Select the appropriate URL from environment variables
-    const standardUrl = process.env.STT_API_URL;
-    const youtubeUrl = process.env.YOUTUBE_STT_API_URL;
+    const apiUrl = process.env.STT_API_URL;
     
-    let targetBaseUrl = isYoutube ? youtubeUrl : standardUrl;
-    
-    if (!targetBaseUrl) {
-      console.error(`[STT Proxy] API URL for ${isYoutube ? 'YouTube' : 'Standard'} is not defined in environment variables.`);
+    if (!apiUrl) {
+      console.error(`[STT Proxy] API URL is not defined in environment variables.`);
       return NextResponse.json({ message: 'Server configuration error: API URL missing' }, { status: 500 });
     }
 
-    // Ensure clean URL formatting (handle trailing slashes)
-    const apiUrl = targetBaseUrl.replace(/\/$/, '') + (targetBaseUrl.includes('/v1/') ? '' : '/');
-    
-    console.log(`[STT Proxy] Forwarding to: ${apiUrl}`);
-
     // Forward the URL to the external server with Auth header
-    // The backend expects "audio_path" as the key
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -46,7 +34,6 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ audio_path: audio_url }),
     });
 
-    // Check if the response is JSON or something else (like HTML error page)
     const contentType = res.headers.get('content-type');
     
     if (contentType && contentType.includes('application/json')) {
@@ -59,17 +46,12 @@ export async function POST(request: NextRequest) {
       }
       return NextResponse.json(data);
     } else {
-      // Handle non-JSON responses (HTML errors, plain text)
       const textData = await res.text();
       
-      // Log for debugging
-      console.warn(`[STT Proxy] Received non-JSON response from ${apiUrl}:`, textData.substring(0, 100));
-
       if (!res.ok) {
-        // If it's a 504 or 502, it might be a gateway timeout on the backend side
         if (res.status === 504 || res.status === 502) {
            return NextResponse.json({ 
-             message: 'The transcription engine timed out. This often happens with long audio.',
+             message: 'The transcription engine timed out.',
              success: false,
              stage: 'TIMEOUT'
            }, { status: res.status });
@@ -81,11 +63,9 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      // If it's success (200) but not JSON, wrap it. 
-      // If it looks like HTML, the engine might be serving a wait-page.
       if (textData.includes('<html')) {
         return NextResponse.json({ 
-          message: 'The engine returned a temporary status page. The transcription is likely in progress.',
+          message: 'The engine is processing...',
           success: false,
           stage: 'PROCESSING'
         });

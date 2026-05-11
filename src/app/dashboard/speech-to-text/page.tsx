@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -14,14 +13,7 @@ import {
   Download, 
   FileText,
   Languages,
-  Zap,
-  Mic,
-  Youtube,
-  StopCircle,
-  Play,
-  Pause,
-  Link as LinkIcon,
-  RefreshCw
+  Zap
 } from 'lucide-react';
 import { 
   Select, 
@@ -30,13 +22,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useFirebase } from '@/firebase';
@@ -75,61 +60,8 @@ export default function SpeechToTextPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStage, setProcessingStage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [transcription, setTranscription] = useState('');
   const [language, setLanguage] = useState('english');
-  const [activeTab, setActiveTab] = useState('upload');
-
-  // Mic Recording States
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const recordedFile = new File([blob], `recording_${Date.now()}.webm`, { type: 'audio/webm' });
-        setFile(recordedFile);
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-      setRecordingTime(0);
-      timerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
-      }, 1000);
-    } catch (err) {
-      console.error('Mic error:', err);
-      toast({ title: "Microphone Error", description: "Could not access your microphone.", variant: "destructive" });
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-  };
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -146,7 +78,7 @@ export default function SpeechToTextPage() {
   };
 
   const handleTranscribe = async (retryCount = 0) => {
-    if ((activeTab !== 'youtube' && !file) || !user) return;
+    if (!file || !user) return;
     
     setIsProcessing(true);
     if (retryCount === 0) {
@@ -157,14 +89,8 @@ export default function SpeechToTextPage() {
     try {
       const idToken = await user.getIdToken();
       let audioSourceUrl = '';
-      const isYoutubeMode = activeTab === 'youtube';
 
-      if (isYoutubeMode) {
-        if (!youtubeUrl.includes('youtube.com') && !youtubeUrl.includes('youtu.be')) {
-          throw new Error('Please enter a valid YouTube URL');
-        }
-        audioSourceUrl = youtubeUrl;
-      } else if (file && retryCount === 0) {
+      if (retryCount === 0) {
         setProcessingStage('UPLOADING');
         // 1. Get Presigned URL for R2 Upload
         const fileName = `${crypto.randomUUID()}-${file.name}`;
@@ -197,11 +123,6 @@ export default function SpeechToTextPage() {
         if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
         
         audioSourceUrl = presignData.signedReadUrl;
-      } else if (file) {
-        // In retry mode for file, we don't re-upload. 
-        // We'd need to store the audioSourceUrl between retries for this to work correctly.
-        // For now, let's assume we re-hit the proxy with the URL if we had it.
-        // (Improving this would require adding a ref or state for audioSourceUrl)
       }
 
       setProcessingStage('TRANSCRIBING');
@@ -214,8 +135,8 @@ export default function SpeechToTextPage() {
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({ 
-          audio_url: audioSourceUrl || youtubeUrl,
-          isYoutube: isYoutubeMode
+          audio_url: audioSourceUrl,
+          isYoutube: false
         }),
       });
 
@@ -226,7 +147,7 @@ export default function SpeechToTextPage() {
 
         if (!response.ok) {
           if (data.stage === 'TIMEOUT') {
-             throw new Error("The request timed out. High-volume audio takes longer to process. Please try smaller files or check back later.");
+             throw new Error("The request timed out. High-volume audio takes longer to process. Please try smaller files.");
           }
           throw new Error(data.message || data.detail || 'Transcription failed');
         }
@@ -260,10 +181,10 @@ export default function SpeechToTextPage() {
         });
       } else {
         if (response.status === 504 || response.status === 502) {
-          throw new Error("The request timed out. High-volume audio takes longer to process. Please try smaller files or check back later.");
+          throw new Error("The request timed out. High-volume audio takes longer to process.");
         }
         
-        throw new Error(`Server returned unexpected format (${response.status}). This usually indicates a timeout or server-side crash.`);
+        throw new Error(`Server returned unexpected format (${response.status}).`);
       }
     } catch (error: any) {
       console.error('Transcription error:', error);
@@ -317,7 +238,7 @@ export default function SpeechToTextPage() {
             </Button>
             <Button 
               onClick={() => handleTranscribe(0)}
-              disabled={(!file && activeTab !== 'youtube') || isProcessing || (activeTab === 'youtube' && !youtubeUrl)}
+              disabled={!file || isProcessing}
               className="flex-[1.5] sm:flex-none rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               {isProcessing ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Zap className="mr-2 h-4 w-4 md:h-5 md:w-5 fill-current" />}
@@ -328,137 +249,44 @@ export default function SpeechToTextPage() {
 
         <div className="p-6 md:p-14 space-y-6 md:space-y-10">
           {!transcription ? (
-            <Tabs defaultValue="upload" className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 bg-white/5 p-1 rounded-2xl mb-8">
-                <TabsTrigger value="upload" className="rounded-xl font-bold text-xs">
-                  <Upload className="mr-2 h-3.5 w-3.5" /> Upload
-                </TabsTrigger>
-                <TabsTrigger value="record" className="rounded-xl font-bold text-xs">
-                  <Mic className="mr-2 h-3.5 w-3.5" /> Record
-                </TabsTrigger>
-                <TabsTrigger value="youtube" className="rounded-xl font-bold text-xs">
-                  <Youtube className="mr-2 h-3.5 w-3.5" /> YouTube
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="upload" className="space-y-6">
-                <div 
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={onDrop}
-                  onClick={() => !file && document.getElementById('audio-upload')?.click()}
-                  className={cn(
-                    "h-48 md:h-64 border-2 border-dashed rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
-                    file ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
-                  )}
-                >
-                  <input id="audio-upload" type="file" accept="audio/*" className="hidden" onChange={handleFileSelect} />
-                  <div className="text-center p-4">
-                    {file ? (
-                      <div className="space-y-3 md:space-y-4">
-                        <div className="inline-flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-xl md:rounded-2xl bg-primary/20 border border-primary/30">
-                          <FileAudio className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <p className="font-bold text-lg md:text-xl text-white truncate max-w-[200px] md:max-w-none">{file.name}</p>
-                          <p className="text-[10px] md:text-sm text-muted-foreground">{(file.size / (1024 * 1024)).toFixed(2)} MB • Ready</p>
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-destructive hover:text-destructive/80 font-bold uppercase tracking-widest text-[9px] md:text-[10px]">
-                          <X className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Remove
-                        </Button>
+            <div className="space-y-8">
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={onDrop}
+                onClick={() => !file && document.getElementById('audio-upload')?.click()}
+                className={cn(
+                  "h-48 md:h-80 border-2 border-dashed rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
+                  file ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
+                )}
+              >
+                <input id="audio-upload" type="file" accept="audio/*" className="hidden" onChange={handleFileSelect} />
+                <div className="text-center p-4">
+                  {file ? (
+                    <div className="space-y-3 md:space-y-4">
+                      <div className="inline-flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-xl md:rounded-2xl bg-primary/20 border border-primary/30">
+                        <FileAudio className="h-6 w-6 md:h-8 md:w-8 text-primary" />
                       </div>
-                    ) : (
-                      <>
-                        <div className="mb-4 md:mb-6 inline-flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-2xl md:rounded-3xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
-                          <Upload className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-                        </div>
-                        <p className="font-bold text-xl md:text-2xl text-white">Upload Audio</p>
-                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 max-w-[240px] mx-auto">MP3, WAV, or M4A supported.</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="record" className="space-y-6">
-                <div className="h-48 md:h-64 border-2 border-white/10 rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center justify-center bg-white/5 relative overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    {!file ? (
-                      <motion.div 
-                        key="recording"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="text-center space-y-6"
-                      >
-                        <div className="relative">
-                          {isRecording && (
-                            <motion.div 
-                              animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.1, 0.3] }}
-                              transition={{ duration: 1.5, repeat: Infinity }}
-                              className="absolute inset-0 bg-primary rounded-full blur-xl"
-                            />
-                          )}
-                          <Button 
-                            onClick={isRecording ? stopRecording : startRecording}
-                            className={cn(
-                              "h-20 w-20 rounded-full shadow-2xl relative z-10 transition-all",
-                              isRecording ? "bg-red-500 hover:bg-red-600 scale-110" : "bg-primary hover:bg-primary/90"
-                            )}
-                          >
-                            {isRecording ? <StopCircle className="h-10 w-10 fill-current" /> : <Mic className="h-10 w-10" />}
-                          </Button>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="font-bold text-xl">{isRecording ? "Recording Live..." : "Capture Audio"}</p>
-                          <p className={cn(
-                            "font-mono text-2xl font-black transition-colors",
-                            isRecording ? "text-primary" : "text-muted-foreground"
-                          )}>
-                            {formatDuration(recordingTime)}
-                          </p>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div 
-                        key="recorded"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center space-y-4"
-                      >
-                         <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 border border-primary/30">
-                          <FileAudio className="h-8 w-8 text-primary" />
-                        </div>
-                        <p className="font-bold text-xl text-white">Clip Captured</p>
-                        <Button variant="ghost" size="sm" onClick={() => setFile(null)} className="text-destructive font-bold uppercase tracking-widest text-[10px]">
-                          <X className="h-3 w-3 mr-1" /> Discard
-                        </Button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="youtube" className="space-y-6">
-                <div className="h-48 md:h-64 border-2 border-white/10 rounded-[1.5rem] md:rounded-[2.5rem] flex flex-col items-center justify-center bg-white/5 p-8">
-                  <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-red-500/10 border border-red-500/20">
-                    <Youtube className="h-8 w-8 text-red-500" />
-                  </div>
-                  <div className="w-full max-w-md space-y-4">
-                    <div className="relative">
-                      <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Paste YouTube Link..." 
-                        value={youtubeUrl}
-                        onChange={(e) => setYoutubeUrl(e.target.value)}
-                        className="h-14 pl-12 bg-black/20 border-white/10 rounded-xl focus:ring-primary/20"
-                      />
+                      <div className="space-y-1">
+                        <p className="font-bold text-lg md:text-xl text-white truncate max-w-[200px] md:max-w-none">{file.name}</p>
+                        <p className="text-[10px] md:text-sm text-muted-foreground">{(file.size / (1024 * 1024)).toFixed(2)} MB • Ready</p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-destructive hover:text-destructive/80 font-bold uppercase tracking-widest text-[9px] md:text-[10px]">
+                        <X className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1" /> Remove
+                      </Button>
                     </div>
-                    <p className="text-[10px] text-muted-foreground text-center">Video audio will be extracted and transcribed instantly.</p>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="mb-4 md:mb-6 inline-flex h-12 w-12 md:h-16 md:w-16 items-center justify-center rounded-2xl md:rounded-3xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
+                        <Upload className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                      </div>
+                      <p className="font-bold text-xl md:text-2xl text-white">Upload Audio Source</p>
+                      <p className="text-[10px] md:text-sm text-muted-foreground mt-2 max-w-[240px] mx-auto">Drag and drop your audio files here. MP3, WAV, or M4A supported.</p>
+                    </>
+                  )}
                 </div>
-              </TabsContent>
+              </div>
 
-              <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center mt-10">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center">
                 <div className="w-full md:w-1/2 space-y-2">
                   <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">Detection Language</label>
                   <Select value={language} onValueChange={setLanguage}>
@@ -481,7 +309,7 @@ export default function SpeechToTextPage() {
                   </div>
                 </div>
               </div>
-            </Tabs>
+            </div>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 md:space-y-8">
               <div className="flex items-center justify-between border-b border-white/5 pb-4 md:pb-6">
@@ -491,7 +319,7 @@ export default function SpeechToTextPage() {
                   </div>
                   <p className="text-[10px] md:text-sm font-bold text-white uppercase tracking-wider">Transcription Complete</p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => { setTranscription(''); setFile(null); setYoutubeUrl(''); }} className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white">
+                <Button variant="ghost" size="sm" onClick={() => { setTranscription(''); setFile(null); }} className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white">
                   Start New
                 </Button>
               </div>
@@ -519,7 +347,7 @@ export default function SpeechToTextPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
         {[
           { title: "Neural Accuracy", desc: "Industry-leading error rates.", icon: Ear },
-          { title: "Multi-Source", icon: Zap, desc: "Mic, Files, or YouTube." },
+          { title: "Multi-Source", icon: Zap, desc: "Supported file formats: MP3, WAV." },
           { title: "Instant Export", desc: "Download as TXT or SRT.", icon: FileText },
         ].map((feature, i) => (
           <div key={i} className="p-4 md:p-6 rounded-xl md:rounded-[2rem] bg-white/5 border border-white/10 flex items-start gap-3 md:gap-4">
