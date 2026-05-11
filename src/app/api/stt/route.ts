@@ -22,19 +22,17 @@ export async function POST(request: NextRequest) {
     let targetBaseUrl = isYoutube ? youtubeUrl : standardUrl;
     
     if (!targetBaseUrl) {
-      console.error(`[STT Proxy] API URL for ${isYoutube ? 'YouTube' : 'Standard'} is not defined.`);
-      return NextResponse.json({ message: 'Server configuration error' }, { status: 500 });
+      console.error(`[STT Proxy] API URL for ${isYoutube ? 'YouTube' : 'Standard'} is not defined in environment variables.`);
+      return NextResponse.json({ message: 'Server configuration error: API URL missing' }, { status: 500 });
     }
 
-    // Handle trailing slashes carefully:
-    // If it's a root IP/domain, ensure one slash.
-    // If it's a specific path endpoint, don't force a trailing slash.
-    const apiUrl = targetBaseUrl.includes('/v1/') 
-      ? targetBaseUrl 
-      : targetBaseUrl.replace(/\/$/, '') + '/';
+    // Ensure clean URL formatting (handle trailing slashes)
+    const apiUrl = targetBaseUrl.replace(/\/$/, '') + (targetBaseUrl.includes('/v1/') ? '' : '/');
     
+    console.log(`[STT Proxy] Forwarding to: ${apiUrl}`);
+
     // Forward the URL to the external server with Auth header
-    // Body uses audio_path as the common interface for both endpoints
+    // The backend expects "audio_path" as the key
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -44,16 +42,30 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ audio_path: audio_url }),
     });
 
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      return NextResponse.json(
-        { message: data.detail || data.message || 'Transcription engine error' }, 
-        { status: res.status }
-      );
+    // Check if the response is JSON or something else (like HTML error page)
+    const contentType = res.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+      const data = await res.json();
+      if (!res.ok) {
+        return NextResponse.json(
+          { message: data.detail || data.message || 'Transcription engine error' }, 
+          { status: res.status }
+        );
+      }
+      return NextResponse.json(data);
+    } else {
+      // Handle non-JSON responses (HTML errors, plain text)
+      const textData = await res.text();
+      if (!res.ok) {
+        return NextResponse.json(
+          { message: `Engine error (${res.status}): ${textData.substring(0, 100)}` },
+          { status: res.status }
+        );
+      }
+      // If it's success but not JSON, wrap it
+      return NextResponse.json({ text: textData, success: true });
     }
-
-    return NextResponse.json(data);
   } catch (error: any) {
     console.error('STT Proxy Error:', error);
     return NextResponse.json(

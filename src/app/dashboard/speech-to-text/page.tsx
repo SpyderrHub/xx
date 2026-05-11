@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -146,8 +147,6 @@ export default function SpeechToTextPage() {
     if ((activeTab !== 'youtube' && !file) || isProcessing || !user) return;
     
     setIsProcessing(true);
-    // Do not clear transcription immediately to avoid flickering if re-transcribing
-    // but we will clear it if successful later.
 
     try {
       const idToken = await user.getIdToken();
@@ -160,7 +159,7 @@ export default function SpeechToTextPage() {
         }
         audioSourceUrl = youtubeUrl;
       } else if (file) {
-        // 1. Get Presigned URLs for R2
+        // 1. Get Presigned URL for R2 Upload
         const fileName = `${crypto.randomUUID()}-${file.name}`;
         const presignRes = await fetch('/api/r2/presign', {
           method: 'POST',
@@ -189,6 +188,8 @@ export default function SpeechToTextPage() {
         });
 
         if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
+        
+        // Use the signedReadUrl so the backend has permission to access the private R2 file
         audioSourceUrl = presignData.signedReadUrl;
       }
 
@@ -205,21 +206,25 @@ export default function SpeechToTextPage() {
         }),
       });
 
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textError = await response.text();
+        throw new Error(`Unexpected server response: ${textError.substring(0, 100)}`);
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || data.detail || 'Transcription failed');
       }
 
-      // 4. Robust parsing of unified JSON result text
-      // We check for all possible keys across your API versions
-      const resultText = 
-        data.text || 
-        data.transcription || 
-        data.output || 
-        (data.data && typeof data.data === 'string' ? data.data : null) ||
-        (typeof data === 'string' ? data : JSON.stringify(data));
+      // 4. Extract text field specifically from the standardized API response
+      const resultText = data.text || data.transcription || data.output || "";
         
+      if (!resultText) {
+        throw new Error("API completed but no text was returned.");
+      }
+
       setTranscription(resultText);
       
       toast({
