@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Proxy route for the Speech-to-Text API.
  * Dynamically routes requests to standard or YouTube endpoints based on payload.
  * 
- * Increased maxDuration to 600s (10 minutes) to allow for very long transcription tasks.
+ * Increased maxDuration to 600s (10 minutes) to allow for long transcription tasks.
  */
 export const maxDuration = 600;
 
@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
       console.error(`[STT Proxy] Target API URL is not defined in environment variables.`);
       return NextResponse.json({ message: 'Server configuration error: API URL missing' }, { status: 500 });
     }
+
+    console.log(`[STT Proxy] Routing to ${isYoutube ? 'YouTube' : 'Standard'} endpoint: ${apiUrl}`);
 
     // Forward the request to the external server
     // Note: We use 'audio_path' as the key as required by the backend engine

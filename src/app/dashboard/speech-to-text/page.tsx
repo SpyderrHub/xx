@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,7 +51,6 @@ const TranscriptionEditor = ({ value, onChange }: { value: string, onChange: (va
         suppressContentEditableWarning
         className="w-full min-h-[300px] md:min-h-[400px] p-0 text-[18px] md:text-[20px] leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/50 font-medium text-white/90"
         style={{ fontFamily: "'Inter', sans-serif" }}
-        data-placeholder="Your transcription will appear here..."
       >
         {value}
       </div>
@@ -92,7 +91,10 @@ export default function SpeechToTextPage() {
     const isYoutube = activeTab === 'youtube';
     const source = isYoutube ? youtubeUrl : file;
 
-    if (!source || !user) return;
+    if (!source || !user) {
+      toast({ title: "Input Required", description: isYoutube ? "Please enter a valid YouTube URL." : "Please upload an audio file.", variant: "destructive" });
+      return;
+    }
     
     setIsProcessing(true);
     if (retryCount === 0) {
@@ -140,6 +142,7 @@ export default function SpeechToTextPage() {
       setProcessingStage(isYoutube ? 'FETCHING VIDEO' : 'TRANSCRIBING');
 
       // 2. Send Source URL to Transcription Proxy
+      // Note: isYoutube flag ensures the proxy hits YOUTUBE_STT_API_URL
       const response = await fetch('/api/stt', {
         method: 'POST',
         headers: {
@@ -166,8 +169,8 @@ export default function SpeechToTextPage() {
 
         // Handle specific stage logic if returned (Processing/Wait state)
         if (data.stage === 'PROCESSING' || (!data.text && data.success !== false)) {
-          if (retryCount < 5) {
-            setProcessingStage(`STILL PROCESSING (Attempt ${retryCount + 1}/5)`);
+          if (retryCount < 10) {
+            setProcessingStage(`STILL PROCESSING (Attempt ${retryCount + 1})`);
             setTimeout(() => handleTranscribe(retryCount + 1), 5000);
             return;
           } else {
@@ -194,7 +197,7 @@ export default function SpeechToTextPage() {
         if (response.status === 504 || response.status === 502) {
           throw new Error("The request timed out. Long videos or large files take more time.");
         }
-        throw new Error(`Server returned unexpected format (${response.status}).`);
+        throw new Error(`Server returned unexpected format (${response.status}). This usually indicates a timeout or internal error.`);
       }
     } catch (error: any) {
       console.error('Transcription error:', error);
@@ -233,7 +236,7 @@ export default function SpeechToTextPage() {
             </div>
             <div className="text-left">
               <p className="text-xs md:text-sm font-bold leading-tight">AI Speech to Text</p>
-              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Transcription Studio</p>
+              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">v2.0 Workspace</p>
             </div>
           </div>
 
@@ -309,7 +312,7 @@ export default function SpeechToTextPage() {
                   <div className="relative group">
                     <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input 
-                      placeholder="Paste YouTube Video URL..." 
+                      placeholder="Paste YouTube Video URL (e.g. https://youtu.be/...)" 
                       className="h-16 pl-12 bg-white/5 border-white/10 rounded-2xl text-lg font-medium focus:ring-primary/20"
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
@@ -319,7 +322,7 @@ export default function SpeechToTextPage() {
                     <Youtube className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <h4 className="text-sm font-bold text-white">Direct Processing</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">Our engine will extract the audio automatically from the link provided and process the transcription remotely.</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">Our engine will extract the audio automatically and route the request to the specialized YouTube endpoint for processing.</p>
                     </div>
                   </div>
                 </div>
