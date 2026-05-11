@@ -189,7 +189,6 @@ export default function SpeechToTextPage() {
         });
 
         if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
-        // Use the temporary signedReadUrl so the STT engine can access the private file
         audioSourceUrl = presignData.signedReadUrl;
       }
 
@@ -206,24 +205,31 @@ export default function SpeechToTextPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Transcription failed');
+        throw new Error(data.message || data.detail || 'Transcription failed');
       }
 
-      const data = await response.json();
-      const resultText = data.text || data.transcription || (typeof data === 'string' ? data : JSON.stringify(data));
+      // 4. Robust parsing of result text
+      const resultText = 
+        data.text || 
+        data.transcription || 
+        data.output || 
+        (data.data && typeof data.data === 'string' ? data.data : null) ||
+        (typeof data === 'string' ? data : JSON.stringify(data));
+        
       setTranscription(resultText);
       
       toast({
         title: "Transcription Complete",
-        description: "Your audio has been successfully converted to text.",
+        description: "Your content has been successfully processed.",
       });
     } catch (error: any) {
       console.error('Transcription error:', error);
       toast({
-        title: "Transcription Error",
-        description: error.message || "Failed to process audio file.",
+        title: "Process Error",
+        description: error.message || "Failed to process content.",
         variant: "destructive"
       });
     } finally {

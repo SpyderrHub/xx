@@ -19,14 +19,19 @@ export async function POST(request: NextRequest) {
     const standardUrl = process.env.STT_API_URL;
     const youtubeUrl = process.env.YOUTUBE_STT_API_URL;
     
-    const targetBaseUrl = isYoutube ? youtubeUrl : standardUrl;
+    let targetBaseUrl = isYoutube ? youtubeUrl : standardUrl;
     
     if (!targetBaseUrl) {
       console.error(`[STT Proxy] API URL for ${isYoutube ? 'YouTube' : 'Standard'} is not defined.`);
       return NextResponse.json({ message: 'Server configuration error' }, { status: 500 });
     }
 
-    const apiUrl = targetBaseUrl.replace(/\/$/, '') + '/';
+    // Handle trailing slashes carefully:
+    // If it's a root IP/domain, ensure one slash.
+    // If it's a specific path endpoint, don't force a trailing slash.
+    const apiUrl = targetBaseUrl.includes('/v1/') 
+      ? targetBaseUrl 
+      : targetBaseUrl.replace(/\/$/, '') + '/';
     
     // Forward the URL to the external server with Auth header
     // Body uses audio_path as the common interface for both endpoints
@@ -39,15 +44,15 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ audio_path: audio_url }),
     });
 
+    const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
       return NextResponse.json(
-        { message: errorData.detail || errorData.message || 'Transcription engine error' }, 
+        { message: data.detail || data.message || 'Transcription engine error' }, 
         { status: res.status }
       );
     }
 
-    const data = await res.json();
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('STT Proxy Error:', error);
