@@ -193,6 +193,7 @@ export default function SpeechToTextPage() {
       }
 
       // 3. Send Source URL to Transcription Proxy
+      // Note: This request can now stay open for up to 10 minutes (600s)
       const response = await fetch('/api/stt', {
         method: 'POST',
         headers: {
@@ -237,7 +238,7 @@ export default function SpeechToTextPage() {
         const textData = await response.text();
         
         if (response.status === 504 || response.status === 502) {
-          throw new Error("The request timed out. High-volume audio takes longer to process. Please check your History in a few minutes.");
+          throw new Error("The request timed out. High-volume audio takes longer to process. Please try smaller files or check your history later.");
         }
         
         throw new Error(`Server returned unexpected format (${response.status}). This usually indicates a timeout or server-side crash.`);
@@ -511,4 +512,3 @@ export default function SpeechToTextPage() {
     </div>
   );
 }
-

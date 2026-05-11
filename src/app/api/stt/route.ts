@@ -6,9 +6,9 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Forwards the audio URL to the external engine with required headers.
  * Supports standard STT and specialized YouTube-to-text endpoints.
  * 
- * Increased maxDuration to 120s to allow for long transcription tasks.
+ * Increased maxDuration to 600s (10 minutes) to allow for very long transcription tasks.
  */
-export const maxDuration = 120;
+export const maxDuration = 600;
 
 export async function POST(request: NextRequest) {
   try {
