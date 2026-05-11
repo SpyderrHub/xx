@@ -26,7 +26,7 @@ RAZORPAY_PLAN_PRO_YEARLY=plan_wwwwww
 
 # API Configuration
 NEXT_PUBLIC_API_URL=https://58.224.7.137:45153/v1/text-to-speech
-STT_API_URL=http://103.13.113.123:20014/
+STT_API_URL=http://103.13.113.123:20014/v1/text-to-speech
 YOUTUBE_STT_API_URL=http://103.13.113.123:20014/v1/youtube-to-text
 
 # Cloudflare R2
@@ -47,3 +47,4 @@ NEXT_PUBLIC_R2_PUBLIC_DOMAIN=https://your-custom-domain.com
 - **Text to Speech**: Convert text to high-quality audio.
 - **Author Studio**: Upload and manage custom voice profiles.
 - **Subscription Management**: Secure recurring billing via Razorpay Subscriptions API.
+- **Speech to Text**: Highly accurate transcription from files or YouTube links.

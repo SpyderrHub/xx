@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 /**
  * Proxy route for the Speech-to-Text API.
- * Forwards the audio URL to the external engine with required headers.
+ * Dynamically routes requests to standard or YouTube endpoints based on payload.
  * 
  * Increased maxDuration to 600s (10 minutes) to allow for very long transcription tasks.
  */
@@ -11,20 +11,25 @@ export const maxDuration = 600;
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
-    const { audio_url } = await request.json();
+    const { audio_url, isYoutube } = await request.json();
 
     if (!audio_url) {
-      return NextResponse.json({ message: 'No audio source provided' }, { status: 400 });
+      return NextResponse.json({ message: 'No source URL provided' }, { status: 400 });
     }
 
-    const apiUrl = process.env.STT_API_URL;
+    // Determine the target endpoint
+    const standardUrl = process.env.STT_API_URL;
+    const youtubeUrl = process.env.YOUTUBE_STT_API_URL || 'http://103.13.113.123:20014/v1/youtube-to-text';
+    
+    const apiUrl = isYoutube ? youtubeUrl : standardUrl;
     
     if (!apiUrl) {
-      console.error(`[STT Proxy] API URL is not defined in environment variables.`);
+      console.error(`[STT Proxy] Target API URL is not defined in environment variables.`);
       return NextResponse.json({ message: 'Server configuration error: API URL missing' }, { status: 500 });
     }
 
-    // Forward the URL to the external server with Auth header
+    // Forward the request to the external server
+    // Note: We use 'audio_path' as the key as required by the backend engine
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -63,6 +68,7 @@ export async function POST(request: NextRequest) {
         );
       }
       
+      // If the engine returns HTML (like a refresh page), notify the frontend to poll
       if (textData.includes('<html')) {
         return NextResponse.json({ 
           message: 'The engine is processing...',
@@ -71,6 +77,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      // Fallback for plain text responses
       return NextResponse.json({ text: textData, success: true, stage: 'COMPLETED' });
     }
   } catch (error: any) {
