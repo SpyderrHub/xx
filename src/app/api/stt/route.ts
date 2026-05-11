@@ -5,7 +5,11 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Proxy route for the Speech-to-Text API.
  * Forwards the audio URL to the external engine with required headers.
  * Supports standard STT and specialized YouTube-to-text endpoints.
+ * 
+ * Increased maxDuration to 120s to allow for long transcription tasks.
  */
+export const maxDuration = 120;
+
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -57,13 +61,27 @@ export async function POST(request: NextRequest) {
     } else {
       // Handle non-JSON responses (HTML errors, plain text)
       const textData = await res.text();
+      
+      // Log for debugging
+      console.warn(`[STT Proxy] Received non-JSON response from ${apiUrl}:`, textData.substring(0, 100));
+
       if (!res.ok) {
         return NextResponse.json(
           { message: `Engine error (${res.status}): ${textData.substring(0, 100)}` },
           { status: res.status }
         );
       }
-      // If it's success but not JSON, wrap it
+      
+      // If it's success (200) but not JSON, wrap it. 
+      // If it looks like HTML, the engine might be serving a wait-page.
+      if (textData.includes('<html')) {
+        return NextResponse.json({ 
+          message: 'The engine returned a temporary status page. The transcription is likely in progress.',
+          success: false,
+          stage: 'PROCESSING'
+        });
+      }
+
       return NextResponse.json({ text: textData, success: true });
     }
   } catch (error: any) {

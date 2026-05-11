@@ -189,7 +189,6 @@ export default function SpeechToTextPage() {
 
         if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
         
-        // Use the signedReadUrl so the backend has permission to access the private R2 file
         audioSourceUrl = presignData.signedReadUrl;
       }
 
@@ -207,30 +206,42 @@ export default function SpeechToTextPage() {
       });
 
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const textError = await response.text();
-        throw new Error(`Unexpected server response: ${textError.substring(0, 100)}`);
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || data.detail || 'Transcription failed');
-      }
-
-      // 4. Extract text field specifically from the standardized API response
-      const resultText = data.text || data.transcription || data.output || "";
-        
-      if (!resultText) {
-        throw new Error("API completed but no text was returned.");
-      }
-
-      setTranscription(resultText);
       
-      toast({
-        title: "Transcription Complete",
-        description: "Your content has been successfully processed.",
-      });
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || data.detail || 'Transcription failed');
+        }
+
+        // Handle specific stage logic if returned
+        if (data.stage && data.stage !== 'COMPLETED' && !data.text) {
+          throw new Error(`The process is currently at stage: ${data.stage}. Please wait a few moments and try again.`);
+        }
+
+        // Map the correct text field from the API response
+        const resultText = data.text || data.transcription || data.output || "";
+          
+        if (!resultText) {
+          throw new Error("The engine completed successfully but returned no text.");
+        }
+
+        setTranscription(resultText);
+        
+        toast({
+          title: "Transcription Complete",
+          description: "Your content has been successfully processed.",
+        });
+      } else {
+        // This block catches HTML errors (like 504 Gateway Timeout or 500 crashes)
+        const textData = await response.text();
+        
+        if (response.status === 504 || response.status === 502) {
+          throw new Error("The request timed out. High-volume audio takes longer to process. Please check your History in a few minutes.");
+        }
+        
+        throw new Error(`Server returned unexpected format (${response.status}). This usually indicates a timeout or server-side crash.`);
+      }
     } catch (error: any) {
       console.error('Transcription error:', error);
       toast({
@@ -500,3 +511,4 @@ export default function SpeechToTextPage() {
     </div>
   );
 }
+
