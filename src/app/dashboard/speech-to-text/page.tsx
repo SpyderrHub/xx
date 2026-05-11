@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -147,7 +146,8 @@ export default function SpeechToTextPage() {
     if ((activeTab !== 'youtube' && !file) || isProcessing || !user) return;
     
     setIsProcessing(true);
-    setTranscription('');
+    // Do not clear transcription immediately to avoid flickering if re-transcribing
+    // but we will clear it if successful later.
 
     try {
       const idToken = await user.getIdToken();
@@ -211,7 +211,8 @@ export default function SpeechToTextPage() {
         throw new Error(data.message || data.detail || 'Transcription failed');
       }
 
-      // 4. Robust parsing of result text
+      // 4. Robust parsing of unified JSON result text
+      // We check for all possible keys across your API versions
       const resultText = 
         data.text || 
         data.transcription || 
