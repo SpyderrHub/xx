@@ -66,6 +66,15 @@ export async function POST(request: NextRequest) {
       console.warn(`[STT Proxy] Received non-JSON response from ${apiUrl}:`, textData.substring(0, 100));
 
       if (!res.ok) {
+        // If it's a 504 or 502, it might be a gateway timeout on the backend side
+        if (res.status === 504 || res.status === 502) {
+           return NextResponse.json({ 
+             message: 'The transcription engine timed out. This often happens with long audio.',
+             success: false,
+             stage: 'TIMEOUT'
+           }, { status: res.status });
+        }
+
         return NextResponse.json(
           { message: `Engine error (${res.status}): ${textData.substring(0, 100)}` },
           { status: res.status }
@@ -82,7 +91,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      return NextResponse.json({ text: textData, success: true });
+      return NextResponse.json({ text: textData, success: true, stage: 'COMPLETED' });
     }
   } catch (error: any) {
     console.error('STT Proxy Error:', error);

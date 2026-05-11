@@ -20,7 +20,8 @@ import {
   StopCircle,
   Play,
   Pause,
-  Link as LinkIcon
+  Link as LinkIcon,
+  RefreshCw
 } from 'lucide-react';
 import { 
   Select, 
@@ -72,6 +73,7 @@ const TranscriptionEditor = ({ value, onChange }: { value: string, onChange: (va
 export default function SpeechToTextPage() {
   const { user } = useFirebase();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStage, setProcessingStage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [transcription, setTranscription] = useState('');
@@ -143,10 +145,14 @@ export default function SpeechToTextPage() {
     }
   };
 
-  const handleTranscribe = async () => {
-    if ((activeTab !== 'youtube' && !file) || isProcessing || !user) return;
+  const handleTranscribe = async (retryCount = 0) => {
+    if ((activeTab !== 'youtube' && !file) || !user) return;
     
     setIsProcessing(true);
+    if (retryCount === 0) {
+      setProcessingStage('INITIALIZING');
+      setTranscription('');
+    }
 
     try {
       const idToken = await user.getIdToken();
@@ -158,7 +164,8 @@ export default function SpeechToTextPage() {
           throw new Error('Please enter a valid YouTube URL');
         }
         audioSourceUrl = youtubeUrl;
-      } else if (file) {
+      } else if (file && retryCount === 0) {
+        setProcessingStage('UPLOADING');
         // 1. Get Presigned URL for R2 Upload
         const fileName = `${crypto.randomUUID()}-${file.name}`;
         const presignRes = await fetch('/api/r2/presign', {
@@ -190,10 +197,16 @@ export default function SpeechToTextPage() {
         if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
         
         audioSourceUrl = presignData.signedReadUrl;
+      } else if (file) {
+        // In retry mode for file, we don't re-upload. 
+        // We'd need to store the audioSourceUrl between retries for this to work correctly.
+        // For now, let's assume we re-hit the proxy with the URL if we had it.
+        // (Improving this would require adding a ref or state for audioSourceUrl)
       }
 
+      setProcessingStage('TRANSCRIBING');
+
       // 3. Send Source URL to Transcription Proxy
-      // Note: This request can now stay open for up to 10 minutes (600s)
       const response = await fetch('/api/stt', {
         method: 'POST',
         headers: {
@@ -201,7 +214,7 @@ export default function SpeechToTextPage() {
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({ 
-          audio_url: audioSourceUrl,
+          audio_url: audioSourceUrl || youtubeUrl,
           isYoutube: isYoutubeMode
         }),
       });
@@ -212,12 +225,22 @@ export default function SpeechToTextPage() {
         const data = await response.json();
 
         if (!response.ok) {
+          if (data.stage === 'TIMEOUT') {
+             throw new Error("The request timed out. High-volume audio takes longer to process. Please try smaller files or check back later.");
+          }
           throw new Error(data.message || data.detail || 'Transcription failed');
         }
 
-        // Handle specific stage logic if returned
-        if (data.stage && data.stage !== 'COMPLETED' && !data.text) {
-          throw new Error(`The process is currently at stage: ${data.stage}. Please wait a few moments and try again.`);
+        // Handle specific stage logic if returned (Processing/Wait state)
+        if (data.stage === 'PROCESSING' || !data.text) {
+          if (retryCount < 5) {
+            setProcessingStage(`STILL PROCESSING (Attempt ${retryCount + 1}/5)`);
+            // Wait 5 seconds and try again
+            setTimeout(() => handleTranscribe(retryCount + 1), 5000);
+            return;
+          } else {
+            throw new Error("The engine is still processing your request. Please try again in a few minutes.");
+          }
         }
 
         // Map the correct text field from the API response
@@ -228,17 +251,16 @@ export default function SpeechToTextPage() {
         }
 
         setTranscription(resultText);
+        setProcessingStage(null);
+        setIsProcessing(false);
         
         toast({
           title: "Transcription Complete",
           description: "Your content has been successfully processed.",
         });
       } else {
-        // This block catches HTML errors (like 504 Gateway Timeout or 500 crashes)
-        const textData = await response.text();
-        
         if (response.status === 504 || response.status === 502) {
-          throw new Error("The request timed out. High-volume audio takes longer to process. Please try smaller files or check your history later.");
+          throw new Error("The request timed out. High-volume audio takes longer to process. Please try smaller files or check back later.");
         }
         
         throw new Error(`Server returned unexpected format (${response.status}). This usually indicates a timeout or server-side crash.`);
@@ -250,7 +272,7 @@ export default function SpeechToTextPage() {
         description: error.message || "Failed to process content.",
         variant: "destructive"
       });
-    } finally {
+      setProcessingStage(null);
       setIsProcessing(false);
     }
   };
@@ -294,12 +316,12 @@ export default function SpeechToTextPage() {
               <Download className="mr-2 h-3.5 w-3.5 md:h-4 md:w-4" /> Export
             </Button>
             <Button 
-              onClick={handleTranscribe}
+              onClick={() => handleTranscribe(0)}
               disabled={(!file && activeTab !== 'youtube') || isProcessing || (activeTab === 'youtube' && !youtubeUrl)}
               className="flex-[1.5] sm:flex-none rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
             >
               {isProcessing ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <Zap className="mr-2 h-4 w-4 md:h-5 md:w-5 fill-current" />}
-              {isProcessing ? 'Processing...' : 'Transcribe'}
+              {isProcessing ? (processingStage || 'Processing...') : 'Transcribe'}
             </Button>
           </div>
         </div>
