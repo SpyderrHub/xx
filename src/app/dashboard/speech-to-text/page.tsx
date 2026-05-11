@@ -171,9 +171,6 @@ export default function SpeechToTextPage() {
         setTranscription(resultText);
         toast({ title: "Success", description: "Transcription complete." });
       } else {
-        if (response.status === 504 || response.status === 502) {
-          throw new Error("The request timed out. Long audio tasks may exceed the 10-minute limit.");
-        }
         const rawText = await response.text();
         throw new Error(`Unexpected server response. Received: ${rawText.substring(0, 50)}...`);
       }
