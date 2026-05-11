@@ -170,9 +170,6 @@ export default function SpeechToTextPage() {
 
         setTranscription(resultText);
         toast({ title: "Success", description: "Transcription complete." });
-      } else {
-        const rawText = await response.text();
-        throw new Error(`Unexpected server response. Received: ${rawText.substring(0, 50)}...`);
       }
     } catch (error: any) {
       console.error('Transcription error:', error);
