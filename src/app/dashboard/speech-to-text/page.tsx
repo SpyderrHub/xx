@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -139,7 +139,7 @@ export default function SpeechToTextPage() {
 
       setProcessingStage('PROCESSING');
 
-      // 2. Direct fetch to proxy - Wait until final JSON is returned
+      // 2. Direct fetch to proxy - Wait until final result is returned
       const response = await fetch('/api/stt', {
         method: 'POST',
         headers: {
@@ -161,27 +161,21 @@ export default function SpeechToTextPage() {
           throw new Error(data.message || 'Transcription failed');
         }
 
-        // Prioritize 'text' field from the returned JSON
+        // Parse result text based on common keys
         const resultText = data.text || data.transcription || data.output || "";
           
         if (!resultText) {
-          throw new Error("The engine returned a response but no transcription text was found.");
+          throw new Error("No transcription text was found in the response.");
         }
 
         setTranscription(resultText);
-        setProcessingStage(null);
-        setIsProcessing(false);
-        
-        toast({
-          title: "Transcription Complete",
-          description: "Your content has been successfully processed.",
-        });
+        toast({ title: "Success", description: "Transcription complete." });
       } else {
         if (response.status === 504 || response.status === 502) {
-          throw new Error("The request timed out. Processing very long content can exceed the 10-minute limit.");
+          throw new Error("The request timed out. Long audio tasks may exceed the 10-minute limit.");
         }
         const rawText = await response.text();
-        throw new Error(`Unexpected response format. Server returned: ${rawText.substring(0, 100)}`);
+        throw new Error(`Unexpected server response. Received: ${rawText.substring(0, 50)}...`);
       }
     } catch (error: any) {
       console.error('Transcription error:', error);
@@ -190,6 +184,7 @@ export default function SpeechToTextPage() {
         description: error.message || "Failed to process content.",
         variant: "destructive"
       });
+    } finally {
       setProcessingStage(null);
       setIsProcessing(false);
     }
@@ -220,7 +215,7 @@ export default function SpeechToTextPage() {
             </div>
             <div className="text-left">
               <p className="text-xs md:text-sm font-bold leading-tight">AI Speech to Text</p>
-              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">v2.0 Workspace</p>
+              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Direct Synthesis</p>
             </div>
           </div>
 
@@ -306,7 +301,7 @@ export default function SpeechToTextPage() {
                     <Youtube className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <h4 className="text-sm font-bold text-white">Direct Processing</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">Our engine will extract the audio automatically and route the request to the specialized YouTube endpoint for processing.</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">Our engine will extract the audio automatically and route the request to your YouTube endpoint.</p>
                     </div>
                   </div>
                 </div>
@@ -330,7 +325,7 @@ export default function SpeechToTextPage() {
                 <div className="w-full md:w-1/2 flex items-center justify-center p-4 md:p-6 rounded-xl md:rounded-2xl bg-primary/5 border border-primary/10 h-12 md:h-auto">
                   <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-sm font-bold text-primary">
                     <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
-                    Neural Transcription Active
+                    Neural Engine Ready
                   </div>
                 </div>
               </div>
@@ -368,22 +363,6 @@ export default function SpeechToTextPage() {
           )}
         </div>
       </motion.div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-        {[
-          { title: "Neural Accuracy", desc: "Top-tier word error rates.", icon: Ear },
-          { title: "Batch Support", icon: Zap, desc: "Process long-form audio." },
-          { title: "Universal Link", desc: "YouTube & Cloud links.", icon: LinkIcon },
-        ].map((feature, i) => (
-          <div key={i} className="p-4 md:p-6 rounded-xl md:rounded-[2rem] bg-white/5 border border-white/10 flex items-start gap-3 md:gap-4">
-            <feature.icon className="h-4 w-4 md:h-5 md:w-5 text-primary mt-1" />
-            <div>
-              <h5 className="text-[10px] md:text-sm font-black uppercase tracking-widest text-white">{feature.title}</h5>
-              <p className="text-[9px] md:text-xs text-muted-foreground mt-1">{feature.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
