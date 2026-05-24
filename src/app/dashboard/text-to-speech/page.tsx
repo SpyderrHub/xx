@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { useFirebase, useCollection, useMemoFirebase, useDoc, errorEmitter, FirestorePermissionError, type SecurityRuleContext } from '@/firebase';
 import { toast } from '@/hooks/use-toast';
-import { collection, query, getDocs, doc, updateDoc, addDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
+import { collection, query, doc, updateDoc, addDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -53,11 +53,39 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.onloadedmetadata = () => setDuration(audioRef.current?.duration || 0);
-      audioRef.current.ontimeupdate = () => setProgress((audioRef.current?.currentTime || 0) / (audioRef.current?.duration || 1) * 100);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.play().catch(() => onTogglePlay());
+    } else {
+      audio.pause();
     }
-  }, [audioUrl]);
+  }, [isPlaying, onTogglePlay]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audioUrl && audio) {
+      audio.src = audioUrl;
+      audio.load();
+      setProgress(0);
+      setDuration(0);
+      
+      const handleMetadata = () => setDuration(audio.duration || 0);
+      const handleTime = () => setProgress((audio.currentTime / (audio.duration || 1)) * 100);
+      const handleEnded = () => onTogglePlay();
+
+      audio.addEventListener('loadedmetadata', handleMetadata);
+      audio.addEventListener('timeupdate', handleTime);
+      audio.addEventListener('ended', handleEnded);
+
+      return () => {
+        audio.removeEventListener('loadedmetadata', handleMetadata);
+        audio.removeEventListener('timeupdate', handleTime);
+        audio.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, [audioUrl, onTogglePlay]);
 
   const handleShare = async () => {
     if (!audioUrl) return;
@@ -114,7 +142,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
           <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden relative">
             <motion.div className="absolute h-full bg-primary" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground">{Math.floor(duration)}s</span>
+          <span className="text-[10px] font-mono text-muted-foreground">{duration ? Math.floor(duration) : 0}s</span>
         </div>
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
@@ -126,12 +154,12 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" onClick={handleShare} title="Share link">
             <Share2 className="h-5 w-5" />
           </Button>
-          <Button className="h-12 w-12 rounded-xl bg-white/10 hover:bg-white/20">
+          <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-primary" />
-          </Button>
+          </div>
         </div>
       </div>
-      <audio ref={audioRef} src={audioUrl} />
+      <audio ref={audioRef} className="hidden" />
     </motion.div>
   );
 };
@@ -144,7 +172,6 @@ export default function TextToSpeechPage() {
   const [generatedAudio, setGeneratedAudio] = useState<{url: string, voice: string, characters: number} | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // 1. Fetch User Data for Credits
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
@@ -152,7 +179,6 @@ export default function TextToSpeechPage() {
 
   const { data: userData } = useDoc(userDocRef);
 
-  // 2. Fetch User's Selected Voices (myVoices subcollection)
   const myVoicesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'myVoices');
@@ -160,7 +186,6 @@ export default function TextToSpeechPage() {
 
   const { data: myVoicesDocs, isLoading: isMyVoicesLoading } = useCollection(myVoicesQuery);
 
-  // 3. Fetch All Public Voices
   const allVoicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'voices');
@@ -168,14 +193,12 @@ export default function TextToSpeechPage() {
 
   const { data: allVoices, isLoading: isAllVoicesLoading } = useCollection(allVoicesQuery);
 
-  // 4. Filter voices based on User's selection
   const userVoices = useMemo(() => {
     if (!allVoices || !myVoicesDocs) return [];
     const myIds = new Set(myVoicesDocs.map(d => d.id));
     return allVoices.filter(v => myIds.has(v.id));
   }, [allVoices, myVoicesDocs]);
 
-  // Set default voice when userVoices list loads
   useEffect(() => {
     if (userVoices.length > 0 && !selectedVoiceId) {
       setSelectedVoiceId(userVoices[0].id);
@@ -190,7 +213,6 @@ export default function TextToSpeechPage() {
     const charCount = text.length;
     const currentCredits = userData?.credits || 0;
 
-    // Fast local check
     if (currentCredits < charCount) {
       toast({
         title: "Insufficient Credits",
@@ -206,7 +228,6 @@ export default function TextToSpeechPage() {
     try {
       const token = await user.getIdToken();
       
-      // Perform the exact fetch structure requested
       const response = await fetch('/api/tts', {
         method: "POST",
         headers: {
@@ -226,14 +247,12 @@ export default function TextToSpeechPage() {
         throw new Error(data.message || 'Synthesis engine error');
       }
 
-      // Check for audio_download_url as requested, fallback to other common keys
       const audioUrl = data.audio_download_url || data.audio_url || data.url || data.audio;
       
       if (!audioUrl) {
         throw new Error("No audio URL returned from the synthesis engine.");
       }
 
-      // 2. Atomic Credit Deduction and History Logging via Transaction
       await runTransaction(firestore, async (transaction) => {
         const uRef = doc(firestore, 'users', user.uid);
         const uSnap = await transaction.get(uRef);
@@ -241,17 +260,13 @@ export default function TextToSpeechPage() {
         if (!uSnap.exists()) throw new Error("User record not found");
         
         const dbCredits = uSnap.data().credits || 0;
-        if (dbCredits < charCount) {
-          throw new Error("Insufficient credits in database check");
-        }
+        if (dbCredits < charCount) throw new Error("Insufficient credits");
 
-        // Deduct credits
         transaction.update(uRef, {
           credits: dbCredits - charCount,
           lastGeneratedAt: new Date().toISOString()
         });
 
-        // Add to generations collection
         const historyRef = doc(collection(firestore, 'users', user.uid, 'generations'));
         transaction.set(historyRef, {
           text: text.substring(0, 150) + (text.length > 150 ? '...' : ''),
@@ -301,7 +316,6 @@ export default function TextToSpeechPage() {
 
   return (
     <div className="flex flex-col min-h-[calc(100dvh-theme(spacing.16))] pb-32">
-      {/* Top Studio Controls */}
       <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-3 md:py-4 mb-6 md:mb-12">
         <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between gap-3 md:gap-6">
           <div className="flex items-center gap-3 md:gap-4">
@@ -362,7 +376,6 @@ export default function TextToSpeechPage() {
         </div>
       </div>
 
-      {/* Main Studio Editor */}
       <main className="flex-1 flex flex-col container mx-auto px-4 md:px-6">
         {userVoices.length === 0 && !isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
@@ -384,7 +397,6 @@ export default function TextToSpeechPage() {
         )}
       </main>
 
-      {/* Audio Player Footer */}
       <AudioPlayerFooter 
         audioUrl={generatedAudio?.url} 
         voice={generatedAudio?.voice} 

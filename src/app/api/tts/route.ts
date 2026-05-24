@@ -32,12 +32,10 @@ async function handleSynthesis(request: NextRequest, body: any) {
     
     // Add engine authentication if key is provided
     if (apiKey) {
-      headers['X-API-KEY'] = apiKey; // Or whatever header your backend expects
-      // If your backend also expects the user token, you can pass it through:
-      headers['Authorization'] = `Bearer ${idToken}`;
+      headers['X-API-KEY'] = apiKey;
     }
 
-    // 3. Execute request from the server side (Safe from Mixed Content)
+    // 3. Execute request from the server side
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers,
@@ -59,9 +57,7 @@ async function handleSynthesis(request: NextRequest, body: any) {
       );
     }
 
-    const data = await res.json();
-    
-    // Return the response data (containing audio_url) to the frontend
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('TTS Proxy Error:', error);
