@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
 
 /**
- * Secure Proxy for the specialized TTS engine at 152.160.24.154.
+ * Secure Proxy for the specialized TTS engine.
+ * Fetches the target API URL and Key from environment variables.
  * Verifies Firebase identity before forwarding to the private backend.
  */
 export async function POST(request: NextRequest) {
@@ -17,13 +18,14 @@ export async function POST(request: NextRequest) {
     // 1. Verify user identity server-side
     await adminAuth.verifyIdToken(idToken);
 
-    // 2. Prepare request for the internal engine
+    // 2. Prepare request for the internal engine using .env values
     const body = await request.json();
-    const apiUrl = 'http://152.160.24.154:12417/v1/text-to-speech';
+    const apiUrl = process.env.TTS_API_URL;
     const apiKey = process.env.TTS_API_KEY;
 
-    if (!apiKey) {
-      console.error('[TTS Proxy] TTS_API_KEY is missing from environment variables.');
+    if (!apiUrl) {
+      console.error('[TTS Proxy] TTS_API_URL is missing from environment variables.');
+      return NextResponse.json({ message: 'Server configuration error: API URL missing' }, { status: 500 });
     }
 
     const headers: Record<string, string> = {
