@@ -99,7 +99,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
           </div>
           <div className="ml-auto flex items-center gap-2 md:hidden">
              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
-                <a href={audioUrl} download="quantisai-generation.mp3">
+                <a href={audioUrl} download="quantisai-generation.mp3" target="_blank" rel="noopener noreferrer">
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -119,7 +119,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
-            <a href={audioUrl} download="quantisai-generation.mp3" title="Download Audio">
+            <a href={audioUrl} download="quantisai-generation.mp3" title="Download Audio" target="_blank" rel="noopener noreferrer">
               <Download className="h-5 w-5" />
             </a>
           </Button>
@@ -226,7 +226,8 @@ export default function TextToSpeechPage() {
         throw new Error(data.message || 'Synthesis engine error');
       }
 
-      const audioUrl = data.audio_url || data.url || data.audio;
+      // Check for audio_download_url as requested, fallback to other common keys
+      const audioUrl = data.audio_download_url || data.audio_url || data.url || data.audio;
       
       if (!audioUrl) {
         throw new Error("No audio URL returned from the synthesis engine.");
