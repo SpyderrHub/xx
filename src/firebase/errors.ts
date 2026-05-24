@@ -1,6 +1,9 @@
 'use client';
 import { getAuth, type User } from 'firebase/auth';
 
+/**
+ * Type definition for the context of a Firestore Security Rule failure.
+ */
 export type SecurityRuleContext = {
   path: string;
   operation: 'get' | 'list' | 'create' | 'update' | 'delete' | 'write';
@@ -97,6 +100,10 @@ function buildErrorMessage(requestObject: SecurityRuleRequest): string {
 ${JSON.stringify(requestObject, null, 2)}`;
 }
 
+/**
+ * Custom error class for Firestore permission denials.
+ * Used to provide structured feedback for debugging and AI context.
+ */
 export class FirestorePermissionError extends Error {
   public readonly request: SecurityRuleRequest;
 

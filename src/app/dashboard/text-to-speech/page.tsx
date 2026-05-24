@@ -7,7 +7,6 @@ import {
   Loader2, 
   Zap, 
   Download, 
-  User, 
   Mic2, 
   Play, 
   Pause,
@@ -53,17 +52,19 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Sync state with HTML Audio Element
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
-      audio.play().catch(() => onTogglePlay());
+      audio.play().catch(() => onTogglePlay(false));
     } else {
       audio.pause();
     }
   }, [isPlaying, onTogglePlay]);
 
+  // Handle source changes and metadata
   useEffect(() => {
     const audio = audioRef.current;
     if (audioUrl && audio) {
@@ -72,9 +73,14 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
       setProgress(0);
       setDuration(0);
       
-      const handleMetadata = () => setDuration(audio.duration || 0);
+      const handleMetadata = () => {
+        if (audio.duration && audio.duration !== Infinity) {
+          setDuration(audio.duration);
+        }
+      };
+      
       const handleTime = () => setProgress((audio.currentTime / (audio.duration || 1)) * 100);
-      const handleEnded = () => onTogglePlay();
+      const handleEnded = () => onTogglePlay(false);
 
       audio.addEventListener('loadedmetadata', handleMetadata);
       audio.addEventListener('timeupdate', handleTime);
@@ -117,7 +123,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-4 md:gap-6">
         <div className="flex items-center gap-4 shrink-0 w-full md:w-auto">
           <Button 
-            onClick={onTogglePlay}
+            onClick={() => onTogglePlay(!isPlaying)}
             className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-white text-black hover:bg-white/90 btn-glow"
           >
             {isPlaying ? <Pause className="h-5 w-5 md:h-6 md:w-6 fill-current" /> : <Play className="h-5 w-5 md:h-6 md:w-6 fill-current ml-1" />}
@@ -128,7 +134,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
           </div>
           <div className="ml-auto flex items-center gap-2 md:hidden">
              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
-                <a href={audioUrl} download="quantisai-generation.wav" target="_blank" rel="noopener noreferrer">
+                <a href={audioUrl} download={`quantisai_${Date.now()}.wav`} target="_blank" rel="noopener noreferrer">
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -148,7 +154,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
-            <a href={audioUrl} download="quantisai-generation.wav" title="Download Audio" target="_blank" rel="noopener noreferrer">
+            <a href={audioUrl} download={`quantisai_${Date.now()}.wav`} title="Download Audio" target="_blank" rel="noopener noreferrer">
               <Download className="h-5 w-5" />
             </a>
           </Button>
@@ -225,6 +231,7 @@ export default function TextToSpeechPage() {
 
     setIsGenerating(true);
     setGeneratedAudio(null);
+    setIsPlaying(false);
 
     try {
       const token = await user.getIdToken();
@@ -248,10 +255,11 @@ export default function TextToSpeechPage() {
         throw new Error(data.message || 'Synthesis engine error');
       }
 
-      const audioUrl = data.audio_download_url || data.audio_url || data.url || data.audio;
+      // Priority parsing for engine response
+      const audioUrl = data.audio_download_url || data.audio_url || data.url;
       
       if (!audioUrl) {
-        throw new Error("No audio URL returned from the synthesis engine.");
+        throw new Error("No audio URL was returned by the synthesis engine.");
       }
 
       await runTransaction(firestore, async (transaction) => {
@@ -325,7 +333,7 @@ export default function TextToSpeechPage() {
             </div>
             <div className="hidden sm:block">
               <h2 className="text-xs md:text-sm font-black text-white">Studio Workspace</h2>
-              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">v2.0</p>
+              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">v2.1</p>
             </div>
           </div>
 
@@ -403,7 +411,7 @@ export default function TextToSpeechPage() {
         voice={generatedAudio?.voice} 
         characters={generatedAudio?.characters} 
         isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
+        onTogglePlay={setIsPlaying}
       />
     </div>
   );

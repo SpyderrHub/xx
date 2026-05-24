@@ -4,7 +4,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 /**
  * Secure Proxy for the specialized TTS engine.
  * Fetches the target API URL and Key from environment variables.
- * Verifies Firebase identity before forwarding to the private backend.
+ * Verifies Firebase identity and FORWARDS the token to the engine.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -28,39 +28,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Server configuration error: API URL missing' }, { status: 500 });
     }
 
+    // 3. Construct headers - Forwarding Authorization is CRITICAL for the engine's token verification stage
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Authorization': authHeader as string, 
     };
     
-    // Pass API key if configured in .env.local
+    // Pass custom API key if configured
     if (apiKey) {
       headers['X-API-KEY'] = apiKey;
     }
 
-    // 3. Forward request to the engine
+    // 4. Forward request to the engine
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      const errorText = await res.text();
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { message: errorText };
-      }
-      
       return NextResponse.json(
-        { message: errorData.message || errorData.detail || 'Synthesis engine returned an error' }, 
+        { message: data.message || data.detail || 'Synthesis engine returned an error' }, 
         { status: res.status }
       );
     }
 
-    // 4. Return engine response to the client
-    const data = await res.json();
+    // 5. Return engine response (which includes audio_download_url) to the client
     return NextResponse.json(data);
 
   } catch (error: any) {
