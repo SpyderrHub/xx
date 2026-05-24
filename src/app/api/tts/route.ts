@@ -2,40 +2,40 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
 
 /**
- * Proxy route for the specialized TTS engine at the provided IP address.
- * Bypasses Mixed Content restrictions and secures the TTS_API_KEY.
+ * Secure Proxy for the specialized TTS engine at 152.160.24.154.
+ * Verifies Firebase identity before forwarding to the private backend.
  */
-
-async function handleSynthesis(request: NextRequest, body: any) {
+export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
-    const idToken = authHeader?.split('Bearer ')[1];
+    const idToken = authHeader?.startsWith('Bearer ') ? authHeader.split('Bearer ')[1] : null;
 
     if (!idToken || !adminAuth) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
 
-    // 1. Verify that the request comes from a valid user
+    // 1. Verify user identity server-side
     await adminAuth.verifyIdToken(idToken);
 
-    // 2. Determine target API URL and credentials
+    // 2. Prepare request for the internal engine
+    const body = await request.json();
     const apiUrl = 'http://152.160.24.154:12417/v1/text-to-speech';
     const apiKey = process.env.TTS_API_KEY;
 
     if (!apiKey) {
-      console.error('[TTS Proxy] Missing TTS_API_KEY in environment variables.');
+      console.error('[TTS Proxy] TTS_API_KEY is missing from environment variables.');
     }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     
-    // Add engine authentication if key is provided
+    // Pass API key if configured in .env.local
     if (apiKey) {
       headers['X-API-KEY'] = apiKey;
     }
 
-    // 3. Execute request from the server side
+    // 3. Forward request to the engine
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers,
@@ -57,29 +57,19 @@ async function handleSynthesis(request: NextRequest, body: any) {
       );
     }
 
-    const data = await response.json();
+    // 4. Return engine response to the client
+    const data = await res.json();
     return NextResponse.json(data);
+
   } catch (error: any) {
     console.error('TTS Proxy Error:', error);
     return NextResponse.json(
-      { message: error.message || 'Internal server error during synthesis request' }, 
+      { message: error.message || 'Internal server error during synthesis proxy' }, 
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  return handleSynthesis(request, body);
-}
-
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const body = Object.fromEntries(searchParams.entries());
-  
-  if (!body.text || !body.reference_audio) {
-    return NextResponse.json({ message: 'Missing required query parameters' }, { status: 400 });
-  }
-
-  return handleSynthesis(request, body);
+export async function GET() {
+  return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
 }

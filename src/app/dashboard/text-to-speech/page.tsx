@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { useFirebase, useCollection, useMemoFirebase, useDoc, errorEmitter, FirestorePermissionError, type SecurityRuleContext } from '@/firebase';
 import { toast } from '@/hooks/use-toast';
-import { collection, query, doc, updateDoc, addDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
+import { collection, query, doc, runTransaction } from 'firebase/firestore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
