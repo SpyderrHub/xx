@@ -185,7 +185,7 @@ export default function TextToSpeechPage() {
   const selectedVoice = userVoices.find(v => v.id === selectedVoiceId);
 
   const handleGenerate = async () => {
-    if (!text || isGenerating || !selectedVoiceId || !user || !firestore) return;
+    if (!text || isGenerating || !selectedVoiceId || !user || !firestore || !selectedVoice) return;
 
     const charCount = text.length;
     const currentCredits = userData?.credits || 0;
@@ -204,10 +204,33 @@ export default function TextToSpeechPage() {
     setGeneratedAudio(null);
 
     try {
-      // 1. Mock Synthesis Logic (Simulate high-end neural engine)
-      const audioUrl = await new Promise<string>((resolve) => {
-        setTimeout(() => resolve('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 2000);
+      const token = await user.getIdToken();
+      
+      // Perform the exact fetch structure requested
+      const response = await fetch('/api/tts', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          text: text,
+          reference_audio: selectedVoice.audioUrl,
+          reference_text: selectedVoice.referenceText || ""
+        })
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Synthesis engine error');
+      }
+
+      const audioUrl = data.audio_url || data.url || data.audio;
+      
+      if (!audioUrl) {
+        throw new Error("No audio URL returned from the synthesis engine.");
+      }
 
       // 2. Atomic Credit Deduction and History Logging via Transaction
       await runTransaction(firestore, async (transaction) => {
@@ -240,7 +263,6 @@ export default function TextToSpeechPage() {
           settings: {}
         });
       }).catch(async (serverError) => {
-        // If it's a permission error, emit the contextual version for debugging
         if (serverError.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
             path: `users/${user.uid}/generations`,
@@ -270,7 +292,6 @@ export default function TextToSpeechPage() {
         variant: "destructive" 
       });
     } finally {
-      // Ensure button goes back to initial state immediately
       setIsGenerating(false);
     }
   };

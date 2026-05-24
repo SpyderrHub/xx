@@ -1,31 +1,43 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { adminAuth } from '@/lib/firebase-admin';
 
 /**
- * Proxy route for the TTS API to bypass browser CORS and SSL restrictions.
- * Supports both GET and POST methods for flexible integration and caching.
- * Uses NEXT_PUBLIC_API_URL from environment variables.
+ * Proxy route for the specialized TTS engine at the provided IP address.
+ * Bypasses Mixed Content restrictions and secures the TTS_API_KEY.
  */
 
 async function handleSynthesis(request: NextRequest, body: any) {
   try {
     const authHeader = request.headers.get('authorization');
-    
-    // Get URL from env or fallback to provided IP
-    const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://58.224.7.137:45153/v1/text-to-speech';
-    
-    // Ensure clean URL formatting
-    const apiUrl = baseApiUrl.replace(/\/$/, '') + '/';
-    
+    const idToken = authHeader?.split('Bearer ')[1];
+
+    if (!idToken || !adminAuth) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+    }
+
+    // 1. Verify that the request comes from a valid user
+    await adminAuth.verifyIdToken(idToken);
+
+    // 2. Determine target API URL and credentials
+    const apiUrl = 'http://152.160.24.154:12417/v1/text-to-speech';
+    const apiKey = process.env.TTS_API_KEY;
+
+    if (!apiKey) {
+      console.error('[TTS Proxy] Missing TTS_API_KEY in environment variables.');
+    }
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     
-    // Pass along authorization if provided (usually Firebase ID Token)
-    if (authHeader) {
-      headers['Authorization'] = authHeader;
+    // Add engine authentication if key is provided
+    if (apiKey) {
+      headers['X-API-KEY'] = apiKey; // Or whatever header your backend expects
+      // If your backend also expects the user token, you can pass it through:
+      headers['Authorization'] = `Bearer ${idToken}`;
     }
 
-    // Execute request from the server side
+    // 3. Execute request from the server side (Safe from Mixed Content)
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers,
@@ -33,23 +45,24 @@ async function handleSynthesis(request: NextRequest, body: any) {
     });
 
     if (!res.ok) {
-      const errorData = await res.text();
+      const errorText = await res.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { message: errorText };
+      }
+      
       return NextResponse.json(
-        { message: errorData || 'Synthesis engine returned an error' }, 
+        { message: errorData.message || errorData.detail || 'Synthesis engine returned an error' }, 
         { status: res.status }
       );
     }
 
     const data = await res.json();
     
-    // Return with aggressive 1-year caching for the synthesized output
-    // Enforce audio/mpeg as the primary delivery format
-    return NextResponse.json(data, {
-      headers: {
-        'Content-Type': 'audio/mpeg',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    });
+    // Return the response data (containing audio_url) to the frontend
+    return NextResponse.json(data);
   } catch (error: any) {
     console.error('TTS Proxy Error:', error);
     return NextResponse.json(
@@ -68,9 +81,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const body = Object.fromEntries(searchParams.entries());
   
-  // Basic validation: ensure we have required synthesis params
-  if (!body.text || !body.voice_id) {
-    return NextResponse.json({ message: 'Missing required query parameters: text and voice_id' }, { status: 400 });
+  if (!body.text || !body.reference_audio) {
+    return NextResponse.json({ message: 'Missing required query parameters' }, { status: 400 });
   }
 
   return handleSynthesis(request, body);
