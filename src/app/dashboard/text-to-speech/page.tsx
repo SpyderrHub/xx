@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { WeavyPattern } from '@/components/author/avatar-upload';
 
-const MAX_CHARACTERS = 5000;
+const MAX_CHARACTERS = 2000;
 
 const StudioEditor = ({ value, onChange, maxLength }: { value: string, onChange: (val: string) => void, maxLength: number }) => {
   return (
@@ -159,7 +159,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
             </a>
           </Button>
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" onClick={handleShare} title="Share link">
-            <Share2 className="h-5 w-5" />
+            <Share2 className="h-4 w-4" />
           </Button>
           <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-primary" />
