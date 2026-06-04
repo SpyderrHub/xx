@@ -5,24 +5,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { 
   Upload, 
   Mic2, 
-  CheckCircle2, 
   X, 
   Loader2,
   FileAudio,
   Zap,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  FileText
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 export default function VoiceCloningPage() {
   const [voiceName, setVoiceName] = useState('');
-  const [description, setDescription] = useState('');
   const [referenceText, setReferenceText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isCloning, setIsCloning] = useState(false);
@@ -56,6 +54,7 @@ export default function VoiceCloningPage() {
     }
     
     setIsCloning(true);
+    // Simulation of cloning process
     setTimeout(() => {
       setIsCloning(false);
       toast({
@@ -90,24 +89,27 @@ export default function VoiceCloningPage() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Main Script Area (Center) */}
+        {/* Left: Main Script Area (Center) - Dedicated to Reference Text */}
         <main className="flex-1 flex flex-col p-8 md:p-14 overflow-y-auto scrollbar-hide bg-transparent">
           <div className="max-w-4xl w-full mx-auto space-y-6">
             <div className="flex items-center justify-between px-1">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Script</label>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Text</label>
+              </div>
               <span className="text-[10px] font-mono text-muted-foreground">{referenceText.length} Characters</span>
             </div>
             <textarea
               value={referenceText}
               onChange={(e) => setReferenceText(e.target.value)}
-              placeholder="Paste the script used in your audio samples here. This helps our neural engine map your voice to text accurately..."
+              placeholder="Paste the exact script of what the speaker says in your uploaded samples. This text is used to map your voice characteristics accurately..."
               className="w-full min-h-[600px] p-0 text-[22px] text-left leading-relaxed outline-none bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0"
               style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
         </main>
 
-        {/* Right: Fixed Unified Sidebar with straight vertical border */}
+        {/* Right: Fixed Unified Sidebar */}
         <aside className="w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md">
           <div className="p-8 space-y-10">
             {/* Section: Identity */}
@@ -124,16 +126,6 @@ export default function VoiceCloningPage() {
                   value={voiceName}
                   onChange={(e) => setVoiceName(e.target.value)}
                   className="h-14 bg-white/5 border-white/10 rounded-2xl text-lg font-bold px-6 focus:ring-primary/20"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Description</Label>
-                <Textarea 
-                  placeholder="Describe the tone (e.g. raspy, energetic, calm)..." 
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="h-32 resize-none bg-white/5 border-white/10 rounded-2xl p-6 focus:ring-primary/20 leading-relaxed text-sm"
                 />
               </div>
             </div>
@@ -209,7 +201,7 @@ export default function VoiceCloningPage() {
               <div className="flex items-start gap-3 text-muted-foreground px-2">
                 <ShieldCheck className="h-5 w-5 text-primary/40 shrink-0" />
                 <p className="text-[10px] font-medium leading-relaxed italic">
-                  Private cloning ensures your neural data is encrypted and accessible only to your account via R2 buckets.
+                  Private cloning ensures your neural data is encrypted and accessible only to your account via secure buckets.
                 </p>
               </div>
             </div>
