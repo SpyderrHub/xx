@@ -66,7 +66,7 @@ export default function VoiceCloningPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.32))] -m-4 sm:-m-6 lg:-m-10 overflow-hidden bg-background">
+    <div className="flex flex-col h-[calc(100vh-theme(spacing.32))] -m-4 sm:-m-6 lg:-m-10 overflow-hidden bg-transparent">
       {/* Top Studio Header */}
       <div className="shrink-0 z-40 glass-card border-b border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6">
         <div className="flex items-center gap-4">
@@ -91,7 +91,7 @@ export default function VoiceCloningPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Main Script Area (Center) */}
-        <main className="flex-1 flex flex-col p-8 md:p-14 overflow-y-auto scrollbar-hide">
+        <main className="flex-1 flex flex-col p-8 md:p-14 overflow-y-auto scrollbar-hide bg-transparent">
           <div className="max-w-4xl w-full mx-auto space-y-6">
             <div className="flex items-center justify-between px-1">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Script</label>
@@ -108,7 +108,7 @@ export default function VoiceCloningPage() {
         </main>
 
         {/* Right: Fixed Unified Sidebar with straight vertical border */}
-        <aside className="w-[400px] border-l border-white/10 bg-black/20 overflow-y-auto scrollbar-hide">
+        <aside className="w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md">
           <div className="p-8 space-y-10">
             {/* Section: Identity */}
             <div className="space-y-6">
