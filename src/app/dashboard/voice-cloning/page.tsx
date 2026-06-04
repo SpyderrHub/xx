@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,10 @@ import {
   CheckCircle2, 
   X, 
   Loader2,
-  FileAudio
+  FileAudio,
+  Zap,
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -24,7 +27,7 @@ export default function VoiceCloningPage() {
   const [referenceText, setReferenceText] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isCloning, setIsCloning] = useState(false);
-  const [isAgreed, setIsCheck] = useState(false);
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -44,7 +47,14 @@ export default function VoiceCloningPage() {
   };
 
   const handleClone = async () => {
-    if (!voiceName || !referenceText || files.length === 0 || !isAgreed) return;
+    if (!voiceName || !referenceText || files.length === 0 || !isAgreed) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields, upload samples, and agree to the terms.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsCloning(true);
     setTimeout(() => {
@@ -57,137 +67,157 @@ export default function VoiceCloningPage() {
   };
 
   return (
-    <div className="max-w-[900px] mx-auto space-y-6 md:space-y-10 pb-20 px-4 md:px-0">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card/40 backdrop-blur-[40px] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/10"
-      >
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 border-b border-white/5 bg-white/5 gap-4">
-          <div className="flex items-center gap-3 px-4 py-2 md:px-5 md:py-2.5 rounded-full bg-white/5 border border-white/10 shadow-lg w-full sm:w-auto">
-            <div className="h-8 w-8 md:h-9 md:w-9 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
-              <Mic2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+    <div className="flex flex-col min-h-[calc(100dvh-theme(spacing.16))] pb-32">
+      {/* Top Studio Header */}
+      <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-4 mb-6 md:mb-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+              <Mic2 className="h-5 w-5" />
             </div>
-            <div className="text-left">
-              <p className="text-xs md:text-sm font-bold leading-tight">Instant Voice Cloning</p>
-              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Professional Studio</p>
+            <div>
+              <h2 className="text-sm font-black text-white">Voice Cloning Studio</h2>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Professional Identity Engine</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto">
-            <Button 
-              onClick={handleClone}
-              disabled={!voiceName || !referenceText || files.length === 0 || !isAgreed || isCloning}
-              className="w-full sm:w-auto rounded-full h-10 md:h-12 px-6 md:px-10 bg-primary hover:bg-primary/90 font-black text-sm md:text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
-            >
-              {isCloning ? <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4 md:h-5 md:w-5" />}
-              {isCloning ? 'Processing...' : 'Add Voice'}
-            </Button>
-          </div>
-        </div>
-
-        <div className="p-6 md:p-14 space-y-8 md:space-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-            <div className="space-y-4 md:space-y-6">
-              <div className="space-y-2">
-                <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">Voice Name</Label>
-                <Input 
-                  placeholder="e.g. My Pro Narrator" 
-                  value={voiceName}
-                  onChange={(e) => setVoiceName(e.target.value)}
-                  className="h-12 md:h-14 rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-base md:text-lg font-medium focus:ring-primary/20"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">Description</Label>
-                <Textarea 
-                  placeholder="How does this voice sound?" 
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="h-24 md:h-28 resize-none rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-sm md:text-base font-medium focus:ring-primary/20"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">Reference Text</Label>
-                <Textarea 
-                  placeholder="Paste the script provided in your audio samples..." 
-                  value={referenceText}
-                  onChange={(e) => setReferenceText(e.target.value)}
-                  className="h-24 md:h-28 resize-none rounded-xl md:rounded-2xl bg-white/5 border-white/10 text-sm md:text-base font-medium focus:ring-primary/20"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4 md:space-y-6">
-              <Label className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">Voice Samples</Label>
-              <div 
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={onDrop}
-                onClick={() => document.getElementById('file-upload')?.click()}
-                className={cn(
-                  "h-40 md:h-[320px] border-2 border-dashed rounded-xl md:rounded-[2rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
-                  files.length > 0 ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
-                )}
-              >
-                <input id="file-upload" type="file" multiple accept="audio/*" className="hidden" onChange={handleFileSelect} />
-                <div className="text-center p-4">
-                  <div className="mb-2 md:mb-4 inline-flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
-                    <Upload className="h-5 w-5 md:h-7 md:w-7 text-primary" />
-                  </div>
-                  <p className="font-bold text-base md:text-lg">Click or Drag Samples</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Upload clear audio for best results.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {files.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-              {files.map((file, i) => (
-                <div key={i} className="flex items-center justify-between p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/5 border border-white/10">
-                  <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                    <FileAudio className="h-4 w-4 md:h-5 md:w-5 text-primary shrink-0" />
-                    <span className="text-[10px] md:text-sm font-bold truncate">{file.name}</span>
-                  </div>
-                  <button onClick={() => removeFile(i)} className="text-muted-foreground hover:text-white transition-colors">
-                    <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="pt-6 md:pt-10 border-t border-white/5">
-            <label className="flex items-start gap-3 md:gap-4 cursor-pointer group">
-              <input 
-                type="checkbox" 
-                checked={isAgreed} 
-                onChange={(e) => setIsCheck(e.target.checked)}
-                className="mt-1 h-4 w-4 md:h-5 md:w-5 rounded border-white/10 bg-white/5 text-primary focus:ring-primary/20"
-              />
-              <div className="flex-1">
-                <p className="text-[10px] md:text-sm font-bold group-hover:text-primary transition-colors">I confirm that I have the necessary rights to clone this voice.</p>
-                <p className="text-[9px] md:text-xs text-muted-foreground mt-1">Cloning without permission violates our Terms of Service.</p>
-              </div>
-            </label>
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="bg-primary/5 border border-primary/10 rounded-xl md:rounded-[2rem] p-6 md:p-8 flex items-start gap-4 md:gap-6">
-        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-          <Info className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-        </div>
-        <div>
-          <h4 className="font-black text-base md:text-lg uppercase tracking-widest text-primary mb-2">Cloning Best Practices</h4>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 text-[10px] md:text-sm text-muted-foreground font-medium">
-            <li className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-primary" /> High-quality recordings only.</li>
-            <li className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-primary" /> Multiple samples for range.</li>
-            <li className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-primary" /> 1-5 minutes of audio total.</li>
-            <li className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 text-primary" /> Minimal background noise.</li>
-          </ul>
+          <Button 
+            onClick={handleClone}
+            disabled={!voiceName || !referenceText || files.length === 0 || !isAgreed || isCloning}
+            className="h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
+          >
+            {isCloning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
+            {isCloning ? 'Processing...' : 'Add Voice Profile'}
+          </Button>
         </div>
       </div>
+
+      <main className="container mx-auto px-4 md:px-6 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left/Center: Text Area for Reference Script */}
+          <div className="lg:col-span-8 space-y-6">
+            <div className="flex items-center justify-between px-1">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Script / Text</label>
+              <span className="text-[10px] font-mono text-muted-foreground">{referenceText.length} Characters</span>
+            </div>
+            <textarea
+              value={referenceText}
+              onChange={(e) => setReferenceText(e.target.value)}
+              placeholder="Paste the script provided in your audio samples here. This helps our neural engine map your voice to text accurately..."
+              className="w-full min-h-[500px] p-0 text-[20px] text-left leading-relaxed outline-none bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0 scrollbar-hide"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            />
+          </div>
+
+          {/* Right Sidebar: Settings & Uploads */}
+          <aside className="lg:col-span-4 space-y-6">
+            <div className="glass-card rounded-[2rem] border border-white/5 overflow-hidden">
+              <div className="p-6 border-b border-white/5 bg-white/5">
+                <h3 className="text-xs font-black uppercase tracking-widest text-white flex items-center gap-2">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  Voice Identity
+                </h3>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Voice Name</Label>
+                  <Input 
+                    placeholder="e.g. My Pro Narrator" 
+                    value={voiceName}
+                    onChange={(e) => setVoiceName(e.target.value)}
+                    className="h-12 bg-white/5 border-white/10 rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Description</Label>
+                  <Textarea 
+                    placeholder="Describe the tone (e.g. Energetic, Deep, Calm)" 
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="h-24 resize-none bg-white/5 border-white/10 rounded-xl"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="glass-card rounded-[2rem] border border-white/5 overflow-hidden">
+              <div className="p-6 border-b border-white/5 bg-white/5">
+                <h3 className="text-xs font-black uppercase tracking-widest text-white flex items-center gap-2">
+                  <Upload className="h-3.5 w-3.5 text-primary" />
+                  Voice Samples
+                </h3>
+              </div>
+              <div className="p-6 space-y-6">
+                <div 
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={onDrop}
+                  onClick={() => document.getElementById('file-upload')?.click()}
+                  className={cn(
+                    "h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer group",
+                    files.length > 0 ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
+                  )}
+                >
+                  <input id="file-upload" type="file" multiple accept="audio/*" className="hidden" onChange={handleFileSelect} />
+                  <div className="text-center p-4">
+                    <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
+                      <Upload className="h-6 w-6 text-primary" />
+                    </div>
+                    <p className="font-bold text-sm">Upload Samples</p>
+                    <p className="text-[9px] text-muted-foreground mt-1 uppercase tracking-tighter">MP3 or WAV • Max 5 Files</p>
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {files.length > 0 && (
+                    <div className="space-y-2">
+                      {files.map((file, i) => (
+                        <motion.div 
+                          key={i}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FileAudio className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <span className="text-[10px] font-bold truncate">{file.name}</span>
+                          </div>
+                          <button onClick={(e) => { e.stopPropagation(); removeFile(i); }} className="text-muted-foreground hover:text-white transition-colors p-1">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="glass-card rounded-[2rem] border border-white/5 p-6 space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={isAgreed} 
+                  onChange={(e) => setIsAgreed(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary/20"
+                />
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold group-hover:text-primary transition-colors leading-tight">I confirm that I have the necessary rights to clone this voice.</p>
+                </div>
+              </label>
+              
+              <div className="pt-4 border-t border-white/5">
+                <div className="flex items-start gap-3 text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                  <p className="text-[9px] font-medium leading-relaxed italic">
+                    Your samples are used exclusively for neural training and are stored on secure R2 encrypted buckets.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }
