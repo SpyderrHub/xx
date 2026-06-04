@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { 
   Upload, 
   Mic2, 
-  Info, 
   CheckCircle2, 
   X, 
   Loader2,
@@ -75,9 +74,9 @@ export default function VoiceCloningPage() {
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
               <Mic2 className="h-5 w-5" />
             </div>
-            <div>
+            <div className="hidden sm:block">
               <h2 className="text-sm font-black text-white">Voice Cloning Studio</h2>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Professional Identity Engine</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">v2.1 Identity Engine</p>
             </div>
           </div>
 
@@ -93,33 +92,33 @@ export default function VoiceCloningPage() {
       </div>
 
       <main className="container mx-auto px-4 md:px-6 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
-          {/* Left/Center: Text Area for Reference Script */}
-          <div className="lg:col-span-8 space-y-6">
+          {/* Left/Center: Borderless Text Area for Reference Script */}
+          <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center justify-between px-1">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Script / Text</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Script</label>
               <span className="text-[10px] font-mono text-muted-foreground">{referenceText.length} Characters</span>
             </div>
             <textarea
               value={referenceText}
               onChange={(e) => setReferenceText(e.target.value)}
-              placeholder="Paste the script provided in your audio samples here. This helps our neural engine map your voice to text accurately..."
+              placeholder="Paste the script used in your audio samples here. This helps our neural engine map your voice to text accurately..."
               className="w-full min-h-[500px] p-0 text-[20px] text-left leading-relaxed outline-none bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0 scrollbar-hide"
               style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
 
-          {/* Right Sidebar: Settings & Uploads */}
-          <aside className="lg:col-span-4 space-y-6">
-            <div className="glass-card rounded-[2rem] border border-white/5 overflow-hidden">
-              <div className="p-6 border-b border-white/5 bg-white/5">
-                <h3 className="text-xs font-black uppercase tracking-widest text-white flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  Voice Identity
-                </h3>
-              </div>
-              <div className="p-6 space-y-6">
+          {/* Single Unified Sidebar */}
+          <aside className="lg:col-span-4">
+            <div className="glass-card rounded-[2.5rem] border border-white/5 overflow-hidden flex flex-col h-fit">
+              {/* Identity Section */}
+              <div className="p-8 space-y-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="text-xs font-black uppercase tracking-widest text-white">Voice Identity</h3>
+                </div>
+                
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Voice Name</Label>
                   <Input 
@@ -129,32 +128,33 @@ export default function VoiceCloningPage() {
                     className="h-12 bg-white/5 border-white/10 rounded-xl"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Description</Label>
                   <Textarea 
-                    placeholder="Describe the tone (e.g. Energetic, Deep, Calm)" 
+                    placeholder="Describe the tone..." 
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="h-24 resize-none bg-white/5 border-white/10 rounded-xl"
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="glass-card rounded-[2rem] border border-white/5 overflow-hidden">
-              <div className="p-6 border-b border-white/5 bg-white/5">
-                <h3 className="text-xs font-black uppercase tracking-widest text-white flex items-center gap-2">
-                  <Upload className="h-3.5 w-3.5 text-primary" />
-                  Voice Samples
-                </h3>
-              </div>
-              <div className="p-6 space-y-6">
+              <div className="h-px bg-white/5 mx-8" />
+
+              {/* Upload Section */}
+              <div className="p-8 space-y-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Upload className="h-4 w-4 text-primary" />
+                  <h3 className="text-xs font-black uppercase tracking-widest text-white">Voice Samples</h3>
+                </div>
+
                 <div 
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={onDrop}
                   onClick={() => document.getElementById('file-upload')?.click()}
                   className={cn(
-                    "h-48 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer group",
+                    "h-44 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer group",
                     files.length > 0 ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
                   )}
                 >
@@ -191,24 +191,25 @@ export default function VoiceCloningPage() {
                   )}
                 </AnimatePresence>
               </div>
-            </div>
 
-            <div className="glass-card rounded-[2rem] border border-white/5 p-6 space-y-4">
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  checked={isAgreed} 
-                  onChange={(e) => setIsAgreed(e.target.checked)}
-                  className="mt-1 h-4 w-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary/20"
-                />
-                <div className="flex-1">
-                  <p className="text-[10px] font-bold group-hover:text-primary transition-colors leading-tight">I confirm that I have the necessary rights to clone this voice.</p>
-                </div>
-              </label>
-              
-              <div className="pt-4 border-t border-white/5">
-                <div className="flex items-start gap-3 text-muted-foreground">
-                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+              <div className="h-px bg-white/5 mx-8" />
+
+              {/* Consent Section */}
+              <div className="p-8 space-y-4">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    checked={isAgreed} 
+                    onChange={(e) => setIsAgreed(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-white/10 bg-white/5 text-primary focus:ring-primary/20"
+                  />
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold group-hover:text-primary transition-colors leading-tight">I confirm that I have the necessary rights to clone this voice.</p>
+                  </div>
+                </label>
+                
+                <div className="pt-2 flex items-start gap-3 text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4 text-primary/40 shrink-0" />
                   <p className="text-[9px] font-medium leading-relaxed italic">
                     Your samples are used exclusively for neural training and are stored on secure R2 encrypted buckets.
                   </p>
