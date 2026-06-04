@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, X, PlusCircle, Filter } from 'lucide-react';
+import { Search, X, PlusCircle, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import VoiceCard from '@/components/voices/voice-card';
 import {
   Sheet,
@@ -139,6 +139,9 @@ export default function VoiceLibraryPage() {
     style: '',
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const voicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'voices'));
@@ -162,7 +165,6 @@ export default function VoiceLibraryPage() {
       if (v.gender) genders.add(v.gender);
       if (v.style) styles.add(v.style);
       
-      // Handle array or string for languages
       const vLangs = Array.isArray(v.languages) ? v.languages : (v.language ? [v.language] : []);
       vLangs.forEach((l: string) => languages.add(l));
     });
@@ -193,6 +195,18 @@ export default function VoiceLibraryPage() {
     });
   }, [voices, search, filters]);
 
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredVoices.length / itemsPerPage);
+  const paginatedVoices = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredVoices.slice(start, start + itemsPerPage);
+  }, [filteredVoices, currentPage]);
+
+  // Reset to first page when filters or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filters]);
+
   return (
     <div className="space-y-12">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -220,7 +234,14 @@ export default function VoiceLibraryPage() {
       />
 
       <div>
-        <h2 className="mb-6 text-2xl font-semibold tracking-tight">All Voices</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold tracking-tight">All Voices</h2>
+          {!isLoading && filteredVoices.length > 0 && (
+             <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
+               Showing {Math.min(filteredVoices.length, itemsPerPage)} of {filteredVoices.length} voices
+             </p>
+          )}
+        </div>
         
         {isLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -241,12 +262,42 @@ export default function VoiceLibraryPage() {
               </div>
             ))}
           </div>
-        ) : filteredVoices.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {filteredVoices.map((voice) => (
-              <VoiceCard key={voice.id} voice={voice} />
-            ))}
-          </div>
+        ) : paginatedVoices.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {paginatedVoices.map((voice) => (
+                <VoiceCard key={voice.id} voice={voice} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-16 flex items-center justify-center gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-all"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                
+                <div className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-black uppercase tracking-[0.2em] text-white/60">
+                  Page <span className="text-primary">{currentPage}</span> of {totalPages}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 transition-all"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex h-64 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card/50">
             <p className="text-xl font-semibold">No voices found</p>
