@@ -65,9 +65,9 @@ export default function VoiceCloningPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.32))] -m-4 sm:-m-6 lg:-m-10 overflow-hidden bg-transparent">
+    <div className="flex flex-col h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
       {/* Top Studio Header */}
-      <div className="shrink-0 z-40 glass-card border-b border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6">
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6 mt-6 mx-6 rounded-2xl">
         <div className="flex items-center gap-4">
           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
             <Mic2 className="h-5 w-5" />
