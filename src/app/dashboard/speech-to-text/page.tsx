@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { 
   Ear, 
   Upload, 
@@ -14,17 +13,9 @@ import {
   Download, 
   FileText,
   Zap,
-  Youtube,
-  Link as LinkIcon,
   Sparkles,
   Globe
 } from 'lucide-react';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useFirebase } from '@/firebase';
@@ -62,9 +53,7 @@ export default function SpeechToTextPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStage, setProcessingStage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [transcription, setTranscription] = useState('');
-  const [activeTab, setActiveTab] = useState('upload');
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -81,11 +70,8 @@ export default function SpeechToTextPage() {
   };
 
   const handleTranscribe = async () => {
-    const isYoutube = activeTab === 'youtube';
-    const source = isYoutube ? youtubeUrl : file;
-
-    if (!source || !user) {
-      toast({ title: "Input Required", description: isYoutube ? "Please enter a valid YouTube URL." : "Please upload an audio file.", variant: "destructive" });
+    if (!file || !user) {
+      toast({ title: "Input Required", description: "Please upload an audio file.", variant: "destructive" });
       return;
     }
     
@@ -95,40 +81,38 @@ export default function SpeechToTextPage() {
 
     try {
       const idToken = await user.getIdToken();
-      let audioSourceUrl = isYoutube ? youtubeUrl : '';
+      let audioSourceUrl = '';
 
-      // 1. If it's a file, upload to R2
-      if (!isYoutube && file) {
-        setProcessingStage('UPLOADING');
-        const fileName = `${crypto.randomUUID()}-${file.name}`;
-        const presignRes = await fetch('/api/r2/presign', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`,
-          },
-          body: JSON.stringify({
-            fileName,
-            contentType: file.type,
-            path: 'stt',
-          }),
-        });
+      // 1. Upload to R2
+      setProcessingStage('UPLOADING');
+      const fileName = `${crypto.randomUUID()}-${file.name}`;
+      const presignRes = await fetch('/api/r2/presign', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fileName,
+          contentType: file.type,
+          path: 'stt',
+        }),
+      });
 
-        const presignData = await presignRes.json();
-        if (!presignRes.ok) throw new Error(presignData.message || 'Storage authorization failed');
+      const presignData = await presignRes.json();
+      if (!presignRes.ok) throw new Error(presignData.message || 'Storage authorization failed');
 
-        const uploadRes = await fetch(presignData.presignedUrl, {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': presignData.enforcedMimeType || file.type,
-            'Cache-Control': 'public, max-age=31536000, immutable'
-          },
-          body: file,
-        });
+      const uploadRes = await fetch(presignedUrl, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': presignData.enforcedMimeType || file.type,
+          'Cache-Control': 'public, max-age=31536000, immutable'
+        },
+        body: file,
+      });
 
-        if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
-        audioSourceUrl = presignData.signedReadUrl;
-      }
+      if (!uploadRes.ok) throw new Error("Failed to upload audio to storage.");
+      audioSourceUrl = presignData.signedReadUrl;
 
       setProcessingStage('PROCESSING');
 
@@ -141,7 +125,7 @@ export default function SpeechToTextPage() {
         },
         body: JSON.stringify({ 
           audio_url: audioSourceUrl,
-          isYoutube: isYoutube
+          isYoutube: false
         }),
       });
 
@@ -210,7 +194,7 @@ export default function SpeechToTextPage() {
           )}
           <Button 
             onClick={handleTranscribe}
-            disabled={(activeTab === 'upload' ? !file : !youtubeUrl) || isProcessing}
+            disabled={!file || isProcessing}
             className="h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
           >
             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
@@ -240,66 +224,48 @@ export default function SpeechToTextPage() {
         {/* Right: Fixed Unified Sidebar */}
         <aside className="w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md">
           <div className="p-8 space-y-10">
-            {/* Section: Source Selection - SIMPLIFIED */}
+            {/* Section: Audio Source */}
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <h3 className="text-xs font-black uppercase tracking-widest text-white">Audio Source</h3>
               </div>
 
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
-                <TabsList className="grid w-full grid-cols-2 bg-white/5 rounded-xl p-1 h-12">
-                  <TabsTrigger value="upload" className="rounded-lg text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
-                    <Upload className="h-3 w-3 mr-2" /> Upload
-                  </TabsTrigger>
-                  <TabsTrigger value="youtube" className="rounded-lg text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
-                    <Youtube className="h-3 w-3 mr-2" /> YouTube
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="upload" className="space-y-4 focus:outline-none">
-                  <div 
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={onDrop}
-                    onClick={() => !file && document.getElementById('audio-upload-sidebar')?.click()}
-                    className={cn(
-                      "h-32 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer group",
-                      file ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
-                    )}
-                  >
-                    <input id="audio-upload-sidebar" type="file" accept="audio/*" className="hidden" onChange={handleFileSelect} />
-                    <div className="text-center p-4">
-                      {file ? (
-                        <div className="flex items-center gap-3 bg-black/20 p-2 rounded-xl border border-white/10">
-                          <FileAudio className="h-4 w-4 text-primary shrink-0" />
-                          <p className="font-bold text-[10px] text-white truncate max-w-[150px]">{file.name}</p>
-                          <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-muted-foreground hover:text-white transition-colors">
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <Upload className="h-5 w-5 text-primary mx-auto mb-2" />
-                          <p className="font-bold text-xs">Select Audio File</p>
-                          <p className="text-[9px] text-muted-foreground uppercase tracking-widest">MP3, WAV, M4A</p>
-                        </>
-                      )}
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={onDrop}
+                onClick={() => !file && document.getElementById('audio-upload-sidebar')?.click()}
+                className={cn(
+                  "h-48 border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
+                  file ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
+                )}
+              >
+                <input id="audio-upload-sidebar" type="file" accept="audio/*" className="hidden" onChange={handleFileSelect} />
+                <div className="text-center p-6">
+                  {file ? (
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                        <FileAudio className="h-6 w-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-bold text-xs text-white truncate max-w-[200px]">{file.name}</p>
+                        <p className="text-[9px] text-muted-foreground">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }} className="h-8 text-[9px] uppercase font-black text-destructive hover:bg-destructive/10 hover:text-destructive">
+                        <X className="h-3 w-3 mr-1" /> Remove
+                      </Button>
                     </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="youtube" className="space-y-4 focus:outline-none">
-                  <div className="relative group">
-                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-                    <Input 
-                      placeholder="Paste YouTube URL" 
-                      className="h-12 pl-10 bg-white/5 border-white/10 rounded-xl text-xs font-bold focus:ring-primary/20"
-                      value={youtubeUrl}
-                      onChange={(e) => setYoutubeUrl(e.target.value)}
-                    />
-                  </div>
-                </TabsContent>
-              </Tabs>
+                  ) : (
+                    <>
+                      <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <Upload className="h-6 w-6 text-primary" />
+                      </div>
+                      <p className="font-bold text-sm">Select Audio File</p>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-widest mt-1">MP3, WAV, M4A up to 50MB</p>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="h-px bg-white/5" />
