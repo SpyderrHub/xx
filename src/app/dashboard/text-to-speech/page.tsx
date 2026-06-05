@@ -325,67 +325,66 @@ export default function TextToSpeechPage() {
 
   return (
     <div className="flex flex-col min-h-[calc(100dvh-theme(spacing.16))] pb-32">
-      <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-3 md:py-4 mb-6 md:mb-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between gap-3 md:gap-6">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
-              <Mic2 className="h-4 w-4 md:h-5 md:w-5" />
-            </div>
-            <div className="hidden sm:block">
-              <h2 className="text-xs md:text-sm font-black text-white">Studio Workspace</h2>
-              <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">v2.1</p>
-            </div>
+      {/* Studio Header - Floating Style */}
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6 mt-6 mx-6 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+            <Mic2 className="h-4 w-4 md:h-5 md:w-5" />
+          </div>
+          <div className="hidden sm:block">
+            <h2 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Studio Workspace</h2>
+            <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Synthesis Engine v2.1</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 md:gap-3 ml-auto">
+          <div className="text-right hidden xl:block mr-2">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">{text.length} / {MAX_CHARACTERS}</p>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3 ml-auto">
-            <div className="text-right hidden xl:block mr-2">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">{text.length} / {MAX_CHARACTERS}</p>
-            </div>
-
-            <Select value={selectedVoiceId || ''} onValueChange={setSelectedVoiceId} disabled={userVoices.length === 0}>
-              <SelectTrigger className="w-[130px] md:w-[200px] h-10 md:h-12 rounded-xl bg-white/5 border-white/10 text-[10px] md:text-xs font-bold focus:ring-0">
-                <SelectValue placeholder={isLoading ? "Loading..." : userVoices.length === 0 ? "No Voices" : "Speaker"} />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
-                {userVoices.map((v) => {
-                  const isGradient = v.avatarUrl?.startsWith('weavy:');
-                  const gradientIndex = isGradient ? parseInt(v.avatarUrl.split(':')[1]) : 0;
-                  
-                  return (
-                    <SelectItem key={v.id} value={v.id} className="cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-6 w-6 ring-1 ring-white/10 shrink-0">
-                          {isGradient ? (
-                            <WeavyPattern presetIndex={gradientIndex} />
-                          ) : (
-                            <AvatarImage src={v.avatarUrl} className="object-cover" />
-                          )}
-                          <AvatarFallback className="text-[8px] bg-primary/10">{v.voiceName[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="text-left min-w-0">
-                          <p className="text-xs font-bold truncate">{v.voiceName}</p>
-                        </div>
+          <Select value={selectedVoiceId || ''} onValueChange={setSelectedVoiceId} disabled={userVoices.length === 0}>
+            <SelectTrigger className="w-[130px] md:w-[200px] h-10 md:h-12 rounded-xl bg-white/5 border-white/10 text-[10px] md:text-xs font-bold focus:ring-0">
+              <SelectValue placeholder={isLoading ? "Loading..." : userVoices.length === 0 ? "No Voices" : "Speaker"} />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
+              {userVoices.map((v) => {
+                const isGradient = v.avatarUrl?.startsWith('weavy:');
+                const gradientIndex = isGradient ? parseInt(v.avatarUrl.split(':')[1]) : 0;
+                
+                return (
+                  <SelectItem key={v.id} value={v.id} className="cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-6 w-6 ring-1 ring-white/10 shrink-0">
+                        {isGradient ? (
+                          <WeavyPattern presetIndex={gradientIndex} />
+                        ) : (
+                          <AvatarImage src={v.avatarUrl} className="object-cover" />
+                        )}
+                        <AvatarFallback className="text-[8px] bg-primary/10">{v.voiceName[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="text-left min-w-0">
+                        <p className="text-xs font-bold truncate">{v.voiceName}</p>
                       </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
 
-            <Button 
-              onClick={handleGenerate}
-              disabled={isGenerating || !text || !selectedVoiceId || userVoices.length === 0}
-              className="h-10 md:h-12 px-4 md:px-8 rounded-xl bg-primary btn-glow font-black text-xs md:text-sm"
-            >
-              {isGenerating ? <Loader2 className="md:mr-2 h-4 w-4 animate-spin" /> : <Zap className="md:mr-2 h-4 w-4 fill-current" />}
-              <span className="hidden md:inline">{isGenerating ? 'Synthesizing...' : 'Generate'}</span>
-              <span className="md:hidden">{isGenerating ? '' : 'Go'}</span>
-            </Button>
-          </div>
+          <Button 
+            onClick={handleGenerate}
+            disabled={isGenerating || !text || !selectedVoiceId || userVoices.length === 0}
+            className="h-10 md:h-12 px-4 md:px-8 rounded-xl bg-primary btn-glow font-black text-xs md:text-sm"
+          >
+            {isGenerating ? <Loader2 className="md:mr-2 h-4 w-4 animate-spin" /> : <Zap className="md:mr-2 h-4 w-4 fill-current" />}
+            <span className="hidden md:inline">{isGenerating ? 'Synthesizing...' : 'Generate Audio'}</span>
+            <span className="md:hidden">{isGenerating ? '' : 'Go'}</span>
+          </Button>
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col container mx-auto px-4 md:px-6">
+      <main className="flex-1 flex flex-col container mx-auto px-4 md:px-6 pt-12">
         {userVoices.length === 0 && !isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
             <div className="h-20 w-20 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center">

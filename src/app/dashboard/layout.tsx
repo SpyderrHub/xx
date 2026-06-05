@@ -410,7 +410,7 @@ export default function DashboardLayout({
     return 'Dashboard';
   };
 
-  const isStudioMode = pathname === '/dashboard/voice-cloning' || pathname === '/dashboard/music-generator';
+  const isStudioMode = pathname === '/dashboard/voice-cloning' || pathname === '/dashboard/music-generator' || pathname === '/dashboard/text-to-speech';
 
   return (
     <div className="dark font-body antialiased">
