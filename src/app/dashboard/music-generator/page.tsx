@@ -246,37 +246,35 @@ export default function MusicGeneratorPage() {
 
   return (
     <div className="min-h-screen pb-32">
-      {/* Top Studio Header */}
-      <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-4 mb-8">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
-              <Music className="h-5 w-5" />
+      {/* Top Studio Header - Match Voice Cloning UI */}
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6 mt-6 mx-6 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+            <Music className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-black text-white uppercase tracking-wider">Music Generator</h2>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Composition Engine v2.1</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="hidden sm:flex flex-col items-end">
+            <div className="flex items-center gap-1.5 text-primary">
+              <CalendarDays className="h-3 w-3" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Daily Quota</span>
             </div>
-            <div>
-              <h2 className="text-sm font-black text-white">Music Generator</h2>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Composition Engine v2.0</p>
-            </div>
+            <p className="text-xs font-bold text-white">{remainingGenerations} / {dailyLimit} Left</p>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="hidden sm:flex flex-col items-end">
-              <div className="flex items-center gap-1.5 text-primary">
-                <CalendarDays className="h-3 w-3" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Daily Quota</span>
-              </div>
-              <p className="text-xs font-bold text-white">{remainingGenerations} / {dailyLimit} Left</p>
-            </div>
-
-            <Button 
-              onClick={handleGenerate}
-              disabled={isGenerating || !prompt || remainingGenerations <= 0}
-              className="h-12 px-6 md:px-8 rounded-xl bg-primary btn-glow font-black text-sm"
-            >
-              {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
-              {isGenerating ? 'Composing...' : 'Generate Track'}
-            </Button>
-          </div>
+          <Button 
+            onClick={handleGenerate}
+            disabled={isGenerating || !prompt || remainingGenerations <= 0}
+            className="h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
+          >
+            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
+            {isGenerating ? 'Composing...' : 'Generate Track'}
+          </Button>
         </div>
       </div>
 

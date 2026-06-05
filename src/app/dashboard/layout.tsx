@@ -410,17 +410,17 @@ export default function DashboardLayout({
     return 'Dashboard';
   };
 
-  const isVoiceCloning = pathname === '/dashboard/voice-cloning';
+  const isStudioMode = pathname === '/dashboard/voice-cloning' || pathname === '/dashboard/music-generator';
 
   return (
     <div className="dark font-body antialiased">
       <SidebarProvider>
         <DashboardSidebar />
         <SidebarInset className="bg-background/50">
-          {!isVoiceCloning && <DashboardHeader title={getTitle()} />}
+          {!isStudioMode && <DashboardHeader title={getTitle()} />}
           <main className={cn(
             "flex-1 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full",
-            isVoiceCloning && "pt-6 sm:pt-8 lg:pt-10"
+            isStudioMode && "pt-6 sm:pt-8 lg:pt-10"
           )}>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
