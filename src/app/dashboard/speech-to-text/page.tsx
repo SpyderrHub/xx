@@ -102,7 +102,7 @@ export default function SpeechToTextPage() {
       const presignData = await presignRes.json();
       if (!presignRes.ok) throw new Error(presignData.message || 'Storage authorization failed');
 
-      const uploadRes = await fetch(presignedUrl, {
+      const uploadRes = await fetch(presignData.presignedUrl, {
         method: 'PUT',
         headers: { 
           'Content-Type': presignData.enforcedMimeType || file.type,
@@ -124,7 +124,7 @@ export default function SpeechToTextPage() {
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({ 
-          audio_url: audioSourceUrl,
+          audio_path: audioSourceUrl,
           isYoutube: false
         }),
       });
