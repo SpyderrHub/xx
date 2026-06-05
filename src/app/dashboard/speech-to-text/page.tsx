@@ -13,19 +13,12 @@ import {
   CheckCircle2, 
   Download, 
   FileText,
-  Languages,
   Zap,
   Youtube,
   Link as LinkIcon,
-  Sparkles
+  Sparkles,
+  Globe
 } from 'lucide-react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
 import {
   Tabs,
   TabsContent,
@@ -71,7 +64,6 @@ export default function SpeechToTextPage() {
   const [file, setFile] = useState<File | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [transcription, setTranscription] = useState('');
-  const [language, setLanguage] = useState('english');
   const [activeTab, setActiveTab] = useState('upload');
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -162,7 +154,6 @@ export default function SpeechToTextPage() {
           throw new Error(data.message || 'Transcription failed');
         }
 
-        // Parse result text based on common keys
         const resultText = data.text || data.transcription || data.output || "";
           
         if (!resultText) {
@@ -249,14 +240,14 @@ export default function SpeechToTextPage() {
         {/* Right: Fixed Unified Sidebar */}
         <aside className="w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md">
           <div className="p-8 space-y-10">
-            {/* Section: Source Selection */}
+            {/* Section: Source Selection - SIMPLIFIED */}
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <h3 className="text-xs font-black uppercase tracking-widest text-white">Audio Source</h3>
               </div>
 
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
                 <TabsList className="grid w-full grid-cols-2 bg-white/5 rounded-xl p-1 h-12">
                   <TabsTrigger value="upload" className="rounded-lg text-[10px] uppercase font-black tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
                     <Upload className="h-3 w-3 mr-2" /> Upload
@@ -272,29 +263,25 @@ export default function SpeechToTextPage() {
                     onDrop={onDrop}
                     onClick={() => !file && document.getElementById('audio-upload-sidebar')?.click()}
                     className={cn(
-                      "h-48 border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
+                      "h-32 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer group",
                       file ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
                     )}
                   >
                     <input id="audio-upload-sidebar" type="file" accept="audio/*" className="hidden" onChange={handleFileSelect} />
                     <div className="text-center p-4">
                       {file ? (
-                        <div className="space-y-3">
-                          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 border border-primary/30">
-                            <FileAudio className="h-5 w-5 text-primary" />
-                          </div>
-                          <p className="font-bold text-sm text-white truncate max-w-[200px]">{file.name}</p>
-                          <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-destructive hover:text-white transition-colors text-[9px] font-black uppercase tracking-widest flex items-center justify-center w-full">
-                            <X className="h-3 w-3 mr-1" /> Remove
+                        <div className="flex items-center gap-3 bg-black/20 p-2 rounded-xl border border-white/10">
+                          <FileAudio className="h-4 w-4 text-primary shrink-0" />
+                          <p className="font-bold text-[10px] text-white truncate max-w-[150px]">{file.name}</p>
+                          <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="text-muted-foreground hover:text-white transition-colors">
+                            <X className="h-3 w-3" />
                           </button>
                         </div>
                       ) : (
                         <>
-                          <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
-                            <Upload className="h-5 w-5 text-primary" />
-                          </div>
-                          <p className="font-bold text-sm">Upload File</p>
-                          <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-tighter">MP3, WAV, M4A</p>
+                          <Upload className="h-5 w-5 text-primary mx-auto mb-2" />
+                          <p className="font-bold text-xs">Select Audio File</p>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-widest">MP3, WAV, M4A</p>
                         </>
                       )}
                     </div>
@@ -303,17 +290,13 @@ export default function SpeechToTextPage() {
 
                 <TabsContent value="youtube" className="space-y-4 focus:outline-none">
                   <div className="relative group">
-                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                     <Input 
-                      placeholder="Paste YouTube Link" 
-                      className="h-14 pl-11 bg-white/5 border-white/10 rounded-2xl text-sm font-bold focus:ring-primary/20"
+                      placeholder="Paste YouTube URL" 
+                      className="h-12 pl-10 bg-white/5 border-white/10 rounded-xl text-xs font-bold focus:ring-primary/20"
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
                     />
-                  </div>
-                  <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-3">
-                    <Youtube className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">We extract audio automatically from your link for direct processing.</p>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -321,50 +304,41 @@ export default function SpeechToTextPage() {
 
             <div className="h-px bg-white/5" />
 
-            {/* Section: Settings */}
+            {/* Section: Language Model - AUTO DETECT ONLY */}
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
-                <Languages className="h-4 w-4 text-primary" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-white">Neural Settings</h3>
+                <Globe className="h-4 w-4 text-primary" />
+                <h3 className="text-xs font-black uppercase tracking-widest text-white">Language Model</h3>
               </div>
               
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Language Model</label>
-                <Select value={language} onValueChange={setLanguage}>
-                  <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-white/10 text-sm font-bold focus:ring-primary/20">
-                    <SelectValue placeholder="Select Language" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
-                    <SelectItem value="english">English (Standard)</SelectItem>
-                    <SelectItem value="hindi">Hindi (Regional)</SelectItem>
-                    <SelectItem value="multilingual">Auto-Detection</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-between group">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span className="text-[10px] font-bold text-white uppercase tracking-widest">Neural Ready</span>
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-white uppercase tracking-widest">Auto-Detection</p>
+                    <p className="text-[9px] text-muted-foreground italic">Neural Engine Enabled</p>
+                  </div>
                 </div>
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               </div>
             </div>
 
             <div className="h-px bg-white/5" />
 
             {/* Section: Actions */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               <Button 
                 variant="outline" 
-                className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 font-black text-xs uppercase tracking-widest"
+                className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 font-black text-[10px] uppercase tracking-widest"
                 disabled={!transcription}
                 onClick={handleExport}
               >
                 <Download className="mr-2 h-4 w-4" /> Export Transcription
               </Button>
-              <p className="text-[10px] text-center text-muted-foreground italic leading-relaxed px-4">
-                Transcriptions are processed securely and not stored on our primary servers for your privacy.
+              <p className="text-[9px] text-center text-muted-foreground italic leading-relaxed px-4 uppercase tracking-tighter">
+                Neural processing is secured via end-to-end encryption.
               </p>
             </div>
           </div>
