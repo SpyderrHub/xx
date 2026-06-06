@@ -84,7 +84,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
     <motion.div 
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-white/10 p-4 md:p-6"
+      className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-white/10 p-4 md:p-6 pb-6 md:pb-6"
     >
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-4 md:gap-6">
         <div className="flex items-center gap-4 shrink-0 w-full md:w-auto">
@@ -274,58 +274,57 @@ export default function VoiceDesignerPage() {
 
   return (
     <div className="min-h-screen pb-32">
-      {/* Top Studio Header */}
-      <div className="sticky top-16 z-40 glass-card border-b border-white/5 py-4 mb-8">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
-              <Sparkles className="h-5 w-5" />
+      {/* Top Studio Header - Responsive Row */}
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl text-[0.9em]">
+        <div className="flex items-center gap-2 sm:gap-4 w-auto">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+            <Sparkles className="h-4 w-4 md:h-5 md:w-5" />
+          </div>
+          <div>
+            <h2 className="text-[10px] md:text-sm font-black text-white uppercase tracking-wider leading-tight">Designer</h2>
+            <p className="text-[7px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black hidden sm:block">Neural Engine v2.0</p>
+          </div>
+        </div>
+
+        <div className="flex-1 max-w-md hidden lg:flex items-center gap-8 px-8">
+          <div className="flex-1 space-y-2">
+            <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
+              <Label>Stability</Label>
+              <span>{settings.stability}%</span>
             </div>
-            <div>
-              <h2 className="text-sm font-black text-white">Voice Designer</h2>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Neural Engine v2.0</p>
+            <Slider value={[settings.stability]} onValueChange={(v) => setSettings({...settings, stability: v[0]})} className="h-4" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
+              <Label>Clarity</Label>
+              <span>{settings.clarity}%</span>
             </div>
+            <Slider value={[settings.clarity]} onValueChange={(v) => setSettings({...settings, clarity: v[0]})} className="h-4" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-6 ml-auto">
+          <div className="hidden xl:flex flex-col items-end">
+            <div className="flex items-center gap-1.5 text-primary">
+              <CalendarDays className="h-3 w-3" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Quota</span>
+            </div>
+            <p className="text-xs font-bold text-white">{remainingGenerations} Left</p>
           </div>
 
-          <div className="flex-1 max-w-md hidden lg:flex items-center gap-8 px-8">
-            <div className="flex-1 space-y-2">
-              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-                <Label>Stability</Label>
-                <span>{settings.stability}%</span>
-              </div>
-              <Slider value={[settings.stability]} onValueChange={(v) => setSettings({...settings, stability: v[0]})} className="h-4" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-                <Label>Clarity</Label>
-                <span>{settings.clarity}%</span>
-              </div>
-              <Slider value={[settings.clarity]} onValueChange={(v) => setSettings({...settings, clarity: v[0]})} className="h-4" />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="hidden sm:flex flex-col items-end">
-              <div className="flex items-center gap-1.5 text-primary">
-                <CalendarDays className="h-3 w-3" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Daily Quota</span>
-              </div>
-              <p className="text-xs font-bold text-white">{remainingGenerations} / {dailyLimit} Left</p>
-            </div>
-
-            <Button 
-              onClick={handleGenerate}
-              disabled={isDesigning || !prompt || !referenceText || remainingGenerations <= 0}
-              className="h-12 px-6 md:px-8 rounded-xl bg-primary btn-glow font-black text-sm"
-            >
-              {isDesigning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
-              {isDesigning ? 'Designing...' : 'Generate Voice'}
-            </Button>
-          </div>
+          <Button 
+            onClick={handleGenerate}
+            disabled={isDesigning || !prompt || !referenceText || remainingGenerations <= 0}
+            className="h-9 md:h-12 px-3 md:px-8 rounded-lg md:rounded-xl bg-primary btn-glow font-black text-[10px] md:text-sm"
+          >
+            {isDesigning ? <Loader2 className="h-3 w-3 md:mr-2 md:h-4 md:w-4 animate-spin" /> : <Zap className="h-3 w-3 md:mr-2 md:h-4 md:w-4 fill-current" />}
+            <span className="hidden sm:inline">{isDesigning ? 'Designing...' : 'Generate Voice'}</span>
+            <span className="sm:hidden">{isDesigning ? '' : 'Go'}</span>
+          </Button>
         </div>
       </div>
 
-      <main className="container mx-auto px-6 max-w-5xl space-y-12 pt-8">
+      <main className="container mx-auto px-4 md:px-6 max-w-5xl space-y-12 pt-8">
         {/* Text Area Workspaces */}
         <div className="grid grid-cols-1 gap-10">
           <StudioTextArea 

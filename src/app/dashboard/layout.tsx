@@ -412,7 +412,13 @@ export default function DashboardLayout({
     return 'Dashboard';
   };
 
-  const isStudioMode = pathname === '/dashboard/voice-cloning' || pathname === '/dashboard/music-generator' || pathname === '/dashboard/text-to-speech' || pathname === '/dashboard/speech-to-text';
+  const isStudioMode = [
+    '/dashboard/voice-cloning',
+    '/dashboard/music-generator',
+    '/dashboard/text-to-speech',
+    '/dashboard/speech-to-text',
+    '/dashboard/voice-designer'
+  ].includes(pathname);
 
   // Navbar is always shown on mobile, but hidden in studio mode on desktop
   const showHeader = !isStudioMode || isMobile;
