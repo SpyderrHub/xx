@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -66,30 +67,31 @@ export default function VoiceCloningPage() {
 
   return (
     <div className="flex flex-col h-auto lg:h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
-      {/* Top Studio Header */}
-      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-4 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
-            <Mic2 className="h-5 w-5" />
+      {/* Top Studio Header - Mobile Responsive Single Row */}
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl text-[0.9em]">
+        <div className="flex items-center gap-2 sm:gap-4 w-auto">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+            <Mic2 className="h-4 w-4 md:h-5 md:w-5" />
           </div>
           <div>
-            <h2 className="text-sm font-black text-white uppercase tracking-wider">Voice Cloning Studio</h2>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Identity Engine v2.1</p>
+            <h2 className="text-[10px] md:text-sm font-black text-white uppercase tracking-wider leading-tight">Cloning</h2>
+            <p className="text-[7px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black hidden sm:block">Identity Engine v2.1</p>
           </div>
         </div>
 
         <Button 
           onClick={handleClone}
           disabled={!voiceName || !referenceText || files.length === 0 || !isAgreed || isCloning}
-          className="w-full sm:w-auto h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
+          className="h-9 md:h-12 px-3 md:px-8 rounded-lg md:rounded-xl bg-primary btn-glow font-black text-[10px] md:text-sm w-auto ml-auto"
         >
-          {isCloning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
-          {isCloning ? 'Processing...' : 'Create Voice Clone'}
+          {isCloning ? <Loader2 className="h-3 w-3 md:mr-2 md:h-4 md:w-4 animate-spin" /> : <Zap className="h-3 w-3 md:mr-2 md:h-4 md:w-4 fill-current" />}
+          <span className="hidden sm:inline">{isCloning ? 'Processing...' : 'Create Clone'}</span>
+          <span className="sm:hidden">{isCloning ? '' : 'Clone'}</span>
         </Button>
       </div>
 
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-        {/* Left: Main Script Area (Center) - Dedicated to Reference Text */}
+        {/* Left: Main Script Area (Center) */}
         <main className="flex-1 flex flex-col p-6 md:p-14 overflow-y-auto scrollbar-hide bg-transparent order-2 lg:order-1">
           <div className="max-w-4xl w-full mx-auto space-y-6">
             <div className="flex items-center justify-between px-1">
@@ -102,7 +104,7 @@ export default function VoiceCloningPage() {
             <textarea
               value={referenceText}
               onChange={(e) => setReferenceText(e.target.value)}
-              placeholder="Paste the exact script of what the speaker says in your uploaded samples. This text is used to map your voice characteristics accurately..."
+              placeholder="Paste the exact script of what the speaker says in your uploaded samples..."
               className="w-full min-h-[300px] md:min-h-[600px] p-0 text-[18px] md:text-[22px] text-left leading-relaxed outline-none bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0"
               style={{ fontFamily: "'Inter', sans-serif" }}
             />

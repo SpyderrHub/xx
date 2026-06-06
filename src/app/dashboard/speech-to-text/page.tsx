@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
@@ -173,19 +174,19 @@ export default function SpeechToTextPage() {
 
   return (
     <div className="flex flex-col h-auto lg:h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
-      {/* Top Studio Header */}
-      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-4 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
-            <Ear className="h-5 w-5" />
+      {/* Top Studio Header - Mobile Responsive Single Row */}
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl text-[0.9em]">
+        <div className="flex items-center gap-2 sm:gap-4 w-auto">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+            <Ear className="h-4 w-4 md:h-5 md:w-5" />
           </div>
           <div>
-            <h2 className="text-sm font-black text-white uppercase tracking-wider">Speech to Text Studio</h2>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Neural Engine v2.1</p>
+            <h2 className="text-[10px] md:text-sm font-black text-white uppercase tracking-wider leading-tight">Transcription</h2>
+            <p className="text-[7px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black hidden sm:block">Neural Engine v2.1</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-2 md:gap-4 w-auto ml-auto">
           {transcription && (
             <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-muted-foreground uppercase">
               <span className="text-primary font-black">{transcription.split(' ').length}</span>
@@ -195,10 +196,11 @@ export default function SpeechToTextPage() {
           <Button 
             onClick={handleTranscribe}
             disabled={!file || isProcessing}
-            className="flex-1 sm:flex-none h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
+            className="h-9 md:h-12 px-3 md:px-8 rounded-lg md:rounded-xl bg-primary btn-glow font-black text-[10px] md:text-sm"
           >
-            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
-            {isProcessing ? (processingStage || 'Processing...') : 'Transcribe'}
+            {isProcessing ? <Loader2 className="h-3 w-3 md:mr-2 md:h-4 md:w-4 animate-spin" /> : <Zap className="h-3 w-3 md:mr-2 md:h-4 md:w-4 fill-current" />}
+            <span className="hidden sm:inline">{isProcessing ? (processingStage || 'Processing...') : 'Transcribe'}</span>
+            <span className="sm:hidden">{isProcessing ? '' : 'Start'}</span>
           </Button>
         </div>
       </div>
@@ -221,7 +223,7 @@ export default function SpeechToTextPage() {
           </div>
         </main>
 
-        {/* Right: Fixed Unified Sidebar (Stacks on top on mobile for workflow flow) */}
+        {/* Right: Fixed Unified Sidebar */}
         <aside className="w-full lg:w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md order-1 lg:order-2">
           <div className="p-6 md:p-8 space-y-10">
             {/* Section: Audio Source */}
