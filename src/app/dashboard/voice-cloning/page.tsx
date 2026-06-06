@@ -65,10 +65,10 @@ export default function VoiceCloningPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
+    <div className="flex flex-col h-auto lg:h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
       {/* Top Studio Header */}
-      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6 mt-6 mx-6 rounded-2xl">
-        <div className="flex items-center gap-4">
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-4 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
             <Mic2 className="h-5 w-5" />
           </div>
@@ -81,21 +81,21 @@ export default function VoiceCloningPage() {
         <Button 
           onClick={handleClone}
           disabled={!voiceName || !referenceText || files.length === 0 || !isAgreed || isCloning}
-          className="h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
+          className="w-full sm:w-auto h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
         >
           {isCloning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
           {isCloning ? 'Processing...' : 'Create Voice Clone'}
         </Button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Left: Main Script Area (Center) - Dedicated to Reference Text */}
-        <main className="flex-1 flex flex-col p-8 md:p-14 overflow-y-auto scrollbar-hide bg-transparent">
+        <main className="flex-1 flex flex-col p-6 md:p-14 overflow-y-auto scrollbar-hide bg-transparent order-2 lg:order-1">
           <div className="max-w-4xl w-full mx-auto space-y-6">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary" />
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Text</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Reference Script</label>
               </div>
               <span className="text-[10px] font-mono text-muted-foreground">{referenceText.length} Characters</span>
             </div>
@@ -103,15 +103,15 @@ export default function VoiceCloningPage() {
               value={referenceText}
               onChange={(e) => setReferenceText(e.target.value)}
               placeholder="Paste the exact script of what the speaker says in your uploaded samples. This text is used to map your voice characteristics accurately..."
-              className="w-full min-h-[600px] p-0 text-[22px] text-left leading-relaxed outline-none bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0"
+              className="w-full min-h-[300px] md:min-h-[600px] p-0 text-[18px] md:text-[22px] text-left leading-relaxed outline-none bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0"
               style={{ fontFamily: "'Inter', sans-serif" }}
             />
           </div>
         </main>
 
         {/* Right: Fixed Unified Sidebar */}
-        <aside className="w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md">
-          <div className="p-8 space-y-10">
+        <aside className="w-full lg:w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md order-1 lg:order-2">
+          <div className="p-6 md:p-8 space-y-10">
             {/* Section: Identity */}
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
@@ -144,16 +144,16 @@ export default function VoiceCloningPage() {
                 onDrop={onDrop}
                 onClick={() => document.getElementById('file-upload')?.click()}
                 className={cn(
-                  "h-56 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
+                  "h-48 md:h-56 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center transition-all cursor-pointer group",
                   files.length > 0 ? "border-primary/50 bg-primary/5" : "border-white/10 hover:border-primary/30 hover:bg-white/5"
                 )}
               >
                 <input id="file-upload" type="file" multiple accept="audio/*" className="hidden" onChange={handleFileSelect} />
                 <div className="text-center p-6">
-                  <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
-                    <Upload className="h-7 w-7 text-primary" />
+                  <div className="mb-4 inline-flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
+                    <Upload className="h-6 w-6 md:h-7 md:w-7 text-primary" />
                   </div>
-                  <p className="font-bold text-lg">Upload Samples</p>
+                  <p className="font-bold text-base md:text-lg">Upload Samples</p>
                   <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest font-black">MP3 / WAV • Max 5 Files</p>
                 </div>
               </div>
@@ -201,7 +201,7 @@ export default function VoiceCloningPage() {
               <div className="flex items-start gap-3 text-muted-foreground px-2">
                 <ShieldCheck className="h-5 w-5 text-primary/40 shrink-0" />
                 <p className="text-[10px] font-medium leading-relaxed italic">
-                  Private cloning ensures your neural data is encrypted and accessible only to your account via secure buckets.
+                  Private cloning ensures your neural data is encrypted and secure.
                 </p>
               </div>
             </div>

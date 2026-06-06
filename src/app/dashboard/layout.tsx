@@ -50,6 +50,7 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const planLimits: Record<string, number> = {
   free: 3000,
@@ -373,6 +374,7 @@ export default function DashboardLayout({
   const { role, isLoading: isRoleLoading } = useUserRole();
   const router = useRouter();
   const pathname = usePathname();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!isUserLoading && !isRoleLoading) {
@@ -412,15 +414,18 @@ export default function DashboardLayout({
 
   const isStudioMode = pathname === '/dashboard/voice-cloning' || pathname === '/dashboard/music-generator' || pathname === '/dashboard/text-to-speech' || pathname === '/dashboard/speech-to-text';
 
+  // Navbar is always shown on mobile, but hidden in studio mode on desktop
+  const showHeader = !isStudioMode || isMobile;
+
   return (
     <div className="dark font-body antialiased">
       <SidebarProvider>
         <DashboardSidebar />
         <SidebarInset className="bg-background/50">
-          {!isStudioMode && <DashboardHeader title={getTitle()} />}
+          {showHeader && <DashboardHeader title={getTitle()} />}
           <main className={cn(
             "flex-1 p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full",
-            isStudioMode && "pt-6 sm:pt-8 lg:pt-10"
+            isStudioMode && !isMobile && "pt-6 sm:pt-8 lg:pt-10"
           )}>
             <motion.div
               initial={{ opacity: 0, y: 10 }}

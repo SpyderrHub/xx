@@ -325,25 +325,25 @@ export default function TextToSpeechPage() {
 
   return (
     <div className="flex flex-col min-h-[calc(100dvh-theme(spacing.16))] pb-32">
-      {/* Studio Header - Floating Style */}
-      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6 mt-6 mx-6 rounded-2xl">
-        <div className="flex items-center gap-4">
+      {/* Studio Header - Mobile Responsive */}
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-4 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
             <Mic2 className="h-4 w-4 md:h-5 md:w-5" />
           </div>
-          <div className="hidden sm:block">
+          <div className="block">
             <h2 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Studio Workspace</h2>
             <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black">Synthesis Engine v2.1</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3 ml-auto">
+        <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto ml-auto">
           <div className="text-right hidden xl:block mr-2">
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">{text.length} / {MAX_CHARACTERS}</p>
           </div>
 
           <Select value={selectedVoiceId || ''} onValueChange={setSelectedVoiceId} disabled={userVoices.length === 0}>
-            <SelectTrigger className="w-[130px] md:w-[200px] h-10 md:h-12 rounded-xl bg-white/5 border-white/10 text-[10px] md:text-xs font-bold focus:ring-0">
+            <SelectTrigger className="flex-1 sm:w-[130px] md:w-[200px] h-10 md:h-12 rounded-xl bg-white/5 border-white/10 text-[10px] md:text-xs font-bold focus:ring-0">
               <SelectValue placeholder={isLoading ? "Loading..." : userVoices.length === 0 ? "No Voices" : "Speaker"} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-white/10 bg-black/95 backdrop-blur-xl">
@@ -378,8 +378,8 @@ export default function TextToSpeechPage() {
             className="h-10 md:h-12 px-4 md:px-8 rounded-xl bg-primary btn-glow font-black text-xs md:text-sm"
           >
             {isGenerating ? <Loader2 className="md:mr-2 h-4 w-4 animate-spin" /> : <Zap className="md:mr-2 h-4 w-4 fill-current" />}
-            <span className="hidden md:inline">{isGenerating ? 'Synthesizing...' : 'Generate Audio'}</span>
-            <span className="md:hidden">{isGenerating ? '' : 'Go'}</span>
+            <span className="hidden sm:inline">{isGenerating ? 'Synthesizing...' : 'Generate Audio'}</span>
+            <span className="sm:hidden">{isGenerating ? '' : 'Go'}</span>
           </Button>
         </div>
       </div>

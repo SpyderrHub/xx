@@ -34,13 +34,13 @@ const TranscriptionEditor = ({ value, onChange }: { value: string, onChange: (va
         contentEditable
         onInput={handleInput}
         suppressContentEditableWarning
-        className="w-full flex-1 min-h-[500px] p-0 text-[20px] md:text-[22px] text-left leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0 scrollbar-hide"
+        className="w-full flex-1 min-h-[300px] md:min-h-[500px] p-0 text-[18px] md:text-[22px] text-left leading-relaxed outline-none whitespace-pre-wrap bg-transparent placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 border-none resize-none focus:ring-0 scrollbar-hide"
         style={{ fontFamily: "'Inter', sans-serif" }}
       >
         {value}
       </div>
       {value.length === 0 && (
-        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[20px] md:text-[22px] italic font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground/20 text-[18px] md:text-[22px] italic font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
           Transcription output will appear here once processing is complete...
         </div>
       )}
@@ -172,10 +172,10 @@ export default function SpeechToTextPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
+    <div className="flex flex-col h-auto lg:h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
       {/* Top Studio Header */}
-      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-6 md:px-10 flex items-center justify-between gap-6 mt-6 mx-6 rounded-2xl">
-        <div className="flex items-center gap-4">
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-4 px-4 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
             <Ear className="h-5 w-5" />
           </div>
@@ -185,27 +185,27 @@ export default function SpeechToTextPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
           {transcription && (
             <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-[10px] font-mono text-muted-foreground uppercase">
               <span className="text-primary font-black">{transcription.split(' ').length}</span>
-              Words Processed
+              Words
             </div>
           )}
           <Button 
             onClick={handleTranscribe}
             disabled={!file || isProcessing}
-            className="h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
+            className="flex-1 sm:flex-none h-12 px-8 rounded-xl bg-primary btn-glow font-black text-sm"
           >
             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
-            {isProcessing ? (processingStage || 'Processing...') : 'Transcribe Audio'}
+            {isProcessing ? (processingStage || 'Processing...') : 'Transcribe'}
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Left: Main Transcription Workspace (Center) */}
-        <main className="flex-1 flex flex-col p-8 md:p-14 overflow-y-auto scrollbar-hide bg-transparent">
+        <main className="flex-1 flex flex-col p-6 md:p-14 overflow-y-auto scrollbar-hide bg-transparent order-2 lg:order-1">
           <div className="max-w-4xl w-full mx-auto flex-1 flex flex-col space-y-6">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
@@ -221,9 +221,9 @@ export default function SpeechToTextPage() {
           </div>
         </main>
 
-        {/* Right: Fixed Unified Sidebar */}
-        <aside className="w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md">
-          <div className="p-8 space-y-10">
+        {/* Right: Fixed Unified Sidebar (Stacks on top on mobile for workflow flow) */}
+        <aside className="w-full lg:w-[400px] border-l border-white/10 bg-transparent overflow-y-auto scrollbar-hide backdrop-blur-md order-1 lg:order-2">
+          <div className="p-6 md:p-8 space-y-10">
             {/* Section: Audio Source */}
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
@@ -261,7 +261,7 @@ export default function SpeechToTextPage() {
                         <Upload className="h-6 w-6 text-primary" />
                       </div>
                       <p className="font-bold text-sm">Select Audio File</p>
-                      <p className="text-[9px] text-muted-foreground uppercase tracking-widest mt-1">MP3, WAV, M4A up to 50MB</p>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-widest mt-1">MP3, WAV up to 50MB</p>
                     </>
                   )}
                 </div>
@@ -270,7 +270,7 @@ export default function SpeechToTextPage() {
 
             <div className="h-px bg-white/5" />
 
-            {/* Section: Language Model - AUTO DETECT ONLY */}
+            {/* Section: Language Model */}
             <div className="space-y-6">
               <div className="flex items-center gap-2 mb-2">
                 <Globe className="h-4 w-4 text-primary" />
@@ -301,11 +301,8 @@ export default function SpeechToTextPage() {
                 disabled={!transcription}
                 onClick={handleExport}
               >
-                <Download className="mr-2 h-4 w-4" /> Export Transcription
+                <Download className="mr-2 h-4 w-4" /> Export Text
               </Button>
-              <p className="text-[9px] text-center text-muted-foreground italic leading-relaxed px-4 uppercase tracking-tighter">
-                Neural processing is secured via end-to-end encryption.
-              </p>
             </div>
           </div>
         </aside>
