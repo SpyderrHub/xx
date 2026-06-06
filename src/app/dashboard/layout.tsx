@@ -61,7 +61,7 @@ const planLimits: Record<string, number> = {
 };
 
 const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={cn("px-4 mb-2 mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40", className)}>
+  <div className={cn("px-4 mb-2 mt-6 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-white/40", className)}>
     {children}
   </div>
 );
@@ -235,7 +235,7 @@ const DashboardSidebar = () => {
                 isActive={pathname === item.href}
                 tooltip={item.label}
                 className={cn(
-                  "relative rounded-xl h-10 px-3 transition-all duration-200",
+                  "relative rounded-xl h-10 px-3 transition-all duration-200 text-[13px] md:text-sm",
                   pathname === item.href 
                     ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(255,102,0,0.15)] border border-primary/20" 
                     : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -259,7 +259,7 @@ const DashboardSidebar = () => {
                 isActive={pathname === item.href}
                 tooltip={item.label}
                 className={cn(
-                  "relative rounded-xl h-10 px-3 transition-all duration-200",
+                  "relative rounded-xl h-10 px-3 transition-all duration-200 text-[13px] md:text-sm",
                   pathname === item.href 
                     ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(255,102,0,0.15)] border border-primary/20" 
                     : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -288,7 +288,7 @@ const DashboardSidebar = () => {
                 isActive={pathname === item.href}
                 tooltip={item.label}
                 className={cn(
-                  "relative rounded-xl h-10 px-3 transition-all duration-200",
+                  "relative rounded-xl h-10 px-3 transition-all duration-200 text-[13px] md:text-sm",
                   pathname === item.href 
                     ? "bg-primary/10 text-primary font-bold shadow-[0_0_15px_rgba(255,102,0,0.15)] border border-primary/20" 
                     : "hover:bg-white/5 text-white/70 hover:text-white"
