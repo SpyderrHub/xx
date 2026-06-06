@@ -268,9 +268,9 @@ const DashboardSidebar = () => {
                 <Link href={item.href}>
                   <item.icon className={cn("shrink-0", pathname === item.href ? "text-primary" : "")} />
                   <span>{item.label}</span>
-                  {(item.label === "AI Voice Designer" || item.label === "AI Music Generator") && !isCollapsed && (
+                  {["AI Voice Designer", "AI Music Generator", "AI Voice Cloning"].includes(item.label) && !isCollapsed && (
                     <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
-                      Pro
+                      Soon
                     </span>
                   )}
                 </Link>
