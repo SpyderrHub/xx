@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -124,7 +125,7 @@ export function SignUpForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      toast({ title: "Email Verified", description: "Welcome to QuantisAI!" });
+      toast({ title: "Email Verified", description: "Welcome to QuantisAI Labs!" });
       router.push('/dashboard');
     } catch (error: any) {
       toast({ title: "Verification Failed", description: error.message, variant: "destructive" });

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -90,7 +91,7 @@ export default function RefundPolicyPage() {
               <div className="prose prose-invert max-w-none space-y-16">
                 <Section id="cancellation" title="1. Cancellation Policy" icon={XCircle}>
                   <p>
-                    You can cancel your QuantisAI subscription at any time through your Dashboard settings.
+                    You can cancel your QuantisAI Labs subscription at any time through your Dashboard settings.
                   </p>
                   <div className="bg-primary/5 border border-primary/20 p-6 rounded-2xl">
                     <p className="font-bold text-white mb-2">Subscription Cancellations:</p>
@@ -151,11 +152,11 @@ export default function RefundPolicyPage() {
                 <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                   <h3 className="text-white font-bold mb-2">Contact Us</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    For any billing-related inquiries or refund requests, please contact our financial department at <a href="mailto:support@quantisai.com" className="text-primary hover:underline font-bold">support@quantisai.com</a>.
+                    For any billing-related inquiries or refund requests, please contact our financial department at <a href="mailto:support@quantisai.org" className="text-primary hover:underline font-bold">support@quantisai.org</a>.
                   </p>
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
-                  © {new Date().getFullYear()} QuantisAI Billing Systems
+                  © {new Date().getFullYear()} QuantisAI Labs Billing Systems
                 </p>
               </div>
             </motion.div>

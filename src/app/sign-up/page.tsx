@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense } from 'react';
@@ -73,7 +74,7 @@ export default function SignUpPage() {
         </Suspense>
 
         <p className="mt-12 text-sm text-gray-500 font-medium text-center">
-          © {new Date().getFullYear()} QuantisAI. All rights reserved.
+          © {new Date().getFullYear()} QuantisAI Labs. All rights reserved.
         </p>
       </div>
     </div>

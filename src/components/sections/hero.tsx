@@ -47,7 +47,7 @@ const ComparisonCard = () => (
             <Zap className="h-5 w-5 fill-current" />
           </div>
           <div>
-            <span className="text-base font-black text-white">QuantisAI</span>
+            <span className="text-base font-black text-white">QuantisAI Labs</span>
             <p className="text-[10px] text-primary font-bold uppercase">Save 92%</p>
           </div>
         </div>
@@ -84,7 +84,7 @@ const HeroSection = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-8">
               <Zap className="h-3.5 w-3.5 fill-current" />
-              <span>Studio Quality AI Synthesis</span>
+              <span>Studio Quality AI Labs Synthesis</span>
             </div>
             
             <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-8xl leading-[1.05] mb-8">

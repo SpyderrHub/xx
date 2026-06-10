@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -93,7 +94,7 @@ export default function PrivacyPage() {
               <div className="prose prose-invert max-w-none space-y-16">
                 <Section id="introduction" title="1. Introduction" icon={Eye}>
                   <p>
-                    At QuantisAI, we value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our AI voice synthesis platform.
+                    At QuantisAI Labs, we value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and safeguard your information when you use our AI voice synthesis platform.
                   </p>
                   <p>
                     By using our services, you consent to the data practices described in this policy. We designed our platform to ensure that your generated audio content remains your property and your personal details are encrypted.
@@ -117,7 +118,7 @@ export default function PrivacyPage() {
                     Your data is used primarily to facilitate the voice synthesis process and manage your subscription:
                   </p>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>To provide and maintain the QuantisAI service.</li>
+                    <li>To provide and maintain the QuantisAI Labs service.</li>
                     <li>To notify you about changes to our service or your account balance.</li>
                     <li>To provide customer support and troubleshoot technical issues.</li>
                     <li>To detect and prevent fraudulent usage.</li>
@@ -126,7 +127,7 @@ export default function PrivacyPage() {
 
                 <Section id="security" title="4. Data Security" icon={Lock}>
                   <p>
-                    The security of your data is a top priority. QuantisAI uses industry-standard encryption protocols (SSL/TLS) for all data in transit and at rest.
+                    The security of your data is a top priority. QuantisAI Labs uses industry-standard encryption protocols (SSL/TLS) for all data in transit and at rest.
                   </p>
                   <p>
                     Access to your account and generated content is strictly restricted to you through Firebase Authentication. We regularly audit our systems to ensure compliance with modern security standards.
@@ -147,11 +148,11 @@ export default function PrivacyPage() {
                 <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                   <h3 className="text-white font-bold mb-2">Contact Us</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    If you have any questions about this Privacy Policy, please contact our privacy team at <a href="mailto:support@quantisai.com" className="text-primary hover:underline font-bold">support@quantisai.com</a>.
+                    If you have any questions about this Privacy Policy, please contact our privacy team at <a href="mailto:support@quantisai.org" className="text-primary hover:underline font-bold">support@quantisai.org</a>.
                   </p>
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
-                  © {new Date().getFullYear()} QuantisAI Privacy Systems
+                  © {new Date().getFullYear()} QuantisAI Labs Privacy Systems
                 </p>
               </div>
             </motion.div>

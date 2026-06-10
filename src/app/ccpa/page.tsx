@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -104,7 +105,7 @@ export default function CCPAPage() {
 
                 <Section id="right-to-know" title="2. Right to Know" icon={Search}>
                   <p>
-                    You have the right to request that QuantisAI disclose certain information to you about our collection and use of your personal information over the past 12 months:
+                    You have the right to request that QuantisAI Labs disclose certain information to you about our collection and use of your personal information over the past 12 months:
                   </p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>The categories of personal information we collected about you.</li>
@@ -116,7 +117,7 @@ export default function CCPAPage() {
 
                 <Section id="right-to-delete" title="3. Right to Delete" icon={Trash2}>
                   <p>
-                    You have the right to request that QuantisAI delete any of your personal information that we collected from you and retained, subject to certain exceptions.
+                    You have the right to request that QuantisAI Labs delete any of your personal information that we collected from you and retained, subject to certain exceptions.
                   </p>
                   <p>
                     Once we receive and confirm your verifiable consumer request, we will delete (and direct our service providers to delete) your personal information from our records, unless an exception applies (such as completing a transaction or complying with legal obligations).
@@ -125,7 +126,7 @@ export default function CCPAPage() {
 
                 <Section id="opt-out" title="4. Right to Opt-Out" icon={Hand}>
                   <p>
-                    QuantisAI does not "sell" personal information in the traditional sense. However, like many online services, we may use cookies or advertising IDs to provide you with personalized experiences.
+                    QuantisAI Labs does not "sell" personal information in the traditional sense. However, like many online services, we may use cookies or advertising IDs to provide you with personalized experiences.
                   </p>
                   <p>
                     You have the right to opt-out of the "sale" or "sharing" of your personal information for cross-context behavioral advertising. You can exercise this right through your browser settings or by contacting our support team.
@@ -148,11 +149,11 @@ export default function CCPAPage() {
                 <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
                   <h3 className="text-white font-bold mb-2">Contact Us</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    California residents may exercise their privacy rights or ask questions about our CCPA compliance by emailing us at <a href="mailto:support@quantisai.com" className="text-primary hover:underline font-bold">support@quantisai.com</a>.
+                    California residents may exercise their privacy rights or ask questions about our CCPA compliance by emailing us at <a href="mailto:support@quantisai.org" className="text-primary hover:underline font-bold">support@quantisai.org</a>.
                   </p>
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em]">
-                  © {new Date().getFullYear()} QuantisAI Legal Systems
+                  © {new Date().getFullYear()} QuantisAI Labs Legal Systems
                 </p>
               </div>
             </motion.div>

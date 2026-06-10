@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -99,7 +100,7 @@ export default function AffiliateTermsPage() {
               <div className="prose prose-invert max-w-none space-y-20">
                 <Section id="program-basics" title="1. Program Basics" icon={Gift}>
                   <p>
-                    The QuantisAI Refer & Earn program (the "Program") is designed to reward our active creators for expanding the community. By participating, you become an authorized affiliate of the platform, eligible to earn character credits through verified user acquisition.
+                    The QuantisAI Labs Refer & Earn program (the "Program") is designed to reward our active creators for expanding the community. By participating, you become an authorized affiliate of the platform, eligible to earn character credits through verified user acquisition.
                   </p>
                   <p>
                     <strong>Eligibility:</strong> Participation is currently restricted to users with an active paid subscription (Starter, Creator, or Pro). Free-tier users can generate a referral code but will only unlock the reward distribution mechanism upon their first subscription activation.
@@ -130,7 +131,7 @@ export default function AffiliateTermsPage() {
 
                 <Section id="reward-structure" title="3. Reward Structure" icon={Coins}>
                   <p>
-                    We provide a fixed reward for every high-quality referral that contributes to the growth of the QuantisAI ecosystem.
+                    We provide a fixed reward for every high-quality referral that contributes to the growth of the QuantisAI Labs ecosystem.
                   </p>
                   <div className="bg-primary/10 border-2 border-primary/20 p-8 rounded-[2.5rem] text-center my-8">
                     <h3 className="text-4xl font-black text-white mb-2">5,000 Characters</h3>
@@ -159,7 +160,7 @@ export default function AffiliateTermsPage() {
                   <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 space-y-6">
                     <div className="space-y-2">
                       <h4 className="text-white font-bold">What counts as a "Verified Referral"?</h4>
-                      <p className="text-sm text-muted-foreground">A new user with a unique IP address, unique payment method, and no prior QuantisAI accounts who successfully activates a paid plan.</p>
+                      <p className="text-sm text-muted-foreground">A new user with a unique IP address, unique payment method, and no prior QuantisAI Labs accounts who successfully activates a paid plan.</p>
                     </div>
                     <div className="space-y-2">
                       <h4 className="text-red-400 font-bold flex items-center gap-2">
@@ -177,7 +178,7 @@ export default function AffiliateTermsPage() {
 
                 <Section id="usage-policy" title="5. Credit Usage Policy" icon={Rocket}>
                   <p>
-                    QuantisAI prioritizes the consumption of credits in a specific order to maximize user benefit:
+                    QuantisAI Labs prioritizes the consumption of credits in a specific order to maximize user benefit:
                   </p>
                   <div className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
@@ -208,7 +209,7 @@ export default function AffiliateTermsPage() {
                   </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.3em] text-center">
-                  © {new Date().getFullYear()} QuantisAI Billing & Affiliate Systems
+                  © {new Date().getFullYear()} QuantisAI Labs Billing & Affiliate Systems
                 </p>
               </div>
             </motion.div>

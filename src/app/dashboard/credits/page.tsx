@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -91,7 +92,7 @@ export default function CreditsPage() {
         key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'QuantisAI',
+        name: 'QuantisAI Labs',
         description: `Top-up: ${plan.characters.toLocaleString()} Characters`,
         order_id: orderData.orderId,
         handler: async (response: any) => {
@@ -328,7 +329,7 @@ export default function CreditsPage() {
                         pack.popular ? "bg-primary hover:bg-primary/90 btn-glow" : "bg-white text-black hover:bg-white/90"
                       )}
                     >
-                      {isProcessing === pack.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buy Now"}
+                      {isProcessing === plan.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buy Now"}
                     </Button>
                   </div>
                 </CardContent>

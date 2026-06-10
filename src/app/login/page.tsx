@@ -64,7 +64,7 @@ export default function LoginPage() {
         <LoginForm />
 
         <p className="mt-12 text-sm text-gray-500 font-medium">
-          © {new Date().getFullYear()} QuantisAI. Studio Quality Generation.
+          © {new Date().getFullYear()} QuantisAI Labs. Studio Quality Generation.
         </p>
       </div>
     </div>
