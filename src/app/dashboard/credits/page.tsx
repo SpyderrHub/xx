@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -8,8 +7,6 @@ import {
   Zap, 
   TrendingUp, 
   Clock, 
-  ArrowUpRight, 
-  Info,
   ShieldCheck,
   BarChart3,
   Loader2,
@@ -17,10 +14,9 @@ import {
   Sparkles,
   Music,
   ShoppingCart,
-  CheckCircle2,
   Plus
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -71,7 +67,6 @@ export default function CreditsPage() {
     try {
       const idToken = await user.getIdToken();
       
-      // 1. Create Razorpay Order
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: {
@@ -87,7 +82,6 @@ export default function CreditsPage() {
       const orderData = await orderRes.json();
       if (!orderRes.ok) throw new Error(orderData.message);
 
-      // 2. Open Razorpay Checkout
       const options = {
         key: orderData.keyId,
         amount: orderData.amount,
@@ -157,13 +151,12 @@ export default function CreditsPage() {
     <div className="max-w-5xl mx-auto space-y-10 pb-32">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       
-      {/* Page Header */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2">
         <div className="space-y-1">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Resource Management</p>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Credits & Usage</h1>
           <p className="text-muted-foreground text-sm max-w-md">
-            Monitor your character balance and top up whenever you need extra volume.
+            Monitor your QuantisAI Labs balance and top up whenever you need extra volume.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -176,10 +169,7 @@ export default function CreditsPage() {
         </div>
       </header>
 
-      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Balance Card */}
         <Card className="lg:col-span-2 bg-white/[0.02] border-white/5 rounded-[2.5rem] overflow-hidden relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
           <CardHeader className="p-8 pb-4">
@@ -208,7 +198,6 @@ export default function CreditsPage() {
                 </div>
                 <div className="relative">
                     <Progress value={usagePercentage} className="h-3 rounded-full bg-white/5" />
-                    <div className="absolute top-0 right-0 h-full w-px bg-white/10" style={{ left: '100%' }} />
                 </div>
                 <div className="flex justify-between text-[10px] font-mono text-muted-foreground uppercase">
                     <span>0 Chars</span>
@@ -237,7 +226,6 @@ export default function CreditsPage() {
           </CardContent>
         </Card>
 
-        {/* Sidebar Cards */}
         <div className="space-y-6">
             <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
                 <CardHeader className="p-6 border-b border-white/5 bg-white/[0.01]">
@@ -262,23 +250,9 @@ export default function CreditsPage() {
                     </ul>
                 </CardContent>
             </Card>
-
-            <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary/10 to-transparent border border-primary/10 space-y-4">
-                <div className="flex items-center gap-2">
-                    <Info className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-black uppercase tracking-widest text-white">How it works</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                    1 character of input text equals 1 credit. Credits from top-ups do not expire and are used after your monthly plan balance is exhausted.
-                </p>
-                <Button variant="link" className="p-0 h-auto text-primary text-[10px] font-black uppercase tracking-widest" asChild>
-                    <Link href="/docs/billing">Detailed Calculation Guide →</Link>
-                </Button>
-            </div>
         </div>
       </div>
 
-      {/* Top-up Plans Section */}
       <section id="topup-section" className="space-y-8 pt-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
           <div>
@@ -329,7 +303,7 @@ export default function CreditsPage() {
                         pack.popular ? "bg-primary hover:bg-primary/90 btn-glow" : "bg-white text-black hover:bg-white/90"
                       )}
                     >
-                      {isProcessing === plan.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buy Now"}
+                      {isProcessing === pack.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buy Now"}
                     </Button>
                   </div>
                 </CardContent>
@@ -339,7 +313,6 @@ export default function CreditsPage() {
         </div>
       </section>
 
-      {/* Feature Usage Stats */}
       <section className="space-y-6 pt-10">
         <div className="flex items-center gap-2 px-2">
             <BarChart3 className="h-5 w-5 text-primary" />
@@ -369,7 +342,6 @@ export default function CreditsPage() {
             ))}
         </div>
       </section>
-
     </div>
   );
 }

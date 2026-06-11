@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -32,9 +31,6 @@ async function getPublicIp(): Promise<string> {
   }
 }
 
-/**
- * Generates a unique 8-character fixed referral code for a new user.
- */
 function generateReferralCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
@@ -44,9 +40,6 @@ function generateReferralCode(): string {
   return result;
 }
 
-/**
- * Securely triggers OTP generation and email delivery via server-side API.
- */
 async function triggerServerSideOtp(user: any) {
   try {
     const idToken = await user.getIdToken();
@@ -78,14 +71,12 @@ export async function signUpWithEmail(
   referralCodeFromUrl?: string | null
 ): Promise<UserCredential> {
   try {
-    // 1. Create the Auth Account
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
     
-    // 2. Update Display Name
     await updateProfile(userCredential.user, { displayName: fullName });
 
     const user = userCredential.user;
@@ -94,7 +85,6 @@ export async function signUpWithEmail(
 
     let referredByUid: string | null = null;
     
-    // 3. Handle Referral Attribution
     if (referralCodeFromUrl) {
       const referrersQuery = query(
         collection(firestore, 'users'), 
@@ -105,7 +95,6 @@ export async function signUpWithEmail(
       if (!referrerSnapshot.empty) {
         referredByUid = referrerSnapshot.docs[0].id;
         
-        // Log the referral as pending in the referrer's subcollection
         const referralRecordRef = doc(firestore, 'users', referredByUid, 'referrals', user.uid);
         await setDoc(referralRecordRef, {
           referredUserId: user.uid,
@@ -118,7 +107,6 @@ export async function signUpWithEmail(
       }
     }
 
-    // 4. Create Main User Document
     const userData = {
       uid: user.uid,
       name: fullName,
@@ -141,7 +129,6 @@ export async function signUpWithEmail(
     const userDocRef = doc(firestore, 'users', user.uid);
     await setDoc(userDocRef, userData);
 
-    // 5. Trigger Initial SMTP Verification Email (Server-Side)
     await triggerServerSideOtp(user);
 
     return userCredential;

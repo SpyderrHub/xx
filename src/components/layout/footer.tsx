@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { Github, Linkedin, Twitter, Instagram } from 'lucide-react';
 import Logo from '@/components/logo';
@@ -14,7 +13,7 @@ const Footer = () => {
               <Logo className="h-10" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
-              The world&apos;s most expressive AI text-to-speech platform. Empowering developers and creators with natural, multi-lingual voices.
+              The world&apos;s most expressive AI text-to-speech platform. Empowering developers and creators with natural, multi-lingual voices from QuantisAI Labs.
             </p>
             <div className="flex gap-4">
               <Button asChild variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-primary hover:text-white transition-all" aria-label="Twitter">

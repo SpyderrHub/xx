@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
   description:
     'Generate realistic AI voices with advanced text-to-speech technology.',
   icons: {
-    // Referencing the favicon file name exactly as provided by user
     icon: '/fevicon.ico',
     shortcut: '/fevicon.ico',
     apple: '/fevicon.ico',

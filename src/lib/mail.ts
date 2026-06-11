@@ -1,9 +1,8 @@
-
 import nodemailer from 'nodemailer';
 
 /**
  * Server-side utility to send emails via Resend SMTP.
- * Requires RESEND_API_KEY in .env.local.
+ * Rebranded to QuantisAI Labs.
  */
 export async function sendVerificationEmail(to: string, code: string) {
   const apiKey = process.env.RESEND_API_KEY;

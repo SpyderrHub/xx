@@ -1,11 +1,9 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Play, ArrowRight, Zap, Check } from 'lucide-react';
+import { Play, Zap, Check } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const ComparisonCard = () => (
   <div className="glass-card rounded-[2rem] p-8 space-y-6 relative overflow-hidden group">
@@ -74,7 +72,7 @@ const ComparisonCard = () => (
 const HeroSection = () => {
   return (
     <section className="relative pt-24 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
-      <div className="container mx-auto px-6 sm:px-10 lg:px-16">
+      <div className="container mx-auto px-6 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
@@ -84,7 +82,7 @@ const HeroSection = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-8">
               <Zap className="h-3.5 w-3.5 fill-current" />
-              <span>Studio Quality AI Labs Synthesis</span>
+              <span>Studio Quality AI Synthesis</span>
             </div>
             
             <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-8xl leading-[1.05] mb-8">
@@ -97,7 +95,7 @@ const HeroSection = () => {
             </h1>
             
             <p className="max-w-xl text-lg text-muted-foreground sm:text-xl leading-relaxed mb-12">
-              The world's most realistic AI text-to-speech platform designed for batch audio, ultra-low latency, and transparent pricing. 
+              QuantisAI Labs provides the most realistic AI text-to-speech platform designed for batch audio, ultra-low latency, and transparent pricing. 
             </p>
             
             <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
@@ -122,8 +120,6 @@ const HeroSection = () => {
             className="relative lg:ml-10"
           >
             <ComparisonCard />
-            
-            {/* Background Glow */}
             <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
           </motion.div>
         </div>
