@@ -66,7 +66,8 @@ const topupPlans = [
     name: 'Studio Pack', 
     characters: 100000, 
     price: 149, 
-    desc: 'Best value for high volume' 
+    desc: 'Best value for high volume',
+    buttonId: 'pl_T0os3gC0kF4oVi'
   },
 ];
 
