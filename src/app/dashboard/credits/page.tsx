@@ -44,14 +44,35 @@ const planNames: Record<string, string> = {
 };
 
 const topupPlans = [
-  { id: 'topup_25k', name: 'Lite Pack', characters: 25000, price: 49, desc: 'Great for small projects' },
-  { id: 'topup_50k', name: 'Power Pack', characters: 50000, price: 99, desc: 'Our most popular pack', popular: true },
-  { id: 'topup_100k', name: 'Studio Pack', characters: 100000, price: 149, desc: 'Best value for high volume' },
+  { 
+    id: 'topup_25k', 
+    name: 'Lite Pack', 
+    characters: 25000, 
+    price: 49, 
+    desc: 'Great for small projects',
+    buttonId: 'pl_T0oXNYcMxeNBOG' 
+  },
+  { 
+    id: 'topup_50k', 
+    name: 'Power Pack', 
+    characters: 50000, 
+    price: 99, 
+    desc: 'Our most popular pack', 
+    popular: true,
+    buttonId: 'pl_T0opo07PIT6g6U'
+  },
+  { 
+    id: 'topup_100k', 
+    name: 'Studio Pack', 
+    characters: 100000, 
+    price: 149, 
+    desc: 'Best value for high volume' 
+  },
 ];
 
 /**
  * Specialized component to render the Razorpay Payment Button script
- * for the Lite Pack as requested.
+ * for specific tiers as requested.
  */
 const RazorpayPaymentButton = ({ buttonId }: { buttonId: string }) => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -143,7 +164,7 @@ export default function CreditsPage() {
           email: user.email || '',
         },
         theme: {
-          color: '#A855F7',
+          color: '#FF6600',
         },
       };
 
@@ -176,7 +197,7 @@ export default function CreditsPage() {
       
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2">
         <div className="space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Resource Management</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Resource Management</p>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Credits & Usage</h1>
           <p className="text-muted-foreground text-sm max-w-md">
             Monitor your QuantisAI Labs balance and top up whenever you need extra volume.
@@ -319,9 +340,9 @@ export default function CreditsPage() {
                   <div className="space-y-4">
                     <div className="text-3xl font-black text-white">₹{pack.price}</div>
                     
-                    {pack.id === 'topup_25k' ? (
+                    {pack.buttonId ? (
                       <div className="min-h-[48px] flex items-center justify-center">
-                        <RazorpayPaymentButton buttonId="pl_T0oXNYcMxeNBOG" />
+                        <RazorpayPaymentButton buttonId={pack.buttonId} />
                       </div>
                     ) : (
                       <Button 
