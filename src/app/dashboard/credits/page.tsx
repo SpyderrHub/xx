@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Coins, 
@@ -48,6 +48,29 @@ const topupPlans = [
   { id: 'topup_50k', name: 'Power Pack', characters: 50000, price: 99, desc: 'Our most popular pack', popular: true },
   { id: 'topup_100k', name: 'Studio Pack', characters: 100000, price: 149, desc: 'Best value for high volume' },
 ];
+
+/**
+ * Specialized component to render the Razorpay Payment Button script
+ * for the Lite Pack as requested.
+ */
+const RazorpayPaymentButton = ({ buttonId }: { buttonId: string }) => {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!formRef.current) return;
+    
+    // Clear any existing children to prevent double buttons on re-render
+    formRef.current.innerHTML = '';
+    
+    const script = document.createElement('script');
+    script.src = "https://checkout.razorpay.com/v1/payment-button.js";
+    script.setAttribute('data-payment_button_id', buttonId);
+    script.async = true;
+    formRef.current.appendChild(script);
+  }, [buttonId]);
+
+  return <form ref={formRef} className="w-full flex justify-center min-h-[48px]" />;
+};
 
 export default function CreditsPage() {
   const { user, firestore } = useFirebase();
@@ -295,16 +318,23 @@ export default function CreditsPage() {
 
                   <div className="space-y-4">
                     <div className="text-3xl font-black text-white">₹{pack.price}</div>
-                    <Button 
-                      onClick={() => handleTopup(pack)}
-                      disabled={!!isProcessing}
-                      className={cn(
-                        "w-full h-12 rounded-xl font-black text-sm transition-all",
-                        pack.popular ? "bg-primary hover:bg-primary/90 btn-glow" : "bg-white text-black hover:bg-white/90"
-                      )}
-                    >
-                      {isProcessing === pack.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buy Now"}
-                    </Button>
+                    
+                    {pack.id === 'topup_25k' ? (
+                      <div className="min-h-[48px] flex items-center justify-center">
+                        <RazorpayPaymentButton buttonId="pl_T0oXNYcMxeNBOG" />
+                      </div>
+                    ) : (
+                      <Button 
+                        onClick={() => handleTopup(pack)}
+                        disabled={!!isProcessing}
+                        className={cn(
+                          "w-full h-12 rounded-xl font-black text-sm transition-all",
+                          pack.popular ? "bg-primary hover:bg-primary/90 btn-glow" : "bg-white text-black hover:bg-white/90"
+                        )}
+                      >
+                        {isProcessing === pack.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Buy Now"}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
