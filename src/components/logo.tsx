@@ -16,7 +16,7 @@ const Logo = ({ className }: LogoProps) => {
   return (
     <div className={cn("flex items-center justify-start overflow-hidden", className)}>
       <img 
-        src="/logo.png" 
+        src="https://cdn.quantisai.org/images/logo.png" 
         alt="QuantisAI Labs" 
         className="h-full w-auto object-contain"
         style={{ display: 'block' }}
