@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
@@ -11,19 +10,16 @@ interface LogoProps {
 /**
  * QuantisAI Labs Logo component.
  * Uses the exact brand image provided by the user.
- * Includes unoptimized prop to ensure visibility in all environments.
+ * We use a standard img tag here to ensure absolute reliability in showing the asset across all browsers.
  */
 const Logo = ({ className }: LogoProps) => {
   return (
-    <div className={cn("relative flex items-center justify-start", className)}>
-      <Image 
+    <div className={cn("flex items-center justify-start overflow-hidden", className)}>
+      <img 
         src="/logo.png" 
         alt="QuantisAI Labs" 
-        width={300} 
-        height={80} 
         className="h-full w-auto object-contain"
-        priority
-        unoptimized
+        style={{ display: 'block' }}
       />
     </div>
   );

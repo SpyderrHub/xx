@@ -11,7 +11,7 @@ export default function ComparisonSlider() {
 
   // Based on user provided rates: 
   // ElevenLabs: ~₹9,179 for 600k chars (₹15.3 per 1k)
-  // QuantisAI: ₹999 for 1M chars (₹1.0 per 1k)
+  // QuantisAI Labs: ₹999 for 1M chars (₹1.0 per 1k)
   
   const elevenLabsPrice = (chars / 1000) * 15.3;
   const quantisaiPrice = (chars / 1000) * 1.0;
@@ -65,7 +65,7 @@ export default function ComparisonSlider() {
               <CardContent className="p-8 space-y-4">
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary fill-current" />
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantisAI</span>
+                  <span className="text-xs font-bold text-primary uppercase tracking-widest">QuantisAI Labs</span>
                 </div>
                 <div className="text-4xl font-black text-white">₹{Math.round(quantisaiPrice).toLocaleString()}</div>
                 <p className="text-sm text-white/70">Pure synthesis. No markup. No enterprise tax.</p>

@@ -1,6 +1,5 @@
-
 'use client';
-import { CheckCircle, Code } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const ApiShowcaseSection = () => {
@@ -12,7 +11,7 @@ fetch('https://api.quantisai.com/v1/generate', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    text: "Hello from QuantisAI!",
+    text: "Hello from QuantisAI Labs!",
     voice: "alex-male-en-us",
   })
 })
@@ -32,7 +31,7 @@ fetch('https://api.quantisai.com/v1/generate', {
             Developer-Friendly API
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Integrate QuantisAI's powerful voice generation into your applications
+            Integrate QuantisAI Labs' powerful voice generation into your applications
             with just a few lines of code.
           </p>
         </div>
