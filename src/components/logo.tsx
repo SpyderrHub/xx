@@ -11,6 +11,7 @@ interface LogoProps {
 /**
  * QuantisAI Labs Logo component.
  * Uses the exact brand image provided by the user.
+ * Includes unoptimized prop to ensure visibility in all environments.
  */
 const Logo = ({ className }: LogoProps) => {
   return (
@@ -22,6 +23,7 @@ const Logo = ({ className }: LogoProps) => {
         height={80} 
         className="h-full w-auto object-contain"
         priority
+        unoptimized
       />
     </div>
   );

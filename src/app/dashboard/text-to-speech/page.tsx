@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -100,8 +99,8 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'QuantisAI Generation',
-          text: `Check out this AI-generated voice: ${voice}`,
+          title: 'QuantisAI Labs Generation',
+          text: `Check out this AI-generated voice from QuantisAI Labs: ${voice}`,
           url: window.location.href,
         });
       } else {
@@ -135,7 +134,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
           </div>
           <div className="ml-auto flex items-center gap-2 md:hidden">
              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
-                <a href={audioUrl} download={`quantisai_${Date.now()}.wav`} target="_blank" rel="noopener noreferrer">
+                <a href={audioUrl} download={`quantisai_labs_${Date.now()}.wav`} target="_blank" rel="noopener noreferrer">
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -155,7 +154,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, characters, isPlaying, onTogglePla
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
-            <a href={audioUrl} download={`quantisai_${Date.now()}.wav`} title="Download Audio" target="_blank" rel="noopener noreferrer">
+            <a href={audioUrl} download={`quantisai_labs_${Date.now()}.wav`} title="Download Audio" target="_blank" rel="noopener noreferrer">
               <Download className="h-5 w-5" />
             </a>
           </Button>
@@ -310,7 +309,7 @@ export default function TextToSpeechPage() {
         characters: charCount
       });
 
-      toast({ title: "Synthesis Complete", description: "Audio ready for review." });
+      toast({ title: "Synthesis Complete", description: "Audio ready for review from QuantisAI Labs." });
     } catch (e: any) {
       toast({ 
         title: "Generation Error", 
@@ -394,7 +393,7 @@ export default function TextToSpeechPage() {
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-white">Your Voice Library is Empty</h3>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
-                Add voices from the library to start generating ultra-realistic speech.
+                Add voices from the QuantisAI Labs library to start generating ultra-realistic speech.
               </p>
             </div>
             <Button asChild className="rounded-xl bg-white text-black hover:bg-white/90 font-bold h-12 px-8">

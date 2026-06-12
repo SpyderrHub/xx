@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -60,7 +59,7 @@ export default function PlanCard({
       const options = {
         key: data.keyId,
         subscription_id: data.subscriptionId,
-        name: 'QuantisAI',
+        name: 'QuantisAI Labs',
         description: `${plan.name} Subscription (${billingCycle})`,
         handler: async function (response: any) {
           try {
@@ -95,7 +94,7 @@ export default function PlanCard({
           email: user.email || '',
         },
         theme: {
-          color: '#4F46E5',
+          color: '#FF6600',
         },
       };
 

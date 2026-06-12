@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -90,7 +89,7 @@ export default function ReferralsPage() {
   };
 
   const handleShare = (platform: 'twitter' | 'linkedin' | 'whatsapp') => {
-    const text = `Join me on QuantisAI and experience studio-quality AI voice synthesis! Use my link to get started: ${referralLink}`;
+    const text = `Join me on QuantisAI Labs and experience studio-quality AI voice synthesis! Use my link to get started: ${referralLink}`;
     const encodedText = encodeURIComponent(text);
     
     const urls = {
@@ -137,7 +136,7 @@ export default function ReferralsPage() {
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-white">Unlock Referral Program</h2>
               <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                The QuantisAI Refer & Earn program is available exclusively for our active subscribers. Upgrade to get your invitation link.
+                The QuantisAI Labs Refer & Earn program is available exclusively for our active subscribers. Upgrade to get your invitation link.
               </p>
             </div>
             <Button asChild size="lg" className="h-14 px-10 rounded-2xl bg-primary font-black text-lg btn-glow">
