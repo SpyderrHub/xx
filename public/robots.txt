@@ -3,7 +3,7 @@ Allow: /
 Allow: /docs
 Disallow: /dashboard/
 Disallow: /author/
-Disallow: /api/
+Disallow: /dashboard/api/
 Disallow: /forgot-password
 
 Sitemap: https://www.quantisai.org/sitemap.xml
