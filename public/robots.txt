@@ -1,20 +1,9 @@
-# https://www.robotstxt.org/robotstxt.html
-
 User-agent: *
 Allow: /
 Allow: /docs
-Allow: /privacy
-Allow: /terms
-Allow: /gdpr
-Allow: /ccpa
-
-# Disallow indexing of private dashboard and auth routes
 Disallow: /dashboard/
 Disallow: /author/
-Disallow: /login
-Disallow: /sign-up
-Disallow: /forgot-password
 Disallow: /api/
+Disallow: /forgot-password
 
-# Sitemap
 Sitemap: https://www.quantisai.org/sitemap.xml
