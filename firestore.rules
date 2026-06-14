@@ -11,26 +11,26 @@ service cloud.firestore {
       return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
     // ROOT COLLECTIONS
     
     // Explicit rules for Top-ups (Root Collection)
     match /user_topups/{id} {
-      // Allow read if the user is signed in and the query filters by their UID,
-      // or if getting a specific document that belongs to them.
       allow read: if isSignedIn() && (
-        (request.query.filters.userId == request.auth.uid) ||
-        (resource != null && resource.data.userId == request.auth.uid)
+        (resource != null && resource.data.userId == request.auth.uid) ||
+        (request.query.filters.userId == request.auth.uid)
       );
       allow write: if false; // Only Admin SDK can write
     }
 
     // Explicit rules for Subscriptions (Root Collection)
     match /user_subscriptions/{id} {
-      // Allow read if the user is signed in and the query filters by their UID.
-      // For listing, we also allow checking the status filter if provided.
       allow read: if isSignedIn() && (
-        (request.query.filters.userId == request.auth.uid) ||
-        (resource != null && resource.data.userId == request.auth.uid)
+        (resource != null && resource.data.userId == request.auth.uid) ||
+        (request.query.filters.userId == request.auth.uid)
       );
       allow write: if false; // Only Admin SDK can write
     }
@@ -55,26 +55,37 @@ service cloud.firestore {
 
     // USER-SPECIFIC DATA
     match /users/{userId} {
-      // Users can read any profile (for referral checks), but only write their own
-      allow read: if isSignedIn();
-      allow write: if isSignedIn() && request.auth.uid == userId;
+      // 1. Basic Profile Access (Name, Avatar, ReferralCode)
+      // Allow 'get' for everyone to see speaker names/avatars.
+      allow get: if isSignedIn();
       
-      // User Subcollections - Using flattened paths for query provability
+      // 2. Full Document Access (Owner/Admin)
+      // Sensitive data like 'apiKey' and 'email' are only readable by owner.
+      allow read, write: if isOwner(userId) || isAdmin();
+      
+      // 3. Referral Code Lookup (Sign-up flow)
+      // Allows the specific query used during sign-up to find a referrer by code.
+      allow list: if isSignedIn() && 
+                    request.query.limit <= 1 && 
+                    request.query.filters.referralCode != null;
+
+      // SUBCOLLECTIONS
+      
       match /myVoices/{voiceId} {
-        allow read, write: if isSignedIn() && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
 
       match /generations/{genId} {
-        allow read, write: if isSignedIn() && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
 
       match /api_logs/{logId} {
-        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow read: if isOwner(userId);
       }
 
       match /referrals/{refId} {
-        allow read: if isSignedIn() && request.auth.uid == userId;
-        allow write: if isSignedIn(); // Allow recording new referrals
+        allow read: if isOwner(userId);
+        allow write: if isSignedIn(); // Allow recording new referrals during sign-up
       }
     }
   }
