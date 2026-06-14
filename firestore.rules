@@ -68,6 +68,10 @@ service cloud.firestore {
         allow read, write: if isSignedIn() && request.auth.uid == userId;
       }
 
+      match /api_logs/{logId} {
+        allow read: if isSignedIn() && request.auth.uid == userId;
+      }
+
       match /referrals/{refId} {
         allow read: if isSignedIn() && request.auth.uid == userId;
         allow write: if isSignedIn(); // Allow recording new referrals
