@@ -163,7 +163,9 @@ export default function VoiceLibraryPage() {
 
     voices.forEach(v => {
       if (v.gender) genders.add(v.gender);
-      if (v.style) styles.add(v.style);
+      
+      const vStyles = Array.isArray(v.styles) ? v.styles : (v.style ? [v.style] : []);
+      vStyles.forEach((s: string) => styles.add(s));
       
       const vLangs = Array.isArray(v.languages) ? v.languages : (v.language ? [v.language] : []);
       vLangs.forEach((l: string) => languages.add(l));
@@ -181,26 +183,32 @@ export default function VoiceLibraryPage() {
     return voices.filter((voice) => {
       const searchLower = search.toLowerCase();
       const voiceLangs = Array.isArray(voice.languages) ? voice.languages : (voice.language ? [voice.language] : []);
+      const voiceStyles = Array.isArray(voice.styles) ? voice.styles : (voice.style ? [voice.style] : []);
       
       const matchesSearch =
         voice.voiceName.toLowerCase().includes(searchLower) ||
         voice.description?.toLowerCase().includes(searchLower) ||
-        voice.style?.toLowerCase().includes(searchLower);
+        voiceLangs.some(l => l.toLowerCase().includes(searchLower)) ||
+        voiceStyles.some(s => s.toLowerCase().includes(searchLower));
 
       const matchesGender = !filters.gender || voice.gender === filters.gender;
       const matchesLanguage = !filters.language || voiceLangs.includes(filters.language);
-      const matchesStyle = !filters.style || voice.style === filters.style;
+      const matchesStyle = !filters.style || voiceStyles.includes(filters.style);
 
       return matchesSearch && matchesGender && matchesLanguage && matchesStyle;
     });
   }, [voices, search, filters]);
 
-  // Pagination Logic
-  const totalPages = Math.ceil(filteredVoices.length / itemsPerPage);
+  // Check if any filter is active
+  const isFiltering = search.length > 0 || filters.gender || filters.language || filters.style;
+
+  // Pagination Logic - If filtering, we "list all" matching items as requested
+  const totalPages = isFiltering ? 1 : Math.ceil(filteredVoices.length / itemsPerPage);
   const paginatedVoices = useMemo(() => {
+    if (isFiltering) return filteredVoices;
     const start = (currentPage - 1) * itemsPerPage;
     return filteredVoices.slice(start, start + itemsPerPage);
-  }, [filteredVoices, currentPage]);
+  }, [filteredVoices, currentPage, isFiltering]);
 
   // Reset to first page when filters or search changes
   useEffect(() => {
@@ -238,7 +246,9 @@ export default function VoiceLibraryPage() {
           <h2 className="text-2xl font-semibold tracking-tight">All Voices</h2>
           {!isLoading && filteredVoices.length > 0 && (
              <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
-               Showing {Math.min(filteredVoices.length, itemsPerPage)} of {filteredVoices.length} voices
+               {isFiltering 
+                 ? `Showing all ${filteredVoices.length} matches` 
+                 : `Showing ${Math.min(filteredVoices.length, itemsPerPage)} of ${filteredVoices.length} voices`}
              </p>
           )}
         </div>
@@ -270,7 +280,7 @@ export default function VoiceLibraryPage() {
               ))}
             </div>
 
-            {totalPages > 1 && (
+            {!isFiltering && totalPages > 1 && (
               <div className="mt-16 flex items-center justify-center gap-4">
                 <Button
                   variant="outline"
