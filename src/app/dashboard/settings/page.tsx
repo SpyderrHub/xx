@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -273,15 +272,6 @@ export default function SettingsPage() {
                       className="h-12 pl-11 bg-black/20 border-white/10 rounded-xl text-muted-foreground cursor-not-allowed"
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Avatar R2 Key</Label>
-                  <Input 
-                    value={photoURL}
-                    readOnly
-                    className="h-12 bg-black/20 border-white/5 rounded-xl text-[10px] font-mono text-muted-foreground italic truncate"
-                  />
                 </div>
               </CardContent>
               <CardFooter className="p-8 border-t border-white/5 flex justify-end">
