@@ -262,6 +262,19 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      value={user?.email || ''}
+                      readOnly
+                      className="h-12 pl-11 bg-black/20 border-white/10 rounded-xl text-muted-foreground cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Avatar R2 Key</Label>
                   <Input 
