@@ -11,6 +11,7 @@ import {
   Users,
   FileText,
   Gift,
+  CreditCard,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -168,6 +169,14 @@ export default function AuthorLayout({
                   <Link href="/author/users">
                     <Users />
                     <span>Manage Users</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Payments Audit">
+                  <Link href="/author/payments">
+                    <CreditCard />
+                    <span>Payments Audit</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
