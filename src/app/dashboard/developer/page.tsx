@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -99,8 +98,8 @@ export default function DeveloperPage() {
           <Terminal className="h-3.5 w-3.5" />
           <span>Developer Tools</span>
         </div>
-        <h1 className="text-4xl font-bold tracking-tight text-white">API Access</h1>
-        <p className="text-muted-foreground mt-2 max-w-2xl">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">API Access</h1>
+        <p className="text-sm md:text-muted-foreground mt-2 max-w-2xl">
           Manage your production credentials and monitor programmatic usage across QuantisAI Labs neural engines.
         </p>
       </header>
@@ -108,49 +107,49 @@ export default function DeveloperPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Token Management Section */}
         <div className="lg:col-span-12">
-          <Card className="bg-white/[0.02] border-white/5 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
+          <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden relative shadow-2xl">
             <div className="absolute top-0 right-0 p-8">
               <Key className="h-8 w-8 text-white/5" />
             </div>
-            <CardHeader className="p-10 pb-0">
-              <CardTitle className="text-2xl font-black text-white">Neural Engine Token</CardTitle>
-              <CardDescription className="text-base text-muted-foreground mt-2">
+            <CardHeader className="p-6 md:p-10 pb-0">
+              <CardTitle className="text-xl md:text-2xl font-black text-white">Neural Engine Token</CardTitle>
+              <CardDescription className="text-sm md:text-base text-muted-foreground mt-2">
                 This secret token grants full access to your character balance via our REST API. Never share this key.
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-10 space-y-8">
+            <CardContent className="p-6 md:p-10 space-y-8">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
                   <Input 
                     value={userData?.apiKey || "No active token found"} 
                     readOnly 
-                    className="h-16 bg-black/20 border-white/10 rounded-2xl px-6 font-mono text-lg text-primary tracking-wider focus:ring-0"
+                    className="h-12 md:h-16 bg-black/20 border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 font-mono text-base md:text-lg text-primary tracking-wider focus:ring-0"
                   />
                   {userData?.apiKey && (
                     <Button 
                       variant="ghost" 
                       onClick={handleCopy}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-12 w-12 rounded-xl hover:bg-white/10"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-10 md:h-12 w-10 md:w-12 rounded-lg md:rounded-xl hover:bg-white/10"
                     >
-                      {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5 text-muted-foreground" />}
+                      {copied ? <Check className="h-4 md:h-5 w-4 md:w-5 text-green-500" /> : <Copy className="h-4 md:h-5 w-4 md:w-5 text-muted-foreground" />}
                     </Button>
                   )}
                 </div>
                 <Button 
                   onClick={handleGenerateToken}
                   disabled={isGenerating}
-                  className="h-16 px-8 rounded-2xl bg-white text-black font-black hover:bg-white/90 transition-all shrink-0"
+                  className="h-12 md:h-16 px-6 md:px-8 rounded-xl md:rounded-2xl bg-white text-black font-black hover:bg-white/90 transition-all shrink-0 text-xs md:text-base"
                 >
-                  {isGenerating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <RefreshCw className="mr-2 h-5 w-5" />}
+                  {isGenerating ? <Loader2 className="mr-2 h-4 md:h-5 w-4 md:w-5 animate-spin" /> : <RefreshCw className="mr-2 h-4 md:h-5 w-4 md:w-5" />}
                   {userData?.apiKey ? "Revoke & Regenerate" : "Generate Production Key"}
                 </Button>
               </div>
 
-              <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex gap-4">
-                <ShieldAlert className="h-6 w-6 text-amber-500 shrink-0" />
+              <div className="p-4 md:p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex gap-4">
+                <ShieldAlert className="h-5 md:h-6 w-5 md:w-6 text-amber-500 shrink-0" />
                 <div className="space-y-1">
-                  <p className="text-sm font-bold text-white">Security Advisory</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-xs md:text-sm font-bold text-white">Security Advisory</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground leading-relaxed">
                     Rolling your key will immediately invalidate the current token. Ensure you update your environment variables in production to prevent service interruption.
                   </p>
                 </div>
@@ -163,10 +162,10 @@ export default function DeveloperPage() {
         <div className="lg:col-span-12 space-y-6">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-3">
-              <Activity className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-bold text-white">Recent API Activity</h2>
+              <Activity className="h-4 md:h-5 w-4 md:w-5 text-primary" />
+              <h2 className="text-lg md:text-xl font-bold text-white">Recent API Activity</h2>
             </div>
-            <Button variant="link" className="text-xs font-black uppercase tracking-widest text-primary p-0 h-auto" asChild>
+            <Button variant="link" className="text-[10px] md:text-xs font-black uppercase tracking-widest text-primary p-0 h-auto" asChild>
               <a href="https://docs.quantisai.org" target="_blank" rel="noopener noreferrer">
                 Developer Docs <ExternalLink className="ml-1.5 h-3 w-3" />
               </a>
@@ -175,69 +174,71 @@ export default function DeveloperPage() {
 
           <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
             <CardContent className="p-0">
-              <Table>
-                <TableHeader className="bg-white/[0.02]">
-                  <TableRow className="border-white/5 hover:bg-transparent">
-                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 h-12">Timestamp</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Method</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Resource</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Status</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Latency</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLogsLoading ? (
-                    [...Array(3)].map((_, i) => (
-                      <TableRow key={i} className="border-white/5">
-                        <TableCell className="px-8 py-5"><div className="h-4 w-32 bg-white/5 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-4 w-12 bg-white/5 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-4 w-40 bg-white/5 rounded animate-pulse" /></TableCell>
-                        <TableCell><div className="h-6 w-16 bg-white/5 rounded-full animate-pulse" /></TableCell>
-                        <TableCell className="px-8 py-5"><div className="h-4 w-16 bg-white/5 rounded animate-pulse ml-auto" /></TableCell>
-                      </TableRow>
-                    ))
-                  ) : logs && logs.length > 0 ? (
-                    logs.map((log) => (
-                      <TableRow key={log.id} className="border-white/5 hover:bg-white/[0.03] transition-colors group">
-                        <TableCell className="px-8 py-5 text-xs text-white/70 font-medium">
-                          {format(new Date(log.timestamp), 'MMM dd, HH:mm:ss')}
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-[10px] font-black font-mono text-muted-foreground uppercase">{log.method}</span>
-                        </TableCell>
-                        <TableCell>
-                          <code className="text-xs text-primary/80 font-mono">{log.endpoint}</code>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={cn(
-                            "text-[9px] uppercase font-black px-2 py-0.5 border-none",
-                            log.status < 400 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
-                          )}>
-                            {log.status} {log.status < 400 ? "OK" : "Error"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right px-8">
-                          <span className="text-xs font-mono text-muted-foreground">{log.latency}ms</span>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-64 text-center">
-                        <div className="flex flex-col items-center justify-center gap-3 opacity-30">
-                          <div className="h-16 w-16 rounded-3xl bg-white/5 flex items-center justify-center">
-                            <Activity className="h-8 w-8 text-white/50" />
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-bold text-white">Waiting for API traffic...</p>
-                            <p className="text-xs text-muted-foreground">Requests authenticated with your token will appear here.</p>
-                          </div>
-                        </div>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-white/[0.02]">
+                    <TableRow className="border-white/5 hover:bg-transparent">
+                      <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground px-6 md:px-8 h-10 md:h-12">Timestamp</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground h-10 md:h-12">Method</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground h-10 md:h-12">Resource</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground h-10 md:h-12">Status</TableHead>
+                      <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground h-10 md:h-12 text-right px-6 md:px-8">Latency</TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {isLogsLoading ? (
+                      [...Array(3)].map((_, i) => (
+                        <TableRow key={i} className="border-white/5">
+                          <TableCell className="px-6 md:px-8 py-4 md:py-5"><div className="h-4 w-24 md:w-32 bg-white/5 rounded animate-pulse" /></TableCell>
+                          <TableCell><div className="h-4 w-10 md:w-12 bg-white/5 rounded animate-pulse" /></TableCell>
+                          <TableCell><div className="h-4 w-32 md:w-40 bg-white/5 rounded animate-pulse" /></TableCell>
+                          <TableCell><div className="h-6 w-14 md:w-16 bg-white/5 rounded-full animate-pulse" /></TableCell>
+                          <TableCell className="px-6 md:px-8 py-4 md:py-5"><div className="h-4 w-12 md:w-16 bg-white/5 rounded animate-pulse ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : logs && logs.length > 0 ? (
+                      logs.map((log) => (
+                        <TableRow key={log.id} className="border-white/5 hover:bg-white/[0.03] transition-colors group">
+                          <TableCell className="px-6 md:px-8 py-4 md:py-5 text-[10px] md:text-xs text-white/70 font-medium">
+                            {format(new Date(log.timestamp), 'MMM dd, HH:mm:ss')}
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-[9px] md:text-[10px] font-black font-mono text-muted-foreground uppercase">{log.method}</span>
+                          </TableCell>
+                          <TableCell>
+                            <code className="text-[10px] md:text-xs text-primary/80 font-mono">{log.endpoint}</code>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={cn(
+                              "text-[8px] md:text-[9px] uppercase font-black px-1.5 md:px-2 py-0.5 border-none",
+                              log.status < 400 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+                            )}>
+                              {log.status} {log.status < 400 ? "OK" : "Error"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right px-6 md:px-8">
+                            <span className="text-[10px] md:text-xs font-mono text-muted-foreground">{log.latency}ms</span>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-48 md:h-64 text-center">
+                          <div className="flex flex-col items-center justify-center gap-3 opacity-30">
+                            <div className="h-12 md:h-16 w-12 md:w-16 rounded-2xl md:rounded-3xl bg-white/5 flex items-center justify-center">
+                              <Activity className="h-6 md:h-8 w-6 md:w-8 text-white/50" />
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs md:text-sm font-bold text-white">Waiting for API traffic...</p>
+                              <p className="text-[10px] md:text-xs text-muted-foreground">Requests authenticated with your token will appear here.</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </div>

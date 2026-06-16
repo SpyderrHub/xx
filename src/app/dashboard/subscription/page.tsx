@@ -153,21 +153,21 @@ export default function SubscriptionPage() {
       
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Subscription & Billing</h1>
-          <p className="mt-2 text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Subscription & Billing</h1>
+          <p className="mt-2 text-xs md:text-sm text-muted-foreground">
             Manage your plan, usage, and billing settings.
           </p>
         </div>
         <div className="flex items-center space-x-3 rounded-full bg-card/50 p-1 border">
-          <Label htmlFor="billing-cycle" className="pl-2">Monthly</Label>
+          <Label htmlFor="billing-cycle" className="pl-2 text-[10px] md:text-sm">Monthly</Label>
           <Switch
             id="billing-cycle"
             checked={isYearly}
             onCheckedChange={setIsYearly}
             aria-label="Toggle billing cycle"
           />
-          <Label htmlFor="billing-cycle">Yearly</Label>
-          <div className="rounded-full border border-green-500/50 bg-green-500/10 px-3 py-1 text-xs text-green-400">
+          <Label htmlFor="billing-cycle" className="text-[10px] md:text-sm">Yearly</Label>
+          <div className="rounded-full border border-green-500/50 bg-green-500/10 px-2 py-0.5 md:px-3 md:py-1 text-[8px] md:text-xs text-green-400">
             Save ~20%
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function SubscriptionPage() {
       )}
 
       <div id="pricing-plans">
-        <h2 className="mb-8 text-2xl font-semibold tracking-tight text-center">
+        <h2 className="mb-8 text-xl md:text-2xl font-semibold tracking-tight text-center">
           Choose the plan that's right for you
         </h2>
         <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">

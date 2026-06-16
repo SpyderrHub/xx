@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { 
   User, 
@@ -9,13 +8,7 @@ import {
   Camera, 
   Save, 
   Loader2, 
-  ShieldCheck,
-  Calendar,
-  Sparkles,
-  AlertTriangle,
-  Trash2,
-  Upload,
-  CheckCircle2
+  Upload
 } from 'lucide-react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { updateProfile, deleteUser } from 'firebase/auth';
@@ -25,19 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 /**
  * Converts any image to WebP format for optimal caching (Content-Type: image/webp)
@@ -81,7 +62,6 @@ export default function SettingsPage() {
   const { user, firestore, auth } = useFirebase();
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   
   const [displayName, setDisplayName] = useState('');
@@ -116,7 +96,6 @@ export default function SettingsPage() {
     try {
       const webpFile = await convertToWebP(file);
       const idToken = await user.getIdToken();
-      // Use unique filename to ensure the 1-year immutable cache works correctly on new versions
       const uniqueFileName = `${crypto.randomUUID()}-${webpFile.name}`;
 
       // 1. Get Presigned URL
@@ -183,21 +162,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!user || !firestore) return;
-    setIsDeleting(true);
-    try {
-      const userRef = doc(firestore, 'users', user.uid);
-      await deleteDoc(userRef);
-      await deleteUser(user);
-      router.push('/login');
-    } catch (error: any) {
-      toast({ title: "Deletion Error", description: error.message, variant: "destructive" });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
 
   if (isDocLoading) {
@@ -211,8 +175,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-10 pb-32">
       <header className="px-2">
-        <h1 className="text-3xl font-bold tracking-tight text-white">Account Settings</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Identity management with R2 immutable storage.</p>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Account Settings</h1>
+        <p className="text-muted-foreground mt-1 text-xs md:text-sm">Identity management with R2 immutable storage.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -223,19 +187,19 @@ export default function SettingsPage() {
                 className="relative group mb-4 cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Avatar className="h-24 w-24 ring-4 ring-primary/10 transition-all group-hover:ring-primary/30">
+                <Avatar className="h-20 md:h-24 w-20 md:w-24 ring-4 ring-primary/10 transition-all group-hover:ring-primary/30">
                   <AvatarImage src={photoURL} className="object-cover" />
-                  <AvatarFallback className="text-2xl bg-primary/10 text-primary font-black">
+                  <AvatarFallback className="text-xl md:text-2xl bg-primary/10 text-primary font-black">
                     {displayName ? getInitials(displayName) : 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-full transition-opacity backdrop-blur-[2px]">
-                  {isUploading ? <Loader2 className="h-6 w-6 text-white animate-spin" /> : <Upload className="h-6 w-6 text-white" />}
+                  {isUploading ? <Loader2 className="h-5 md:h-6 w-5 md:w-6 text-white animate-spin" /> : <Upload className="h-5 md:h-6 w-5 md:w-6 text-white" />}
                 </div>
                 <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} accept="image/*" className="hidden" />
               </div>
-              <h3 className="font-bold text-white text-lg">{displayName || 'User'}</h3>
-              <p className="text-xs text-muted-foreground uppercase tracking-widest font-black mt-1">
+              <h3 className="font-bold text-white text-base md:text-lg">{displayName || 'User'}</h3>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black mt-1">
                 {userData?.plan || 'Free'} Plan
               </p>
             </CardContent>
@@ -245,37 +209,37 @@ export default function SettingsPage() {
         <div className="md:col-span-2">
           <form onSubmit={handleSaveProfile}>
             <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
-              <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
-                <CardTitle className="text-xl font-bold">Public Profile</CardTitle>
-                <CardDescription>All media served via 1-year immutable caching.</CardDescription>
+              <CardHeader className="p-6 md:p-8 border-b border-white/5 bg-white/[0.01]">
+                <CardTitle className="text-lg md:text-xl font-bold">Public Profile</CardTitle>
+                <CardDescription className="text-xs md:text-sm">All media served via 1-year immutable caching.</CardDescription>
               </CardHeader>
-              <CardContent className="p-8 space-y-6">
+              <CardContent className="p-6 md:p-8 space-y-6">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Display Name</Label>
+                  <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Display Name</Label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="h-12 pl-11 bg-white/5 border-white/10 rounded-xl"
+                      className="h-10 md:h-12 pl-10 md:pl-11 bg-white/5 border-white/10 rounded-xl text-sm md:text-base"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</Label>
+                  <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</Label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                       value={user?.email || ''}
                       readOnly
-                      className="h-12 pl-11 bg-black/20 border-white/10 rounded-xl text-muted-foreground cursor-not-allowed"
+                      className="h-10 md:h-12 pl-10 md:pl-11 bg-black/20 border-white/10 rounded-xl text-muted-foreground cursor-not-allowed text-sm md:text-base"
                     />
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="p-8 border-t border-white/5 flex justify-end">
-                <Button type="submit" disabled={isSaving} className="h-12 px-8 rounded-xl bg-primary font-black btn-glow">
+              <CardFooter className="p-6 md:p-8 border-t border-white/5 flex justify-end">
+                <Button type="submit" disabled={isSaving} className="h-10 md:h-12 px-6 md:px-8 rounded-xl bg-primary font-black btn-glow text-xs md:text-sm">
                   {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   Save Changes
                 </Button>

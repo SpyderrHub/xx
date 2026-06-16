@@ -121,35 +121,35 @@ export default function PlanCard({
           isCurrent && 'border-primary ring-2 ring-primary'
         )}
       >
-        <CardHeader className="p-6 relative">
-          <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+        <CardHeader className="p-5 md:p-6 relative">
+          <CardTitle className="text-xl md:text-2xl font-bold">{plan.name}</CardTitle>
           <div className="flex items-baseline pt-2">
-            <span className="text-4xl font-extrabold tracking-tight">
+            <span className="text-3xl md:text-4xl font-extrabold tracking-tight">
               {plan.price}
             </span>
-            <span className="ml-1 text-muted-foreground text-sm">
+            <span className="ml-1 text-muted-foreground text-xs md:text-sm">
               / {billingCycle === 'monthly' ? 'month' : 'year'}
             </span>
           </div>
-          <CardDescription className="pt-2 min-h-[40px]">
+          <CardDescription className="pt-2 min-h-[40px] text-xs md:text-sm">
             {plan.description}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 p-6 pt-0">
-          <ul className="space-y-4">
+        <CardContent className="flex-1 p-5 md:p-6 pt-0">
+          <ul className="space-y-3 md:space-y-4">
             {plan.features.map((feature: string) => (
               <li key={feature} className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 shrink-0 text-green-500 mt-0.5" />
-                <span className="text-muted-foreground text-sm">{feature}</span>
+                <CheckCircle className="h-4 md:h-5 w-4 md:w-5 shrink-0 text-green-500 mt-0.5" />
+                <span className="text-muted-foreground text-xs md:text-sm">{feature}</span>
               </li>
             ))}
           </ul>
         </CardContent>
-        <CardFooter className="p-6 pt-0">
+        <CardFooter className="p-5 md:p-6 pt-0">
           {isCurrent ? (
             <Button
               size="lg"
-              className="w-full font-bold"
+              className="w-full font-bold text-xs md:text-sm"
               variant="secondary"
               disabled
             >
@@ -160,7 +160,7 @@ export default function PlanCard({
               onClick={handleSubscription}
               size="lg"
               className={cn(
-                "w-full font-bold",
+                "w-full font-bold text-xs md:text-sm",
                 plan.isHighlighted ? "bg-primary hover:bg-primary/90" : "bg-white/10 hover:bg-white/20 text-white"
               )}
               disabled={isFree || isProcessing}

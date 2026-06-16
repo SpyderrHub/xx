@@ -199,70 +199,70 @@ export default function CreditsPage() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2">
         <div className="space-y-1">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Resource Management</p>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Credits & Usage</h1>
-          <p className="text-muted-foreground text-sm max-w-md">
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">Credits & Usage</h1>
+          <p className="text-muted-foreground text-xs md:text-sm max-w-md">
             Monitor your QuantisAI Labs balance and top up whenever you need extra volume.
           </p>
         </div>
         <div className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-xl border-white/10 bg-white/5 h-12 px-6 font-bold" asChild>
+            <Button variant="outline" className="rounded-xl border-white/10 bg-white/5 h-10 md:h-12 px-4 md:px-6 font-bold text-xs md:text-sm" asChild>
                 <Link href="/dashboard/subscription">View Billing</Link>
             </Button>
-            <Button className="rounded-xl bg-primary hover:bg-primary/90 h-12 px-6 font-black shadow-lg shadow-primary/20 btn-glow" asChild>
+            <Button className="rounded-xl bg-primary hover:bg-primary/90 h-10 md:h-12 px-4 md:px-6 font-black shadow-lg shadow-primary/20 btn-glow text-xs md:text-sm" asChild>
                 <Link href="#topup-section">Instant Top-up</Link>
             </Button>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 bg-white/[0.02] border-white/5 rounded-[2.5rem] overflow-hidden relative group">
+        <Card className="lg:col-span-2 bg-white/[0.02] border-white/5 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
-          <CardHeader className="p-8 pb-4">
+          <CardHeader className="p-6 md:p-8 pb-4">
             <div className="flex items-center justify-between mb-4">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                    <Coins className="h-6 w-6 text-primary" />
+                <div className="h-10 md:h-12 w-10 md:w-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <Coins className="h-5 md:h-6 w-5 md:w-6 text-primary" />
                 </div>
-                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 uppercase font-black text-[10px] px-3 py-1">
+                <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 uppercase font-black text-[9px] md:text-[10px] px-2 md:px-3 py-1">
                     {planNames[plan] || 'User Plan'}
                 </Badge>
             </div>
-            <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">Current Character Balance</CardTitle>
+            <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">Current Character Balance</CardTitle>
           </CardHeader>
-          <CardContent className="p-8 pt-0 space-y-10">
+          <CardContent className="p-6 md:p-8 pt-0 space-y-8 md:space-y-10">
             <div className="flex flex-col sm:flex-row sm:items-end gap-2">
-                <span className="text-7xl font-black text-white tracking-tighter">
+                <span className="text-5xl md:text-7xl font-black text-white tracking-tighter">
                     {creditsRemaining.toLocaleString()}
                 </span>
-                <span className="text-xl font-bold text-muted-foreground mb-3">Available Characters</span>
+                <span className="text-lg md:text-xl font-bold text-muted-foreground mb-1 md:mb-3">Available Characters</span>
             </div>
 
             <div className="space-y-4">
-                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest">
+                <div className="flex items-center justify-between text-[10px] md:text-xs font-bold uppercase tracking-widest">
                     <span className="text-muted-foreground">Usage this cycle</span>
                     <span className="text-white">{usagePercentage.toFixed(1)}% Consumed</span>
                 </div>
                 <div className="relative">
-                    <Progress value={usagePercentage} className="h-3 rounded-full bg-white/5" />
+                    <Progress value={usagePercentage} className="h-2.5 md:h-3 rounded-full bg-white/5" />
                 </div>
-                <div className="flex justify-between text-[10px] font-mono text-muted-foreground uppercase">
+                <div className="flex justify-between text-[9px] md:text-[10px] font-mono text-muted-foreground uppercase">
                     <span>0 Chars</span>
                     <span>{limit.toLocaleString()} Limit</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 pt-4">
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4">
-                    <TrendingUp className="h-5 w-5 text-emerald-400" />
+                    <TrendingUp className="h-4 md:h-5 w-4 md:w-5 text-emerald-400" />
                     <div>
-                        <p className="text-[10px] text-muted-foreground uppercase font-black">Daily Avg.</p>
-                        <p className="text-sm font-bold text-white">~{(creditsUsed / 30).toFixed(0)} Chars</p>
+                        <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase font-black">Daily Avg.</p>
+                        <p className="text-xs md:text-sm font-bold text-white">~{(creditsUsed / 30).toFixed(0)} Chars</p>
                     </div>
                 </div>
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4">
-                    <Clock className="h-5 w-5 text-amber-400" />
+                    <Clock className="h-4 md:h-5 w-4 md:w-5 text-amber-400" />
                     <div>
-                        <p className="text-[10px] text-muted-foreground uppercase font-black">Renewal Date</p>
-                        <p className="text-sm font-bold text-white">
+                        <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase font-black">Renewal Date</p>
+                        <p className="text-xs md:text-sm font-bold text-white">
                             {userData?.currentPeriodEnd ? format(new Date(userData.currentPeriodEnd), 'MMM dd, yyyy') : 'N/A'}
                         </p>
                     </div>
@@ -276,7 +276,7 @@ export default function CreditsPage() {
                 <CardHeader className="p-6 border-b border-white/5 bg-white/[0.01]">
                     <div className="flex items-center gap-2 mb-1">
                         <ShieldCheck className="h-4 w-4 text-primary" />
-                        <CardTitle className="text-sm font-bold">Plan Benefits</CardTitle>
+                        <CardTitle className="text-xs md:text-sm font-bold">Plan Benefits</CardTitle>
                     </div>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -287,7 +287,7 @@ export default function CreditsPage() {
                             { label: 'Parallel Synthesis', value: plan === 'free' ? 'None' : 'Unlimited' },
                             { label: 'Custom Branding', value: plan === 'free' ? 'No' : 'Yes' },
                         ].map((benefit, i) => (
-                            <li key={i} className="flex items-center justify-between text-xs">
+                            <li key={i} className="flex items-center justify-between text-[11px] md:text-xs">
                                 <span className="text-muted-foreground font-medium">{benefit.label}</span>
                                 <span className="text-white font-bold">{benefit.value}</span>
                             </li>
@@ -301,13 +301,13 @@ export default function CreditsPage() {
       <section id="topup-section" className="space-y-8 pt-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-              <ShoppingCart className="h-6 w-6 text-primary" />
-              Instant Character Top-ups
+            <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
+              <ShoppingCart className="h-5 md:h-6 w-5 md:w-6 text-primary" />
+              Instant Top-ups
             </h2>
-            <p className="text-muted-foreground text-sm mt-1">Need more volume? Add credits to your account instantly.</p>
+            <p className="text-muted-foreground text-xs md:text-sm mt-1">Need more volume? Add credits to your account instantly.</p>
           </div>
-          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest">
+          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-3 md:px-4 py-1.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest">
             Credits Never Expire
           </Badge>
         </div>
@@ -316,7 +316,7 @@ export default function CreditsPage() {
           {topupPlans.map((pack) => (
             <motion.div key={pack.id} whileHover={{ y: -5 }} className="relative">
               {pack.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-primary text-white text-[10px] font-black uppercase px-4 py-1 rounded-full shadow-lg shadow-primary/20 ring-4 ring-[#0B0B0F]">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-primary text-white text-[9px] md:text-[10px] font-black uppercase px-3 md:px-4 py-1 rounded-full shadow-lg shadow-primary/20 ring-4 ring-[#0B0B0F]">
                   Most Popular
                 </div>
               )}
@@ -324,22 +324,22 @@ export default function CreditsPage() {
                 "bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden transition-all",
                 pack.popular ? "border-primary/40 bg-primary/[0.03]" : "hover:border-white/20"
               )}>
-                <CardContent className="p-8 text-center space-y-6">
+                <CardContent className="p-6 md:p-8 text-center space-y-6">
                   <div className="space-y-1">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">{pack.name}</h3>
+                    <h3 className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">{pack.name}</h3>
                     <div className="flex items-center justify-center gap-1.5 text-white">
                       <Plus className="h-4 w-4 text-primary" />
-                      <span className="text-4xl font-black">{pack.characters.toLocaleString()}</span>
+                      <span className="text-3xl md:text-4xl font-black">{pack.characters.toLocaleString()}</span>
                     </div>
-                    <p className="text-[10px] text-primary/60 font-bold uppercase tracking-widest">Characters</p>
+                    <p className="text-[9px] md:text-[10px] text-primary/60 font-bold uppercase tracking-widest">Characters</p>
                   </div>
 
                   <div className="py-4 border-y border-white/5">
-                    <p className="text-sm text-muted-foreground">{pack.desc}</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">{pack.desc}</p>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="text-3xl font-black text-white">₹{pack.price}</div>
+                    <div className="text-2xl md:text-3xl font-black text-white">₹{pack.price}</div>
                     
                     {pack.buttonId ? (
                       <div className="min-h-[48px] flex items-center justify-center">
@@ -350,7 +350,7 @@ export default function CreditsPage() {
                         onClick={() => handleTopup(pack)}
                         disabled={!!isProcessing}
                         className={cn(
-                          "w-full h-12 rounded-xl font-black text-sm transition-all",
+                          "w-full h-11 md:h-12 rounded-xl font-black text-xs md:text-sm transition-all",
                           pack.popular ? "bg-primary hover:bg-primary/90 btn-glow" : "bg-white text-black hover:bg-white/90"
                         )}
                       >
@@ -367,11 +367,11 @@ export default function CreditsPage() {
 
       <section className="space-y-6 pt-10">
         <div className="flex items-center gap-2 px-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-bold text-white">Generation Breakdown</h2>
+            <BarChart3 className="h-4 md:h-5 w-4 md:w-5 text-primary" />
+            <h2 className="text-lg md:text-xl font-bold text-white">Generation Breakdown</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
                 { label: 'Voice Synthesis', value: '72%', icon: MessageSquare, color: 'text-purple-400' },
                 { label: 'Voice Designer', value: '18%', icon: Sparkles, color: 'text-amber-400' },
@@ -379,14 +379,14 @@ export default function CreditsPage() {
                 { label: 'Other Studio Tools', value: '4%', icon: Zap, color: 'text-blue-400' },
             ].map((stat, i) => (
                 <Card key={i} className="bg-white/[0.02] border-white/5 hover:bg-white/[0.04] transition-colors rounded-2xl group">
-                    <CardContent className="p-5 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-xl bg-white/5 flex items-center justify-center">
-                                <stat.icon className={cn("h-4 w-4", stat.color)} />
+                    <CardContent className="p-4 md:p-5 flex items-center justify-between">
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <div className="h-8 md:h-9 w-8 md:w-9 rounded-lg md:rounded-xl bg-white/5 flex items-center justify-center">
+                                <stat.icon className={cn("h-3.5 md:h-4 w-3.5 md:w-4", stat.color)} />
                             </div>
                             <div>
-                                <p className="text-[10px] text-muted-foreground uppercase font-black">{stat.label}</p>
-                                <p className="text-sm font-bold text-white">{stat.value}</p>
+                                <p className="text-[8px] md:text-[10px] text-muted-foreground uppercase font-black">{stat.label}</p>
+                                <p className="text-xs md:text-sm font-bold text-white">{stat.value}</p>
                             </div>
                         </div>
                     </CardContent>
