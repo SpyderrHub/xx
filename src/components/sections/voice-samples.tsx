@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -73,12 +72,12 @@ const VoiceCard = ({ voice }: { voice: any }) => {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-black text-white text-lg truncate">{voice.voiceName}</h4>
+          <h4 className="font-black text-white text-base sm:text-lg truncate">{voice.voiceName}</h4>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            <Badge variant="outline" className="bg-white/5 border-none text-[9px] uppercase font-bold text-muted-foreground px-2">
+            <Badge variant="outline" className="bg-white/5 border-none text-[8px] sm:text-[9px] uppercase font-bold text-muted-foreground px-2">
               {languages[0] || 'Global'}
             </Badge>
-            <Badge variant="outline" className="bg-primary/10 border-none text-[9px] uppercase font-bold text-primary px-2">
+            <Badge variant="outline" className="bg-primary/10 border-none text-[8px] sm:text-[9px] uppercase font-bold text-primary px-2">
               {voice.gender}
             </Badge>
           </div>
@@ -110,7 +109,7 @@ const VoiceCard = ({ voice }: { voice: any }) => {
         </div>
       </div>
       
-      <p className="mt-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] italic px-2 truncate">
+      <p className="mt-4 text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] italic px-2 truncate">
         {voice.style || 'Premium Voice'} &bull; 48kHz Stereo
       </p>
     </motion.div>
@@ -135,10 +134,10 @@ export default function VoiceSamplesSection() {
     <section id="voice-samples" className="py-24 bg-black/20">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl mb-6">
+          <h2 className="text-xl font-bold tracking-tight text-white sm:text-5xl mb-6">
             Hear The Difference
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             Studio-quality neural voices that capture the subtle nuances, emotions, and breaths of human speech.
           </p>
         </div>
@@ -168,7 +167,7 @@ export default function VoiceSamplesSection() {
         ) : (
           <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
             <Volume2 className="h-12 w-12 text-white/10 mx-auto mb-4" />
-            <p className="text-muted-foreground italic">No speakers found in the studio library.</p>
+            <p className="text-xs sm:text-sm text-muted-foreground italic">No speakers found in the studio library.</p>
           </div>
         )}
       </div>

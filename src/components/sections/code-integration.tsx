@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -62,22 +61,22 @@ export default function CodeIntegrationSection() {
             <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
               <Terminal className="h-6 w-6" />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl leading-tight">
+            <h2 className="text-2xl font-bold tracking-tight text-white sm:text-5xl leading-tight">
               Built For <br />
               <span className="text-primary">Batch Automation.</span>
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed">
               Don't manually click "Generate" 1,000 times. Our API is built for high-throughput batch processing with ~2s latency globally.
             </p>
             <ul className="space-y-4">
               {['RESTful Architecture', 'Pay-as-you-go Billing', 'Infinite Parallelism'].map((item) => (
-                <li key={item} className="flex items-center gap-3 text-sm font-bold text-white/80">
+                <li key={item} className="flex items-center gap-3 text-xs sm:text-sm font-bold text-white/80">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                   {item}
                 </li>
               ))}
             </ul>
-            <Button variant="link" className="text-primary font-black uppercase tracking-widest p-0">
+            <Button variant="link" className="text-primary font-black uppercase tracking-widest p-0 text-[10px] sm:text-sm">
               View API Documentation →
             </Button>
           </div>
@@ -89,18 +88,18 @@ export default function CodeIntegrationSection() {
                 <div className="h-3 w-3 rounded-full bg-yellow-500/50" />
                 <div className="h-3 w-3 rounded-full bg-green-500/50" />
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono">endpoint: /v1/tts</div>
+              <div className="text-[8px] sm:text-[10px] text-muted-foreground font-mono">endpoint: /v1/tts</div>
             </div>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="px-6 pt-4 flex items-center justify-between">
                 <TabsList className="bg-white/5 border-none p-1 h-auto rounded-xl">
-                  <TabsTrigger value="javascript" className="text-[10px] uppercase font-bold rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-white">JavaScript</TabsTrigger>
-                  <TabsTrigger value="python" className="text-[10px] uppercase font-bold rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-white">Python</TabsTrigger>
-                  <TabsTrigger value="curl" className="text-[10px] uppercase font-bold rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-white">cURL</TabsTrigger>
+                  <TabsTrigger value="javascript" className="text-[8px] sm:text-[10px] uppercase font-bold rounded-lg px-3 sm:px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-white">JavaScript</TabsTrigger>
+                  <TabsTrigger value="python" className="text-[8px] sm:text-[10px] uppercase font-bold rounded-lg px-3 sm:px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-white">Python</TabsTrigger>
+                  <TabsTrigger value="curl" className="text-[8px] sm:text-[10px] uppercase font-bold rounded-lg px-3 sm:px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-white">cURL</TabsTrigger>
                 </TabsList>
                 <Button variant="ghost" size="icon" onClick={handleCopy} className="h-8 w-8 hover:bg-white/5 text-muted-foreground">
-                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                  {copied ? <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
                 </Button>
               </div>
 
@@ -113,7 +112,7 @@ export default function CodeIntegrationSection() {
                     exit={{ opacity: 0, y: -10 }}
                     className="relative"
                   >
-                    <pre className="font-mono text-sm leading-relaxed text-blue-400 overflow-x-auto scrollbar-hide">
+                    <pre className="font-mono text-xs sm:text-sm leading-relaxed text-blue-400 overflow-x-auto scrollbar-hide">
                       <code>{SNIPPETS[activeTab as keyof typeof SNIPPETS]}</code>
                     </pre>
                   </motion.div>

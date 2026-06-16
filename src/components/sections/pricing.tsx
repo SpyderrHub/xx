@@ -55,10 +55,10 @@ const PricingSection = () => {
     <section id="pricing" className="py-24 bg-black/20">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl mb-6">
+          <h2 className="text-xl font-bold tracking-tight text-white sm:text-5xl mb-6">
             Predictable Pricing
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-sm sm:text-lg text-muted-foreground">
             No enterprise taxes. Just pure synthesis at scale.
           </p>
         </div>
@@ -74,22 +74,22 @@ const PricingSection = () => {
             >
               <CardHeader className="p-8">
                 {plan.highlight && (
-                  <div className="bg-primary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4">
+                  <div className="bg-primary text-white text-[8px] sm:text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4">
                     Best Value
                   </div>
                 )}
-                <CardTitle className="text-2xl font-black text-white">{plan.name}</CardTitle>
-                <CardDescription className="text-muted-foreground text-xs pt-2">{plan.description}</CardDescription>
+                <CardTitle className="text-xl sm:text-2xl font-black text-white">{plan.name}</CardTitle>
+                <CardDescription className="text-muted-foreground text-[10px] sm:text-xs pt-2">{plan.description}</CardDescription>
                 <div className="flex items-baseline pt-6">
-                  <span className="text-4xl font-black text-white">{plan.price}</span>
-                  <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
+                  <span className="text-3xl sm:text-4xl font-black text-white">{plan.price}</span>
+                  <span className="text-muted-foreground text-xs ml-1">{plan.period}</span>
                 </div>
               </CardHeader>
               <CardContent className="flex-1 p-8 pt-0 space-y-4">
                 {plan.features.map((feature) => (
                   <div key={feature} className="flex items-center gap-3">
-                    <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-sm text-white/70">{feature}</span>
+                    <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
+                    <span className="text-xs sm:text-sm text-white/70">{feature}</span>
                   </div>
                 ))}
               </CardContent>
@@ -99,7 +99,7 @@ const PricingSection = () => {
                   size="lg"
                   variant={plan.highlight ? 'default' : 'outline'}
                   className={cn(
-                    "w-full h-12 rounded-xl font-black text-sm",
+                    "w-full h-11 sm:h-12 rounded-xl font-black text-xs sm:text-sm",
                     plan.highlight ? "bg-primary btn-glow" : "border-white/10 bg-white/5 hover:bg-white/10"
                   )}
                 >

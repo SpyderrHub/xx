@@ -29,10 +29,10 @@ const FeaturesSection = () => {
     <section id="features" className="py-24">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
+          <h2 className="text-xl font-bold tracking-tight text-white sm:text-5xl">
             Everything You Need
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-sm sm:text-lg text-muted-foreground">
             A developer-first platform designed to replace legacy TTS providers with speed and efficiency.
           </p>
         </div>
@@ -40,11 +40,11 @@ const FeaturesSection = () => {
           {features.map((feature) => (
             <Card key={feature.title} className="glass-card border-white/5 bg-white/[0.02] hover:bg-white/5 transition-all duration-300 rounded-[2rem]">
               <CardHeader className="p-8">
-                <div className="mb-6 h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <div className="mb-6 h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
                   {feature.icon}
                 </div>
-                <CardTitle className="text-xl font-black text-white">{feature.title}</CardTitle>
-                <CardDescription className="pt-4 text-sm text-muted-foreground leading-relaxed">
+                <CardTitle className="text-lg sm:text-xl font-black text-white">{feature.title}</CardTitle>
+                <CardDescription className="pt-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   {feature.description}
                 </CardDescription>
               </CardHeader>

@@ -75,10 +75,10 @@ export default function TtsDemoSection() {
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h2 className="text-xl font-bold tracking-tight text-white sm:text-4xl">
               QuantisAI Labs Voice Studio
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-sm sm:text-lg text-muted-foreground">
               Enter your text, select a professional speaker, and listen to the magic.
             </p>
           </div>
@@ -88,9 +88,9 @@ export default function TtsDemoSection() {
               {/* Top: Text Input */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] block">Input Text</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] block">Input Text</label>
                   <span className={cn(
-                    "text-xs font-mono transition-colors",
+                    "text-[10px] font-mono transition-colors",
                     text.length >= MAX_CHARS ? "text-red-500" : "text-muted-foreground"
                   )}>
                     {text.length} / {MAX_CHARS}
@@ -100,14 +100,14 @@ export default function TtsDemoSection() {
                   value={text}
                   onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
                   placeholder="What would you like QuantisAI Labs to say?"
-                  className="h-44 resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-lg leading-relaxed shadow-inner"
+                  className="h-44 resize-none bg-white/5 border-white/10 rounded-2xl focus:ring-primary/20 text-base sm:text-lg leading-relaxed shadow-inner"
                   maxLength={MAX_CHARS}
                 />
               </div>
 
               {/* Middle: Speaker Selection Grid */}
               <div className="space-y-4">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] block">Select Speaker</label>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] block">Select Speaker</label>
                 
                 {voicesLoading ? (
                   <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -157,7 +157,7 @@ export default function TtsDemoSection() {
                             </h4>
                           </div>
                           {selectedVoiceId === voice.id && (
-                            <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shrink-0" />
+                            <div className="h-1 w-1 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shrink-0" />
                           )}
                         </button>
                       );
@@ -173,9 +173,9 @@ export default function TtsDemoSection() {
                     size="lg" 
                     onClick={handleGenerate}
                     disabled={isGenerating || !text || !selectedVoiceId || text.length > MAX_CHARS}
-                    className="h-14 sm:h-16 px-8 sm:px-10 rounded-2xl bg-primary hover:bg-primary/90 font-bold text-lg sm:text-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                    className="h-12 sm:h-16 px-8 sm:px-10 rounded-2xl bg-primary hover:bg-primary/90 font-bold text-base sm:text-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
-                    {isGenerating ? <Loader2 className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : <Zap className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />}
+                    {isGenerating ? <Loader2 className="mr-2 sm:mr-3 h-4 w-4 sm:h-6 sm:w-6 animate-spin" /> : <Zap className="mr-2 sm:mr-3 h-4 w-4 sm:h-6 sm:w-6" />}
                     {isGenerating ? 'Generating...' : 'Generate Audio'}
                   </Button>
 
@@ -190,18 +190,18 @@ export default function TtsDemoSection() {
                           variant="secondary" 
                           size="icon" 
                           onClick={handleTogglePlay}
-                          className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-white text-black hover:bg-gray-100 shadow-xl transition-all hover:scale-105"
+                          className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-white text-black hover:bg-gray-100 shadow-xl transition-all hover:scale-105"
                         >
-                          {isPlaying ? <Pause className="h-6 w-6 sm:h-8 sm:w-8" /> : <Play className="h-6 w-6 sm:h-8 sm:w-8 ml-1" />}
+                          {isPlaying ? <Pause className="h-5 w-5 sm:h-8 sm:w-8" /> : <Play className="h-5 w-5 sm:h-8 sm:w-8 ml-1" />}
                         </Button>
                         <Button 
                           variant="outline" 
                           size="icon" 
                           asChild
-                          className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl border-white/10 hover:bg-white/5 transition-all hover:scale-105"
+                          className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl border-white/10 hover:bg-white/5 transition-all hover:scale-105"
                         >
                           <a href={audioUrl} download="quantisai-labs-voice.wav">
-                            <Download className="h-6 w-6 sm:h-8 sm:w-8" />
+                            <Download className="h-5 w-5 sm:h-8 sm:w-8" />
                           </a>
                         </Button>
                       </motion.div>
@@ -210,7 +210,7 @@ export default function TtsDemoSection() {
                 </div>
                 
                 {audioUrl && (
-                  <p className="text-sm text-primary font-medium animate-pulse">
+                  <p className="text-xs sm:text-sm text-primary font-medium animate-pulse">
                     ✨ Your QuantisAI Labs voice is ready to play!
                   </p>
                 )}

@@ -85,7 +85,7 @@ const HeroSection = () => {
               <span>Studio Quality AI Synthesis</span>
             </div>
             
-            <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-8xl leading-[1.05] mb-8">
+            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-6xl lg:text-8xl leading-[1.05] mb-8">
               Stop Paying <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-amber-400">
                 Enterprise Prices.
@@ -94,18 +94,18 @@ const HeroSection = () => {
               For Startup Audio.
             </h1>
             
-            <p className="max-w-xl text-lg text-muted-foreground sm:text-xl leading-relaxed mb-12">
+            <p className="max-w-xl text-sm text-muted-foreground sm:text-xl leading-relaxed mb-12">
               QuantisAI Labs provides the most realistic AI text-to-speech platform designed for batch audio, ultra-low latency, and transparent pricing. 
             </p>
             
             <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
               <Link href="/sign-up" className="w-full sm:w-auto">
-                <Button size="lg" className="h-16 w-full rounded-2xl px-10 text-lg font-black bg-primary btn-glow">
+                <Button size="lg" className="h-14 sm:h-16 w-full rounded-2xl px-10 text-base sm:text-lg font-black bg-primary btn-glow">
                   Get Started Free
                 </Button>
               </Link>
               <Link href="/#voice-samples" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="h-16 w-full rounded-2xl px-10 text-lg font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10">
+                <Button size="lg" variant="outline" className="h-14 sm:h-16 w-full rounded-2xl px-10 text-base sm:text-lg font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10">
                     <Play className="mr-2 h-5 w-5 fill-current" />
                     Listen Demo
                 </Button>
