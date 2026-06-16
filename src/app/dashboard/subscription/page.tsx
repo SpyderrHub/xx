@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import CurrentPlanCard from '@/components/subscription/current-plan-card';
 import PlanCard from '@/components/subscription/plan-card';
 import UsageStats from '@/components/subscription/usage-stats';
 import { Switch } from '@/components/ui/switch';
@@ -173,12 +172,6 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
-
-      {isUserLoading ? (
-        <Skeleton className="h-48 w-full rounded-2xl" />
-      ) : (
-        <CurrentPlanCard userData={userData} />
-      )}
       
       {isUserLoading ? (
           <Skeleton className="h-48 w-full rounded-2xl" />
