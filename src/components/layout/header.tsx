@@ -41,7 +41,7 @@ export default function Header() {
       <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
         <div className="flex items-center gap-12">
           <Link href="/" className="flex items-center gap-2 group">
-            <Logo className="h-14 transition-transform group-hover:scale-105" />
+            <Logo className="h-10 md:h-14 transition-transform group-hover:scale-105" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -65,16 +65,16 @@ export default function Header() {
             <>
               <Link 
                 href="/login" 
-                className="hidden sm:block text-sm font-bold text-white/60 hover:text-white transition-colors"
+                className="hidden sm:block text-xs md:text-sm font-bold text-white/60 hover:text-white transition-colors"
               >
                 Sign In
               </Link>
-              <Button asChild className="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 font-black text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.03] active:scale-95 btn-glow">
+              <Button asChild className="h-9 md:h-11 px-4 md:px-6 rounded-lg md:rounded-xl bg-primary hover:bg-primary/90 font-black text-[10px] md:text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.03] active:scale-95 btn-glow">
                 <Link href="/sign-up">Get Started Free</Link>
               </Button>
             </>
           ) : (
-            <Button asChild variant="outline" className="h-11 px-6 rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-sm shadow-inner transition-all hover:scale-[1.02]">
+            <Button asChild variant="outline" className="h-9 md:h-11 px-4 md:px-6 rounded-lg md:rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-[10px] md:text-sm shadow-inner transition-all hover:scale-[1.02]">
               <Link href="/dashboard">Dashboard</Link>
             </Button>
           )}
@@ -84,7 +84,7 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle Menu"
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileMenuOpen ? <X className="h-5 w-5 md:h-6 md:w-6" /> : <Menu className="h-5 w-5 md:h-6 md:w-6" />}
           </button>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function Header() {
                   target={link.name === 'Docs' ? "_blank" : undefined}
                   rel={link.name === 'Docs' ? "noopener noreferrer" : undefined}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between text-lg font-bold text-white/80 hover:text-white transition-colors py-2"
+                  className="flex items-center justify-between text-sm md:text-lg font-bold text-white/80 hover:text-white transition-colors py-2"
                 >
                   {link.name}
                   <ChevronRight className="h-4 w-4 text-primary" />
@@ -119,16 +119,16 @@ export default function Header() {
                     <Link 
                       href="/login" 
                       onClick={() => setMobileMenuOpen(false)}
-                      className="text-center font-bold text-white/60 hover:text-white py-2"
+                      className="text-center font-bold text-white/60 hover:text-white py-2 text-xs md:text-sm"
                     >
                       Sign In
                     </Link>
-                    <Button asChild className="w-full h-14 bg-primary font-black rounded-2xl text-lg shadow-xl shadow-primary/20">
+                    <Button asChild className="w-full h-12 md:h-14 bg-primary font-black rounded-xl md:rounded-2xl text-base md:text-lg shadow-xl shadow-primary/20">
                       <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>Get Started Free</Link>
                     </Button>
                   </>
                 ) : (
-                  <Button asChild variant="outline" className="w-full h-14 rounded-2xl border-white/10 text-lg">
+                  <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl border-white/10 text-base md:text-lg">
                     <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</Link>
                   </Button>
                 )}
