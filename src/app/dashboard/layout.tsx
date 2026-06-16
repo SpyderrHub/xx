@@ -126,10 +126,6 @@ const DashboardHeader = ({ title }: { title: string }) => {
           </div>
         )}
 
-        <Button asChild className="hidden bg-gradient-to-r from-primary to-orange-600 font-bold text-white hover:opacity-90 sm:block rounded-xl shadow-lg shadow-primary/20">
-          <Link href="/dashboard/subscription">Upgrade</Link>
-        </Button>
-
         {isUserLoading ? (
           <Skeleton className="h-8 w-8 rounded-full" />
         ) : user ? (
