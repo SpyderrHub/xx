@@ -66,7 +66,10 @@ export default function ForgotPasswordPage() {
 
       setEmail(values.email);
       setStep('otp');
-      toast({ title: "Verification Sent", description: `OTP sent to ${values.email}. ${data.debugCode ? `(Dev: ${data.debugCode})` : ''}` });
+      toast({ 
+        title: "Verification Sent", 
+        description: `A security code has been sent to ${values.email}.` 
+      });
     } catch (error: any) {
       toast({ title: "Request Failed", description: error.message, variant: "destructive" });
     } finally {
@@ -109,7 +112,10 @@ export default function ForgotPasswordPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      toast({ title: "Code Resent", description: `New OTP sent to your email. ${data.debugCode ? `(Dev: ${data.debugCode})` : ''}` });
+      toast({ 
+        title: "Code Resent", 
+        description: "A new security code has been sent to your email." 
+      });
     } catch (error: any) {
       toast({ title: "Resend Failed", description: error.message, variant: "destructive" });
     } finally {
