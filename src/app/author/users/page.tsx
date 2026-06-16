@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -11,7 +10,9 @@ import {
   Calendar,
   AlertTriangle,
   Info,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { 
   Table, 
@@ -24,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { format } from 'date-fns';
@@ -38,6 +40,8 @@ import {
 export default function ManageUsersPage() {
   const { firestore } = useFirebase();
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Fetch all users
   const usersQuery = useMemoFirebase(() => {
@@ -59,11 +63,26 @@ export default function ManageUsersPage() {
     return counts;
   }, [users]);
 
-  const filteredUsers = users?.filter(user => 
-    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.lastIp?.includes(searchQuery)
-  ) || [];
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    return users.filter(user => 
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.lastIp?.includes(searchQuery)
+    );
+  }, [users, searchQuery]);
+
+  // Reset pagination when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredUsers.slice(start, start + itemsPerPage);
+  }, [filteredUsers, currentPage]);
 
   const getPlanColor = (plan: string) => {
     switch (plan?.toLowerCase()) {
@@ -151,7 +170,7 @@ export default function ManageUsersPage() {
                   <Skeleton key={i} className="h-14 w-full rounded-xl" />
                 ))}
               </div>
-            ) : filteredUsers.length > 0 ? (
+            ) : paginatedUsers.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader className="bg-white/[0.02]">
@@ -164,7 +183,7 @@ export default function ManageUsersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map((user) => {
+                    {paginatedUsers.map((user) => {
                       const ipCount = user.lastIp ? (ipConflictMap.get(user.lastIp) || 0) : 0;
                       const hasConflict = ipCount > 2;
 
@@ -229,6 +248,35 @@ export default function ManageUsersPage() {
               </div>
             )}
           </TooltipProvider>
+
+          {/* Pagination Footer */}
+          {totalPages > 1 && (
+            <div className="p-8 border-t border-white/5 flex items-center justify-center gap-4 bg-white/[0.01]">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-xl border-white/10 bg-white/5 hover:bg-white/10"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              <div className="px-5 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                Page <span className="text-primary">{currentPage}</span> of {totalPages}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-xl border-white/10 bg-white/5 hover:bg-white/10"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
