@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -81,9 +80,9 @@ export function LoginForm() {
       className="absolute inset-y-0 right-0 flex items-center pr-3"
     >
       {visible ? (
-        <EyeOff className="h-5 w-5 text-gray-400" />
+        <EyeOff className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
       ) : (
-        <Eye className="h-5 w-5 text-gray-400" />
+        <Eye className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
       )}
     </button>
   );
@@ -95,35 +94,35 @@ export function LoginForm() {
       transition={{ duration: 0.5, delay: 0.2 }}
       className="w-full"
     >
-      <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 md:p-12 shadow-2xl backdrop-blur-2xl relative overflow-hidden group">
+      <div className="rounded-[2rem] md:rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-6 md:p-12 shadow-2xl backdrop-blur-2xl relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
         
-        <div className="mb-10">
-          <h2 className="text-3xl font-black tracking-tight text-white mb-2">
+        <div className="mb-8 md:mb-10">
+          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white mb-2">
             Welcome back
           </h2>
-          <p className="text-sm text-muted-foreground font-medium">
+          <p className="text-xs md:text-sm text-muted-foreground font-medium">
             Continue your journey with QuantisAI Labs Studio.
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 md:space-y-6 relative z-10">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</FormLabel>
+                  <FormLabel className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Email Address</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="you@example.com"
                       {...field}
-                      className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                      className="h-12 md:h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-xl md:rounded-2xl focus:ring-primary/20 transition-all font-medium text-sm md:text-base"
                     />
                   </FormControl>
-                  <FormMessage className="text-[10px] font-bold" />
+                  <FormMessage className="text-[9px] md:text-[10px] font-bold" />
                 </FormItem>
               )}
             />
@@ -132,14 +131,14 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
+                  <FormLabel className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={passwordVisible ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...field}
-                        className="h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-2xl focus:ring-primary/20 transition-all font-medium"
+                        className="h-12 md:h-14 border-white/5 bg-white/5 text-white placeholder:text-gray-700 rounded-xl md:rounded-2xl focus:ring-primary/20 transition-all font-medium text-sm md:text-base"
                       />
                       <PasswordVisibilityToggle
                         visible={passwordVisible}
@@ -147,12 +146,12 @@ export function LoginForm() {
                       />
                     </div>
                   </FormControl>
-                  <FormMessage className="text-[10px] font-bold" />
+                  <FormMessage className="text-[9px] md:text-[10px] font-bold" />
                 </FormItem>
               )}
             />
 
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-[10px] md:text-xs">
               <FormField
                 control={form.control}
                 name="rememberMe"
@@ -163,12 +162,12 @@ export function LoginForm() {
                         id="remember-me"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="h-5 w-5 rounded-lg border-white/10 bg-white/5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        className="h-4 w-4 md:h-5 md:w-5 rounded-md md:rounded-lg border-white/10 bg-white/5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                     </FormControl>
                     <Label
                       htmlFor="remember-me"
-                      className="cursor-pointer font-bold text-muted-foreground hover:text-white transition-colors"
+                      className="cursor-pointer font-bold text-muted-foreground hover:text-white transition-colors text-[10px] md:text-xs"
                     >
                       Remember me
                     </Label>
@@ -186,11 +185,11 @@ export function LoginForm() {
             <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
               <Button
                 type="submit"
-                className="h-16 w-full bg-primary text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-2xl btn-glow"
+                className="h-14 md:h-16 w-full bg-primary text-base md:text-lg font-black hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 rounded-xl md:rounded-2xl btn-glow"
                 disabled={isEmailLoading}
               >
                 {isEmailLoading ? (
-                  <Loader2 className="animate-spin mr-2" />
+                  <Loader2 className="animate-spin mr-2 h-4 w-4 md:h-5 md:w-5" />
                 ) : null}
                 {isEmailLoading ? 'Processing...' : 'Sign In'}
               </Button>
@@ -199,7 +198,7 @@ export function LoginForm() {
         </Form>
       </div>
 
-      <p className="mt-8 text-center text-sm font-medium text-muted-foreground">
+      <p className="mt-8 text-center text-xs md:text-sm font-medium text-muted-foreground">
         New to QuantisAI Labs?{' '}
         <Link
           href="/sign-up"
