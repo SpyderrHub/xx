@@ -38,10 +38,10 @@ export default function Header() {
           : "py-6 bg-transparent border-b border-transparent"
       )}
     >
-      <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
-        <div className="flex items-center gap-12">
+      <div className="container mx-auto px-4 md:px-6 max-w-7xl flex items-center justify-between">
+        <div className="flex items-center gap-6 md:gap-12">
           <Link href="/" className="flex items-center gap-2 group">
-            <Logo className="h-10 md:h-14 transition-transform group-hover:scale-105" />
+            <Logo className="h-8 md:h-14 transition-transform group-hover:scale-105" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -60,7 +60,7 @@ export default function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {!user ? (
             <>
               <Link 
@@ -69,18 +69,18 @@ export default function Header() {
               >
                 Sign In
               </Link>
-              <Button asChild className="h-9 md:h-11 px-4 md:px-6 rounded-lg md:rounded-xl bg-primary hover:bg-primary/90 font-black text-[10px] md:text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.03] active:scale-95 btn-glow">
-                <Link href="/sign-up">Get Started Free</Link>
+              <Button asChild className="h-8 md:h-11 px-3 md:px-6 rounded-lg md:rounded-xl bg-primary hover:bg-primary/90 font-black text-[9px] md:text-sm shadow-lg shadow-primary/20 transition-all hover:scale-[1.03] active:scale-95 btn-glow">
+                <Link href="/sign-up">Get Started</Link>
               </Button>
             </>
           ) : (
-            <Button asChild variant="outline" className="h-9 md:h-11 px-4 md:px-6 rounded-lg md:rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-[10px] md:text-sm shadow-inner transition-all hover:scale-[1.02]">
+            <Button asChild variant="outline" className="h-8 md:h-11 px-3 md:px-6 rounded-lg md:rounded-xl border-white/10 bg-white/5 hover:bg-white/10 font-bold text-[9px] md:text-sm shadow-inner transition-all hover:scale-[1.02]">
               <Link href="/dashboard">Dashboard</Link>
             </Button>
           )}
 
           <button 
-            className="md:hidden p-2 text-white/60 hover:text-white transition-colors"
+            className="md:hidden p-1.5 text-white/60 hover:text-white transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle Menu"
           >
