@@ -71,17 +71,9 @@ const Footer = () => {
         </div>
         
         <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center md:text-left">
             © {new Date().getFullYear()} QuantisAI Labs. All rights reserved.
           </p>
-          <div className="flex gap-8 text-xs text-muted-foreground font-bold uppercase tracking-widest">
-             <Link href="/privacy" className="hover:text-white">Privacy</Link>
-             <Link href="/gdpr" className="hover:text-white">GDPR</Link>
-             <Link href="/ccpa" className="hover:text-white">CCPA</Link>
-             <Link href="/terms" className="hover:text-white">Terms</Link>
-             <Link href="/affiliate-terms" className="hover:text-white">Affiliate</Link>
-             <Link href="/refund-policy" className="hover:text-white">Refunds</Link>
-          </div>
         </div>
       </div>
     </footer>
