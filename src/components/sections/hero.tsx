@@ -7,15 +7,27 @@ import Link from 'next/link';
 
 const ComparisonCard = () => (
   <motion.div 
-    initial={{ rotateY: 10, rotateX: 5 }}
-    animate={{ rotateY: 0, rotateX: 0 }}
-    transition={{ duration: 1.5, ease: "easeOut" }}
-    className="glass-card rounded-[2.5rem] p-8 space-y-6 relative overflow-hidden group shadow-3d border-white/5"
+    initial={{ rotateY: 15, rotateX: 10, y: 0 }}
+    animate={{ 
+      rotateY: [15, 5, 15], 
+      rotateX: [10, 0, 10],
+      y: [0, -20, 0] 
+    }}
+    transition={{ 
+      duration: 6, 
+      repeat: Infinity, 
+      ease: "easeInOut" 
+    }}
+    className="glass-card rounded-[2.5rem] p-8 space-y-6 relative overflow-hidden group shadow-3d border-white/5 backdrop-blur-3xl"
   >
     <div className="absolute top-0 right-0 p-4">
-      <div className="bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-primary/30">
+      <motion.div 
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-primary/30"
+      >
         Best Value
-      </div>
+      </motion.div>
     </div>
     
     <div>
@@ -41,13 +53,13 @@ const ComparisonCard = () => (
       </div>
 
       <motion.div 
-        whileHover={{ scale: 1.02 }}
-        className="flex items-center justify-between p-6 rounded-3xl bg-primary/10 border-2 border-primary/40 shadow-[0_20px_40px_rgba(255,102,0,0.15)] relative group"
+        whileHover={{ scale: 1.05, rotateY: -5 }}
+        className="flex items-center justify-between p-6 rounded-3xl bg-primary/10 border-2 border-primary/40 shadow-[0_20px_60px_rgba(255,102,0,0.2)] relative group cursor-pointer"
       >
         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
         <div className="flex items-center gap-3 relative z-10">
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30">
-            <Zap className="h-5 w-5 fill-current" />
+            <Zap className="h-5 w-5 fill-current animate-pulse" />
           </div>
           <div>
             <span className="text-base font-black text-white">QuantisAI Labs</span>
@@ -78,16 +90,16 @@ const HeroSection = () => {
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
             className="flex flex-col items-start"
           >
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-8 shadow-3d"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-8 shadow-3d backdrop-blur-md"
             >
               <Sparkles className="h-3.5 w-3.5 fill-current animate-pulse" />
               <span>Studio Quality AI Synthesis</span>
@@ -95,9 +107,13 @@ const HeroSection = () => {
             
             <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-white sm:text-6xl lg:text-8xl lg:leading-[1.1] mb-8">
               Stop Paying <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-amber-400">
+              <motion.span 
+                animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                transition={{ duration: 5, repeat: Infinity }}
+                className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-amber-400 bg-[length:200%_200%]"
+              >
                 Enterprise Prices.
-              </span>
+              </motion.span>
               <br />
               For Startup Audio.
             </h1>
@@ -108,12 +124,12 @@ const HeroSection = () => {
             
             <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
               <Link href="/sign-up" className="w-full sm:w-auto">
-                <Button size="lg" className="h-12 sm:h-16 w-full rounded-2xl px-10 text-[10px] sm:text-lg font-black bg-primary btn-glow shadow-3d">
+                <Button size="lg" className="h-12 sm:h-16 w-full rounded-2xl px-10 text-[10px] sm:text-lg font-black bg-primary btn-glow shadow-3d hover:scale-105 transition-transform">
                   Get Started Free
                 </Button>
               </Link>
               <Link href="/#voice-samples" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="h-12 sm:h-16 w-full rounded-2xl px-10 text-[10px] sm:text-lg font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 shadow-3d">
+                <Button size="lg" variant="outline" className="h-12 sm:h-16 w-full rounded-2xl px-10 text-[10px] sm:text-lg font-bold border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 shadow-3d transition-all">
                     <Play className="mr-2 h-5 w-5 fill-current" />
                     Listen Demo
                 </Button>
@@ -129,9 +145,17 @@ const HeroSection = () => {
           >
             <ComparisonCard />
             
-            {/* Background Neural Orbs */}
-            <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 blur-[100px] rounded-full animate-pulse" />
-            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-600/10 blur-[100px] rounded-full" />
+            {/* Background Neural Orbs with subtle breath motion */}
+            <motion.div 
+              animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 blur-[100px] rounded-full" 
+            />
+            <motion.div 
+              animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.2, 0.1] }}
+              transition={{ duration: 5, repeat: Infinity }}
+              className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-600/10 blur-[100px] rounded-full" 
+            />
           </motion.div>
         </div>
       </div>
