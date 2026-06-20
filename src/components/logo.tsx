@@ -14,7 +14,7 @@ interface LogoProps {
  */
 const Logo = ({ className }: LogoProps) => {
   return (
-    <div className={cn("flex items-center justify-start overflow-hidden", className)}>
+    <div className={cn("flex items-center justify-start overflow-hidden rounded-full", className)}>
       <img 
         src="https://cdn.quantisai.org/images/logo.png" 
         alt="QuantisAI Labs" 
