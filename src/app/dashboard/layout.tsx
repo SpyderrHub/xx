@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useEffect } from 'react';
@@ -8,7 +7,6 @@ import {
   LayoutDashboard,
   MessageSquare,
   Library,
-  History,
   Settings,
   LogOut,
   Menu,
@@ -188,7 +186,6 @@ const DashboardSidebar = () => {
 
   const mainNav = useMemo(() => [
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-    { href: '/dashboard/my-generations', label: 'History', icon: History },
   ], []);
 
   const studioNav = useMemo(() => [
@@ -402,7 +399,6 @@ export default function DashboardLayout({
     if (pathname === '/dashboard/voice-cloning') return 'AI Voice Cloning Studio';
     if (pathname === '/dashboard/voice-designer') return 'AI Voice Designer Studio';
     if (pathname === '/dashboard/voice-library') return 'AI Voice Library';
-    if (pathname === '/dashboard/my-generations') return 'Generation History';
     if (pathname === '/dashboard/subscription') return 'Plan & Billing';
     if (pathname === '/dashboard/settings') return 'Account Settings';
     if (pathname === '/dashboard/credits') return 'Credits & Usage';
