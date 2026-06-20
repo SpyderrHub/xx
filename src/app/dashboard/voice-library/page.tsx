@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -224,9 +223,9 @@ export default function VoiceLibraryPage() {
             Discover and sample from our extensive collection of premium AI voices.
           </p>
         </div>
-        <Button asChild size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold">
+        <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white font-black rounded-xl shadow-lg shadow-primary/20 btn-glow transition-all">
           <Link href="/dashboard/voice-designer">
-            <PlusCircle className="mr-2" />
+            <PlusCircle className="mr-2 h-5 w-5" />
             Create Custom Voice
           </Link>
         </Button>
