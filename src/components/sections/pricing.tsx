@@ -26,7 +26,7 @@ const plans = [
     price: '₹149',
     period: '/ mo',
     description: 'Essential for new creators.',
-    features: ['50,000 Characters', 'Max 60 Min Sessions', '10 Daily Pro Generations', 'No Watermarks', 'Standard Support'],
+    features: ['50,000 Characters', 'Max 60 Min Sessions', '10 Daily Pro Generations', 'No Watermarks'],
     cta: 'Select Starter',
     highlight: false,
   },
@@ -35,7 +35,7 @@ const plans = [
     price: '₹399',
     period: '/ mo',
     description: 'Perfect for professionals.',
-    features: ['300,000 Characters', 'Max 120 Min Sessions', '20 Daily Pro Generations', 'No Watermarks', 'Email Support'],
+    features: ['300,000 Characters', 'Max 120 Min Sessions', '20 Daily Pro Generations', 'Voice Cloning'],
     cta: 'Get Started',
     highlight: true,
   },
@@ -44,7 +44,7 @@ const plans = [
     price: '₹999',
     period: '/ mo',
     description: 'The ultimate synthesis experience.',
-    features: ['1,000,000 Characters', 'Max 360 Min Sessions', '30 Daily Pro Generations', 'No Watermarks', 'Priority Support'],
+    features: ['1M Characters', 'Max 360 Min Sessions', '30 Daily Pro Generations', 'Priority Support'],
     cta: 'Go Pro Now',
     highlight: false,
   },
@@ -52,55 +52,62 @@ const plans = [
 
 const PricingSection = () => {
   return (
-    <section id="pricing" className="py-24 bg-black/20">
-      <div className="container mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <h2 className="text-xl font-bold tracking-tight text-white sm:text-5xl mb-6">
+    <section id="pricing" className="py-32 relative overflow-hidden">
+      <div className="absolute inset-0 bg-primary/5 [mask-image:radial-gradient(circle_at_center,black,transparent)]" />
+      
+      <div className="container mx-auto px-6 sm:px-10 lg:px-16 relative z-10">
+        <div className="max-w-3xl mx-auto text-center mb-20">
+          <h2 className="text-xl font-black tracking-tight text-white sm:text-5xl mb-6">
             Predictable Pricing
           </h2>
-          <p className="text-sm sm:text-lg text-muted-foreground">
-            No enterprise taxes. Just pure synthesis at scale.
+          <p className="text-[10px] sm:text-lg text-muted-foreground">
+            No enterprise taxes. No hidden tiers. Just pure synthesis at scale.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {plans.map((plan) => (
             <Card
               key={plan.name}
               className={cn(
-                'glass-card border-white/5 bg-white/[0.02] flex flex-col rounded-[2rem] transition-all hover:scale-105',
-                plan.highlight && 'border-primary/50 bg-primary/[0.03] ring-2 ring-primary/20'
+                'glass-card flex flex-col rounded-[2.5rem] transition-all duration-500 hover:scale-[1.03] shadow-3d',
+                plan.highlight 
+                  ? 'border-primary/50 bg-primary/[0.04] ring-1 ring-primary/20 scale-105 z-10' 
+                  : 'border-white/5 bg-white/[0.01]'
               )}
             >
-              <CardHeader className="p-8">
+              <CardHeader className="p-8 pb-4">
                 {plan.highlight && (
-                  <div className="bg-primary text-white text-[8px] sm:text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4">
-                    Best Value
+                  <div className="bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-primary/20">
+                    Most Popular
                   </div>
                 )}
                 <CardTitle className="text-xl sm:text-2xl font-black text-white">{plan.name}</CardTitle>
-                <CardDescription className="text-muted-foreground text-[10px] sm:text-xs pt-2">{plan.description}</CardDescription>
+                <CardDescription className="text-muted-foreground text-[8px] sm:text-[10px] font-bold uppercase tracking-widest pt-2">
+                  {plan.description}
+                </CardDescription>
                 <div className="flex items-baseline pt-6">
-                  <span className="text-3xl sm:text-4xl font-black text-white">{plan.price}</span>
-                  <span className="text-muted-foreground text-xs ml-1">{plan.period}</span>
+                  <span className="text-3xl sm:text-5xl font-black text-white">{plan.price}</span>
+                  <span className="text-muted-foreground text-[10px] sm:text-xs ml-2 font-bold uppercase tracking-tighter opacity-50">{plan.period}</span>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 p-8 pt-0 space-y-4">
+              <CardContent className="flex-1 p-8 pt-4 space-y-4">
                 {plan.features.map((feature) => (
                   <div key={feature} className="flex items-center gap-3">
-                    <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
-                    <span className="text-xs sm:text-sm text-white/70">{feature}</span>
+                    <CheckCircle className="h-4 w-4 text-primary shrink-0 opacity-80" />
+                    <span className="text-[10px] sm:text-sm font-medium text-white/70">{feature}</span>
                   </div>
                 ))}
               </CardContent>
-              <CardFooter className="p-8 pt-0">
+              <CardFooter className="p-8 pt-4">
                 <Button
                   asChild
                   size="lg"
-                  variant={plan.highlight ? 'default' : 'outline'}
                   className={cn(
-                    "w-full h-11 sm:h-12 rounded-xl font-black text-xs sm:text-sm",
-                    plan.highlight ? "bg-primary btn-glow" : "border-white/10 bg-white/5 hover:bg-white/10"
+                    "w-full h-12 sm:h-14 rounded-2xl font-black text-[10px] sm:text-sm transition-all",
+                    plan.highlight 
+                      ? "bg-primary text-white btn-glow" 
+                      : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
                   )}
                 >
                   <Link href="/sign-up">{plan.cta}</Link>
@@ -109,6 +116,10 @@ const PricingSection = () => {
             </Card>
           ))}
         </div>
+        
+        <p className="mt-12 text-center text-[10px] text-muted-foreground font-medium uppercase tracking-[0.3em]">
+          All plans include full commercial rights
+        </p>
       </div>
     </section>
   );
