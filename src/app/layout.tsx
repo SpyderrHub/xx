@@ -23,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="!scroll-smooth">
       <head>
+        <meta name="google-site-verification" content="m00rKo1DV2-YssOfdEk3d8NKaOgh7mFd9W3HxZDIXiQ" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
