@@ -33,7 +33,7 @@ export default function ActingInstructionsSection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Fetch specific voices from the database
+  // Fetch specific voices from the database (Sameer, Anaya, Manvi + 2 others)
   const voicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(
@@ -98,6 +98,8 @@ export default function ActingInstructionsSection() {
     if (isPlaying) {
       audioRef.current.pause();
     } else {
+      // Re-link audio source just in case
+      audioRef.current.src = selectedVoice.audio;
       audioRef.current.play().catch(console.error);
     }
     setIsPlaying(!isPlaying);
