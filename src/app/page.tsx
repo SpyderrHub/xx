@@ -1,10 +1,10 @@
-
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import HeroSection from '@/components/sections/hero';
 import ComparisonSlider from '@/components/sections/comparison-slider';
 import VoiceSamplesSection from '@/components/sections/voice-samples';
 import TtsDemoSection from '@/components/sections/tts-demo';
+import ActingInstructionsSection from '@/components/sections/acting-instructions';
 import FeaturesSection from '@/components/sections/features';
 import CodeIntegrationSection from '@/components/sections/code-integration';
 import PricingSection from '@/components/sections/pricing';
@@ -18,6 +18,7 @@ export default function Home() {
         <HeroSection />
         <ComparisonSlider />
         <VoiceSamplesSection />
+        <ActingInstructionsSection />
         <TtsDemoSection />
         <CodeIntegrationSection />
         <FeaturesSection />
