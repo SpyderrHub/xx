@@ -1,8 +1,8 @@
+
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { CheckCircle, Zap } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -56,47 +56,22 @@ const plans = [
 const PricingSection = () => {
   return (
     <section id="pricing" className="py-32 relative overflow-hidden">
-      <div className="absolute inset-0 bg-primary/5 [mask-image:radial-gradient(circle_at_center,black,transparent)]" />
-      
       <div className="container mx-auto px-6 sm:px-10 lg:px-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-20">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-xl font-black tracking-tight text-white sm:text-5xl mb-6"
-          >
+          <h2 className="text-xl font-black tracking-tight text-white sm:text-5xl mb-6">
             Predictable Pricing
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-[10px] sm:text-lg text-muted-foreground"
-          >
+          </h2>
+          <p className="text-[10px] sm:text-lg text-muted-foreground">
             No enterprise taxes. No hidden tiers. Just pure synthesis at scale.
-          </motion.p>
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {plans.map((plan, i) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ 
-                scale: 1.03, 
-                y: -10,
-                rotateY: plan.highlight ? 0 : (i < 2 ? -2 : 2)
-              }}
-              className="flex h-full"
-            >
+          {plans.map((plan) => (
+            <div key={plan.name} className="flex h-full">
               <Card
                 className={cn(
-                  'glass-card flex flex-col rounded-[2.5rem] transition-all duration-500 shadow-3d w-full',
+                  'glass-card flex flex-col rounded-[2.5rem] shadow-3d w-full',
                   plan.highlight 
                     ? 'border-primary/50 bg-primary/[0.04] ring-2 ring-primary/20 z-10' 
                     : 'border-white/5 bg-white/[0.01]'
@@ -104,13 +79,9 @@ const PricingSection = () => {
               >
                 <CardHeader className="p-8 pb-4">
                   {plan.highlight && (
-                    <motion.div 
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-primary/20"
-                    >
+                    <div className="bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-primary/20">
                       Most Popular
-                    </motion.div>
+                    </div>
                   )}
                   <CardTitle className="text-xl sm:text-2xl font-black text-white">{plan.name}</CardTitle>
                   <CardDescription className="text-muted-foreground text-[8px] sm:text-[10px] font-bold uppercase tracking-widest pt-2">
@@ -144,13 +115,9 @@ const PricingSection = () => {
                   </Button>
                 </CardFooter>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
-        
-        <p className="mt-12 text-center text-[10px] text-muted-foreground font-medium uppercase tracking-[0.3em]">
-          All plans include full commercial rights
-        </p>
       </div>
     </section>
   );

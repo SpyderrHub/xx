@@ -9,12 +9,10 @@ import FeaturesSection from '@/components/sections/features';
 import CodeIntegrationSection from '@/components/sections/code-integration';
 import PricingSection from '@/components/sections/pricing';
 import FinalCTASection from '@/components/sections/final-cta';
-import { StarField } from '@/components/ui/star-field';
 
 export default function Home() {
   return (
     <div className="dark min-h-screen bg-[#0B0B0F]">
-      <StarField />
       <Header />
       <main className="flex-1">
         <HeroSection />

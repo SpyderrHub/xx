@@ -1,25 +1,15 @@
+
 'use client';
 
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Zap, Star } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 
 const FinalCTASection = () => {
   return (
     <section className="py-32 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="glass-card rounded-[3.5rem] p-10 sm:p-20 text-center relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-indigo-900/10 border-white/5 shadow-3d"
-        >
-          {/* Subtle Decorative Elements */}
-          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,102,0,0.1),transparent_50%)]" />
-          <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full" />
-          
+        <div className="glass-card rounded-[3.5rem] p-10 sm:p-20 text-center relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-indigo-900/10 border-white/5 shadow-3d">
           <div className="relative z-10 max-w-4xl mx-auto space-y-12">
             <div className="flex flex-col items-center gap-4">
               <div className="flex gap-1">
@@ -49,11 +39,8 @@ const FinalCTASection = () => {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-
-      {/* Extreme background glow */}
-      <div className="absolute -bottom-96 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-primary/5 blur-[150px] rounded-full pointer-events-none" />
     </section>
   );
 };

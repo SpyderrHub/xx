@@ -1,7 +1,7 @@
+
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent } from '@/components/ui/card';
 import { Zap, TrendingDown } from 'lucide-react';
@@ -30,12 +30,7 @@ export default function ComparisonSlider() {
         </div>
 
         <div className="max-w-4xl mx-auto space-y-12">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="space-y-8 glass-card p-10 rounded-[3rem] shadow-3d border-white/5"
-          >
+          <div className="space-y-8 glass-card p-10 rounded-[3rem] shadow-3d border-white/5">
             <div className="flex justify-between items-end">
               <div className="space-y-1">
                 <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Volume Calculator</span>
@@ -55,10 +50,10 @@ export default function ComparisonSlider() {
               step={10000}
               className="h-10"
             />
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-            <motion.div whileHover={{ scale: 0.98 }} className="elevated-card">
+            <div>
               <Card className="glass-card border-white/5 bg-white/[0.01] h-full rounded-[2.5rem] shadow-3d">
                 <CardContent className="p-10 space-y-6">
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Market Standard</span>
@@ -66,9 +61,9 @@ export default function ComparisonSlider() {
                   <p className="text-[10px] sm:text-sm text-muted-foreground leading-relaxed italic">Legacy pricing built on corporate markups and enterprise taxes.</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
-            <motion.div whileHover={{ scale: 1.02 }} className="elevated-card">
+            <div>
               <Card className="glass-card border-primary/30 bg-primary/5 h-full rounded-[2.5rem] relative overflow-hidden ring-1 ring-primary/20 shadow-[0_30px_60px_rgba(255,102,0,0.15)]">
                 <div className="absolute top-0 right-0 p-6">
                   <div className="bg-primary text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/30">Save {Math.round(savings)}%</div>
@@ -82,7 +77,7 @@ export default function ComparisonSlider() {
                   <p className="text-[10px] sm:text-sm text-white/70 leading-relaxed font-medium">Pure neural synthesis. No enterprise tax. Transparent and scalable.</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
