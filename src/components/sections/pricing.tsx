@@ -55,7 +55,7 @@ const plans = [
 
 const PricingSection = () => {
   return (
-    <section id="pricing" className="py-32 relative overflow-hidden">
+    <section id="pricing" className="pt-32 pb-0 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-20">
           <h2 className="text-xl font-black tracking-tight text-white sm:text-5xl mb-6">
