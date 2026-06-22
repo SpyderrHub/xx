@@ -54,7 +54,7 @@ export default function CodeIntegrationSection() {
   };
 
   return (
-    <section className="py-24">
+    <section className="pt-24 pb-0">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
