@@ -7,22 +7,34 @@ import { cn } from '@/lib/utils';
 
 const CHARACTERS = [
   { 
-    id: 'turtle', 
-    name: 'Turtle Guru', 
-    initials: 'TG',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' // Placeholder
+    id: 'sameer', 
+    name: 'Sameer', 
+    initials: 'S',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
   },
   { 
-    id: 'tea', 
-    name: 'Aunt Tea', 
-    initials: 'AT',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' // Placeholder
+    id: 'anaya', 
+    name: 'Anaya', 
+    initials: 'A',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
   },
   { 
-    id: 'sitcom', 
-    name: 'Sitcom Guy', 
-    initials: 'SG',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' // Placeholder
+    id: 'manvi', 
+    name: 'Manvi', 
+    initials: 'M',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+  },
+  { 
+    id: 'kabir', 
+    name: 'Kabir', 
+    initials: 'K',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+  },
+  { 
+    id: 'zoya', 
+    name: 'Zoya', 
+    initials: 'Z',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
   },
 ];
 
@@ -47,7 +59,7 @@ const SCENARIOS = [
 
 export default function ActingInstructionsSection() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeChar, setActiveChar] = useState('turtle');
+  const [activeChar, setActiveChar] = useState('sameer');
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -83,7 +95,11 @@ export default function ActingInstructionsSection() {
   useEffect(() => {
     const char = CHARACTERS.find(c => c.id === activeChar);
     if (char) {
-      audioRef.current = new Audio(char.audio);
+      if (audioRef.current) {
+        audioRef.current.src = char.audio;
+      } else {
+        audioRef.current = new Audio(char.audio);
+      }
       audioRef.current.onended = () => setIsPlaying(false);
     }
     return () => stopAudio();
