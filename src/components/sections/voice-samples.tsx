@@ -11,6 +11,13 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, limit, orderBy } from 'firebase/firestore';
 import { WeavyPattern } from '@/components/author/avatar-upload';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const VoiceCard = ({ voice }: { voice: any }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -124,14 +131,14 @@ export default function VoiceSamplesSection() {
     return query(
       collection(firestore, 'voices'),
       orderBy('createdAt', 'desc'),
-      limit(5)
+      limit(10)
     );
   }, [firestore]);
 
   const { data: voices, isLoading } = useCollection(voicesQuery);
 
   return (
-    <section id="voice-samples" className="py-24 bg-black/20">
+    <section id="voice-samples" className="py-24 bg-black/20 overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="text-center mb-16">
           <h2 className="text-xl font-bold tracking-tight text-white sm:text-5xl mb-6">
@@ -142,34 +149,52 @@ export default function VoiceSamplesSection() {
           </p>
         </div>
 
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="glass-card rounded-[2rem] p-6 space-y-6">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
+        <div className="relative max-w-7xl mx-auto md:px-12">
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="glass-card rounded-[2rem] p-6 space-y-6">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
                   </div>
+                  <Skeleton className="h-20 w-full rounded-2xl" />
+                  <Skeleton className="h-3 w-1/2 mx-2" />
                 </div>
-                <Skeleton className="h-20 w-full rounded-2xl" />
-                <Skeleton className="h-3 w-1/2 mx-2" />
+              ))}
+            </div>
+          ) : voices && voices.length > 0 ? (
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-4 sm:-ml-6">
+                {voices.map((voice) => (
+                  <CarouselItem key={voice.id} className="pl-4 sm:pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5">
+                    <div className="h-full py-4">
+                      <VoiceCard voice={voice} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="hidden md:block">
+                <CarouselPrevious className="bg-white/5 border-white/10 text-white hover:bg-white/10 -left-12" />
+                <CarouselNext className="bg-white/5 border-white/10 text-white hover:bg-white/10 -right-12" />
               </div>
-            ))}
-          </div>
-        ) : voices && voices.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-            {voices.map((voice) => (
-              <VoiceCard key={voice.id} voice={voice} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
-            <Volume2 className="h-12 w-12 text-white/10 mx-auto mb-4" />
-            <p className="text-xs sm:text-sm text-muted-foreground italic">No speakers found in the studio library.</p>
-          </div>
-        )}
+            </Carousel>
+          ) : (
+            <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
+              <Volume2 className="h-12 w-12 text-white/10 mx-auto mb-4" />
+              <p className="text-xs sm:text-sm text-muted-foreground italic">No speakers found in the studio library.</p>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
