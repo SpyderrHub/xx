@@ -198,9 +198,9 @@ export default function VoiceSamplesSection() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <div className="hidden xl:block">
-                <CarouselPrevious className="bg-white/5 border-white/10 text-white hover:bg-white/10 -left-16 h-12 w-12" />
-                <CarouselNext className="bg-white/5 border-white/10 text-white hover:bg-white/10 -right-16 h-12 w-12" />
+              <div className="hidden md:block">
+                <CarouselPrevious className="bg-white/5 border-white/10 text-white hover:bg-white/20 hover:text-primary transition-all -left-12 md:-left-16 h-12 w-12" />
+                <CarouselNext className="bg-white/5 border-white/10 text-white hover:bg-white/20 hover:text-primary transition-all -right-12 md:-right-16 h-12 w-12" />
               </div>
             </Carousel>
           ) : (
