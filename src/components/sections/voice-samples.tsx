@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, User, Volume2, Waves } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Play, Pause, User, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
@@ -25,7 +25,7 @@ const VoiceCard = ({ voice }: { voice: any }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    setRandomBars(Array.from({ length: 15 }, () => Math.random() * 100));
+    setRandomBars(Array.from({ length: 12 }, () => Math.random() * 100));
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -59,66 +59,80 @@ const VoiceCard = ({ voice }: { voice: any }) => {
 
   return (
     <motion.div 
-      whileHover={{ y: -5 }}
-      className="glass-card rounded-[2rem] p-6 group transition-all hover:border-primary/40 flex flex-col h-full"
+      whileHover={{ y: -10 }}
+      className="glass-card rounded-[2.5rem] p-8 group transition-all hover:border-primary/40 flex flex-col items-center text-center h-full bg-white/[0.02] border-white/5 shadow-2xl relative"
     >
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative h-14 w-14 rounded-2xl overflow-hidden border-2 border-white/10 group-hover:border-primary/50 transition-colors shrink-0 flex items-center justify-center bg-white/5">
-          {isGradient ? (
-            <WeavyPattern presetIndex={gradientIndex} />
-          ) : voice.avatarUrl ? (
-            <Image 
-              src={voice.avatarUrl} 
-              alt={voice.voiceName} 
-              fill 
-              unoptimized
-              className="object-cover" 
-            />
-          ) : (
-            <User className="h-6 w-6 text-white/20" />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="font-black text-white text-base sm:text-lg truncate">{voice.voiceName}</h4>
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            <Badge variant="outline" className="bg-white/5 border-none text-[8px] sm:text-[9px] uppercase font-bold text-muted-foreground px-2">
-              {languages[0] || 'Global'}
-            </Badge>
-            <Badge variant="outline" className="bg-primary/10 border-none text-[8px] sm:text-[9px] uppercase font-bold text-primary px-2">
-              {voice.gender}
-            </Badge>
-          </div>
-        </div>
+      {/* Voice Avatar - Top Centered */}
+      <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-white/5 group-hover:border-primary/30 transition-all mb-6 shrink-0 flex items-center justify-center bg-white/5 shadow-inner">
+        {isGradient ? (
+          <WeavyPattern presetIndex={gradientIndex} />
+        ) : voice.avatarUrl ? (
+          <Image 
+            src={voice.avatarUrl} 
+            alt={voice.voiceName} 
+            fill 
+            unoptimized
+            className="object-cover" 
+          />
+        ) : (
+          <User className="h-10 w-10 text-white/10" />
+        )}
       </div>
 
-      <div className="bg-white/5 rounded-2xl p-4 flex items-center gap-4 border border-white/5 group-hover:bg-white/10 transition-colors mt-auto">
-        <Button 
-          size="icon" 
-          variant="secondary" 
-          onClick={togglePlay}
-          className="h-10 w-10 rounded-full bg-white text-black hover:bg-white/90 shadow-xl shrink-0"
-        >
-          {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
-        </Button>
-        
-        <div className="flex-1 flex items-center gap-1 h-6">
+      {/* Voice Info */}
+      <div className="space-y-3 mb-8 w-full">
+        <h4 className="font-black text-white text-xl sm:text-2xl tracking-tight truncate">{voice.voiceName}</h4>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Badge variant="outline" className="bg-white/5 border-none text-[9px] uppercase font-black text-muted-foreground px-3 py-1">
+            {languages[0] || 'Global'}
+          </Badge>
+          <Badge variant="outline" className="bg-primary/10 border-none text-[9px] uppercase font-black text-primary px-3 py-1">
+            {voice.gender}
+          </Badge>
+        </div>
+        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest pt-2 italic line-clamp-1">
+          {voice.style || 'Studio Quality'}
+        </p>
+      </div>
+
+      {/* Visualization & Controls */}
+      <div className="w-full mt-auto space-y-6">
+        <div className="h-10 flex items-end justify-center gap-1 px-4">
           {randomBars.map((height, i) => (
             <motion.div 
               key={i}
-              className="w-1 rounded-full bg-primary/40"
+              className="w-1.5 rounded-full bg-primary/20"
               animate={isPlaying ? {
                 height: [height + '%', '20%', height + '%'],
-                backgroundColor: ['#A855F7', '#6366F1', '#A855F7']
-              } : { height: '30%' }}
-              transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.05 }}
+                backgroundColor: ['#FF6600', '#EA580C', '#FF6600']
+              } : { height: '20%' }}
+              transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }}
             />
           ))}
         </div>
+
+        <Button 
+          size="lg" 
+          variant="secondary" 
+          onClick={togglePlay}
+          className={cn(
+            "h-14 w-full rounded-2xl transition-all font-black text-xs uppercase tracking-widest",
+            isPlaying 
+              ? "bg-white text-black scale-95 shadow-inner" 
+              : "bg-white/10 text-white hover:bg-white/20 hover:scale-105"
+          )}
+        >
+          {isPlaying ? (
+            <><Pause className="h-4 w-4 mr-2 fill-current" /> Stop Preview</>
+          ) : (
+            <><Play className="h-4 w-4 mr-2 fill-current" /> Hear Voice</>
+          )}
+        </Button>
       </div>
       
-      <p className="mt-4 text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] italic px-2 truncate">
-        {voice.style || 'Premium Voice'} &bull; 48kHz Stereo
-      </p>
+      <div className="absolute top-4 right-4 opacity-10">
+        <Volume2 className="h-6 w-6 text-white" />
+      </div>
     </motion.div>
   );
 };
@@ -138,31 +152,32 @@ export default function VoiceSamplesSection() {
   const { data: voices, isLoading } = useCollection(voicesQuery);
 
   return (
-    <section id="voice-samples" className="py-24 bg-black/20 overflow-hidden">
+    <section id="voice-samples" className="py-32 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="text-center mb-16">
-          <h2 className="text-xl font-bold tracking-tight text-white sm:text-5xl mb-6">
-            Hear The Difference
+        <div className="text-center mb-24 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+            <span>The Library</span>
+          </div>
+          <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-7xl leading-tight">
+            Hear the <br />
+            <span className="text-primary">Difference.</span>
           </h2>
-          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Studio-quality neural voices that capture the subtle nuances, emotions, and breaths of human speech.
+          <p className="text-sm sm:text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
+            Discover the most realistic neural voices in the industry. Trained on thousands of hours of expressive speech.
           </p>
         </div>
 
-        <div className="relative max-w-7xl mx-auto md:px-12">
+        <div className="relative max-w-7xl mx-auto md:px-16">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="glass-card rounded-[2rem] p-6 space-y-6">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="glass-card rounded-[2.5rem] p-10 space-y-8 flex flex-col items-center">
+                  <Skeleton className="h-24 w-24 rounded-full shrink-0" />
+                  <div className="space-y-4 w-full flex flex-col items-center">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
                   </div>
-                  <Skeleton className="h-20 w-full rounded-2xl" />
-                  <Skeleton className="h-3 w-1/2 mx-2" />
+                  <Skeleton className="h-14 w-full rounded-2xl mt-auto" />
                 </div>
               ))}
             </div>
@@ -174,28 +189,34 @@ export default function VoiceSamplesSection() {
               }}
               className="w-full"
             >
-              <CarouselContent className="-ml-4 sm:-ml-6">
+              <CarouselContent className="-ml-6">
                 {voices.map((voice) => (
-                  <CarouselItem key={voice.id} className="pl-4 sm:pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5">
-                    <div className="h-full py-4">
+                  <CarouselItem key={voice.id} className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                    <div className="h-full py-6">
                       <VoiceCard voice={voice} />
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <div className="hidden md:block">
-                <CarouselPrevious className="bg-white/5 border-white/10 text-white hover:bg-white/10 -left-12" />
-                <CarouselNext className="bg-white/5 border-white/10 text-white hover:bg-white/10 -right-12" />
+              <div className="hidden xl:block">
+                <CarouselPrevious className="bg-white/5 border-white/10 text-white hover:bg-white/10 -left-16 h-12 w-12" />
+                <CarouselNext className="bg-white/5 border-white/10 text-white hover:bg-white/10 -right-16 h-12 w-12" />
               </div>
             </Carousel>
           ) : (
-            <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
-              <Volume2 className="h-12 w-12 text-white/10 mx-auto mb-4" />
-              <p className="text-xs sm:text-sm text-muted-foreground italic">No speakers found in the studio library.</p>
+            <div className="text-center py-32 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
+              <Volume2 className="h-16 w-16 text-white/10 mx-auto mb-6" />
+              <p className="text-base sm:text-lg text-muted-foreground italic font-medium">No speakers found in the studio library.</p>
+              <Button asChild variant="link" className="text-primary font-black uppercase tracking-widest mt-4">
+                <a href="/dashboard">Upload First Voice →</a>
+              </Button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Decorative background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 blur-[150px] rounded-full -z-10 pointer-events-none" />
     </section>
   );
 }
