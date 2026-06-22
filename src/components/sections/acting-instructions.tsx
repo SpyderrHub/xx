@@ -1,42 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play, Pause, Quote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, Quote, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const CHARACTERS = [
-  { 
-    id: 'sameer', 
-    name: 'Sameer', 
-    initials: 'S',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
-  },
-  { 
-    id: 'anaya', 
-    name: 'Anaya', 
-    initials: 'A',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
-  },
-  { 
-    id: 'manvi', 
-    name: 'Manvi', 
-    initials: 'M',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
-  },
-  { 
-    id: 'kabir', 
-    name: 'Kabir', 
-    initials: 'K',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
-  },
-  { 
-    id: 'zoya', 
-    name: 'Zoya', 
-    initials: 'Z',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
-  },
-];
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where, limit } from 'firebase/firestore';
 
 const SCENARIOS = [
   { 
@@ -58,10 +27,52 @@ const SCENARIOS = [
 ];
 
 export default function ActingInstructionsSection() {
+  const { firestore } = useFirebase();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeChar, setActiveChar] = useState('sameer');
+  const [activeCharName, setActiveCharName] = useState('Sameer');
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Fetch specific voices from the database
+  const voicesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'voices'),
+      where('voiceName', 'in', ['Sameer', 'Anaya', 'Manvi', 'Kabir', 'Zoya']),
+      limit(5)
+    );
+  }, [firestore]);
+
+  const { data: dbVoices, isLoading: voicesLoading } = useCollection(voicesQuery);
+
+  // Map database voices or use fallbacks
+  const characters = useMemo(() => {
+    const defaults = [
+      { id: 'sameer', name: 'Sameer', initials: 'S', audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', refText: null },
+      { id: 'anaya', name: 'Anaya', initials: 'A', audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', refText: null },
+      { id: 'manvi', name: 'Manvi', initials: 'M', audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', refText: null },
+      { id: 'kabir', name: 'Kabir', initials: 'K', audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', refText: null },
+      { id: 'zoya', name: 'Zoya', initials: 'Z', audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', refText: null },
+    ];
+
+    if (!dbVoices) return defaults;
+
+    return defaults.map(def => {
+      const dbMatch = dbVoices.find(v => v.voiceName.toLowerCase() === def.name.toLowerCase());
+      if (dbMatch) {
+        return {
+          ...def,
+          audio: dbMatch.audioUrl || def.audio,
+          refText: dbMatch.referenceText || null
+        };
+      }
+      return def;
+    });
+  }, [dbVoices]);
+
+  const selectedVoice = useMemo(() => 
+    characters.find(c => c.name === activeCharName) || characters[0]
+  , [characters, activeCharName]);
 
   const nextInstruction = () => {
     stopAudio();
@@ -93,17 +104,16 @@ export default function ActingInstructionsSection() {
   };
 
   useEffect(() => {
-    const char = CHARACTERS.find(c => c.id === activeChar);
-    if (char) {
+    if (selectedVoice) {
       if (audioRef.current) {
-        audioRef.current.src = char.audio;
+        audioRef.current.src = selectedVoice.audio;
       } else {
-        audioRef.current = new Audio(char.audio);
+        audioRef.current = new Audio(selectedVoice.audio);
       }
       audioRef.current.onended = () => setIsPlaying(false);
     }
     return () => stopAudio();
-  }, [activeChar]);
+  }, [selectedVoice]);
 
   return (
     <section className="w-full bg-[#0B0B0F] py-20 lg:py-40 overflow-hidden border-t border-white/5">
@@ -118,7 +128,7 @@ export default function ActingInstructionsSection() {
               <div className="relative w-full max-w-[400px] h-[320px] flex items-center justify-center">
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
-                    key={activeIndex}
+                    key={`${activeIndex}-${activeCharName}`}
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -100 }}
@@ -140,8 +150,8 @@ export default function ActingInstructionsSection() {
                           <Quote className="h-3 w-3 fill-current" />
                           <span>Reference Text</span>
                         </div>
-                        <p className="text-sm md:text-base font-medium leading-relaxed italic text-black/70 px-4">
-                          {SCENARIOS[activeIndex].reference}
+                        <p className="text-sm md:text-base font-medium leading-relaxed italic text-black/70 px-4 line-clamp-4">
+                          {selectedVoice.refText || SCENARIOS[activeIndex].reference}
                         </p>
                       </div>
                     </div>
@@ -150,9 +160,12 @@ export default function ActingInstructionsSection() {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={handlePlayToggle}
+                      disabled={voicesLoading}
                       className="absolute -bottom-6 h-16 w-16 rounded-full bg-[#1F1F1F] text-white flex items-center justify-center shadow-2xl border-4 border-[#0B0B0F] z-20 group"
                     >
-                      {isPlaying ? (
+                      {voicesLoading ? (
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      ) : isPlaying ? (
                         <Pause className="h-6 w-6 fill-current" />
                       ) : (
                         <Play className="h-6 w-6 fill-current ml-1 group-hover:text-primary transition-colors" />
@@ -178,23 +191,23 @@ export default function ActingInstructionsSection() {
 
               {/* Character Pills */}
               <div className="mt-20 flex flex-wrap justify-center gap-3">
-                {CHARACTERS.map((char) => (
+                {characters.map((char) => (
                   <button
                     key={char.id}
                     onClick={() => {
                       stopAudio();
-                      setActiveChar(char.id);
+                      setActiveCharName(char.name);
                     }}
                     className={cn(
                       "flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 border",
-                      activeChar === char.id 
+                      activeCharName === char.name 
                         ? "bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.15)] scale-105" 
                         : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10"
                     )}
                   >
                     <div className={cn(
                       "h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black transition-colors",
-                      activeChar === char.id ? "bg-black text-white" : "bg-white/10"
+                      activeCharName === char.name ? "bg-black text-white" : "bg-white/10"
                     )}>
                       {char.initials}
                     </div>
