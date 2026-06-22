@@ -58,10 +58,7 @@ const VoiceCard = ({ voice }: { voice: any }) => {
   const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
 
   return (
-    <motion.div 
-      whileHover={{ y: -10 }}
-      className="glass-card rounded-[2.5rem] p-8 group transition-all hover:border-primary/40 flex flex-col items-center text-center h-full bg-white/[0.02] border-white/5 shadow-2xl relative"
-    >
+    <div className="glass-card rounded-[2.5rem] p-8 group transition-all hover:border-primary/40 flex flex-col items-center text-center h-full bg-white/[0.02] border-white/5 shadow-2xl relative">
       {/* Voice Avatar - Top Centered */}
       <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-white/5 group-hover:border-primary/30 transition-all mb-6 shrink-0 flex items-center justify-center bg-white/5 shadow-inner">
         {isGradient ? (
@@ -99,14 +96,13 @@ const VoiceCard = ({ voice }: { voice: any }) => {
       <div className="w-full mt-auto space-y-6">
         <div className="h-10 flex items-end justify-center gap-1 px-4">
           {randomBars.map((height, i) => (
-            <motion.div 
+            <div 
               key={i}
-              className="w-1.5 rounded-full bg-primary/20"
-              animate={isPlaying ? {
-                height: [height + '%', '20%', height + '%'],
-                backgroundColor: ['#FF6600', '#EA580C', '#FF6600']
-              } : { height: '20%' }}
-              transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }}
+              className={cn(
+                "w-1.5 rounded-full transition-all duration-300",
+                isPlaying ? "bg-primary" : "bg-primary/20"
+              )}
+              style={{ height: isPlaying ? `${height}%` : '20%' }}
             />
           ))}
         </div>
@@ -119,7 +115,7 @@ const VoiceCard = ({ voice }: { voice: any }) => {
             "h-14 w-full rounded-2xl transition-all font-black text-xs uppercase tracking-widest",
             isPlaying 
               ? "bg-white text-black scale-95 shadow-inner" 
-              : "bg-white/10 text-white hover:bg-white/20 hover:scale-105"
+              : "bg-white/10 text-white hover:bg-white/20"
           )}
         >
           {isPlaying ? (
@@ -133,7 +129,7 @@ const VoiceCard = ({ voice }: { voice: any }) => {
       <div className="absolute top-4 right-4 opacity-10">
         <Volume2 className="h-6 w-6 text-white" />
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -167,7 +163,7 @@ export default function VoiceSamplesSection() {
           </p>
         </div>
 
-        <div className="relative max-w-7xl mx-auto md:px-16">
+        <div className="relative max-w-7xl mx-auto">
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {[...Array(4)].map((_, i) => (
@@ -192,15 +188,15 @@ export default function VoiceSamplesSection() {
               <CarouselContent className="-ml-6">
                 {voices.map((voice) => (
                   <CarouselItem key={voice.id} className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                    <div className="h-full py-6">
+                    <div className="h-full">
                       <VoiceCard voice={voice} />
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
               <div className="hidden md:block">
-                <CarouselPrevious className="bg-white/5 border-white/10 text-white hover:bg-white/20 hover:text-primary transition-all -left-12 md:-left-16 h-12 w-12" />
-                <CarouselNext className="bg-white/5 border-white/10 text-white hover:bg-white/20 hover:text-primary transition-all -right-12 md:-right-16 h-12 w-12" />
+                <CarouselPrevious className="bg-white/5 border-white/10 text-white hover:bg-white/20 hover:text-primary transition-all -left-12 h-12 w-12" />
+                <CarouselNext className="bg-white/5 border-white/10 text-white hover:bg-white/20 hover:text-primary transition-all -right-12 h-12 w-12" />
               </div>
             </Carousel>
           ) : (

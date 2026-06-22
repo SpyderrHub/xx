@@ -4,7 +4,6 @@ import HeroSection from '@/components/sections/hero';
 import ComparisonSlider from '@/components/sections/comparison-slider';
 import VoiceSamplesSection from '@/components/sections/voice-samples';
 import TtsDemoSection from '@/components/sections/tts-demo';
-import ActingInstructionsSection from '@/components/sections/acting-instructions';
 import FeaturesSection from '@/components/sections/features';
 import CodeIntegrationSection from '@/components/sections/code-integration';
 import PricingSection from '@/components/sections/pricing';
@@ -12,13 +11,12 @@ import FinalCTASection from '@/components/sections/final-cta';
 
 export default function Home() {
   return (
-    <div className="dark min-h-screen bg-[#0B0B0F]">
+    <div className="dark min-h-screen bg-[#0B0B0F] scroll-smooth">
       <Header />
       <main className="flex-1">
         <HeroSection />
         <ComparisonSlider />
         <VoiceSamplesSection />
-        <ActingInstructionsSection />
         <TtsDemoSection />
         <CodeIntegrationSection />
         <FeaturesSection />
