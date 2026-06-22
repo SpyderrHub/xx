@@ -148,7 +148,7 @@ export default function VoiceSamplesSection() {
   const { data: voices, isLoading } = useCollection(voicesQuery);
 
   return (
-    <section id="voice-samples" className="py-32 relative overflow-hidden">
+    <section id="voice-samples" className="pt-32 pb-0 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="text-center mb-24 space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
