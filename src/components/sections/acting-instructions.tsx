@@ -1,29 +1,93 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, Quote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CHARACTERS = [
-  { id: 'turtle', name: 'Turtle Guru', initials: 'TG' },
-  { id: 'tea', name: 'Aunt Tea', initials: 'AT' },
-  { id: 'sitcom', name: 'Sitcom Guy', initials: 'SG' },
+  { 
+    id: 'turtle', 
+    name: 'Turtle Guru', 
+    initials: 'TG',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' // Placeholder
+  },
+  { 
+    id: 'tea', 
+    name: 'Aunt Tea', 
+    initials: 'AT',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' // Placeholder
+  },
+  { 
+    id: 'sitcom', 
+    name: 'Sitcom Guy', 
+    initials: 'SG',
+    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' // Placeholder
+  },
 ];
 
-const INSTRUCTIONS = [
-  "Speak with a sarcastic tone",
-  "Whisper this like a secret",
-  "Deliver with high energy",
-  "Sound calm and meditative",
+const SCENARIOS = [
+  { 
+    instruction: "Speak with a sarcastic tone", 
+    reference: "Oh sure, because building an entire neural engine in a weekend is totally normal behavior." 
+  },
+  { 
+    instruction: "Whisper this like a secret", 
+    reference: "The key to the vault is hidden behind the third portrait in the library, don't tell anyone." 
+  },
+  { 
+    instruction: "Deliver with high energy", 
+    reference: "Welcome everyone to the grand opening of QuantisAI Labs! Today we change everything!" 
+  },
+  { 
+    instruction: "Sound calm and meditative", 
+    reference: "Close your eyes and breathe deeply. Imagine a world where your voice can reach anyone, anywhere." 
+  },
 ];
 
 export default function ActingInstructionsSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeChar, setActiveChar] = useState('turtle');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const nextInstruction = () => setActiveIndex((prev) => (prev + 1) % INSTRUCTIONS.length);
-  const prevInstruction = () => setActiveIndex((prev) => (prev - 1 + INSTRUCTIONS.length) % INSTRUCTIONS.length);
+  const nextInstruction = () => {
+    stopAudio();
+    setActiveIndex((prev) => (prev + 1) % SCENARIOS.length);
+  };
+  
+  const prevInstruction = () => {
+    stopAudio();
+    setActiveIndex((prev) => (prev - 1 + SCENARIOS.length) % SCENARIOS.length);
+  };
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+  };
+
+  const handlePlayToggle = () => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(console.error);
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  useEffect(() => {
+    const char = CHARACTERS.find(c => c.id === activeChar);
+    if (char) {
+      audioRef.current = new Audio(char.audio);
+      audioRef.current.onended = () => setIsPlaying(false);
+    }
+    return () => stopAudio();
+  }, [activeChar]);
 
   return (
     <section className="w-full bg-[#0B0B0F] py-20 lg:py-40 overflow-hidden border-t border-white/5">
@@ -32,85 +96,88 @@ export default function ActingInstructionsSection() {
           
           {/* Left Panel: Interactive Demo */}
           <div className="space-y-10">
-            <div className="relative bg-white/[0.02] border border-white/5 rounded-[32px] p-10 md:p-20 flex flex-col items-center justify-center min-h-[450px] md:min-h-[550px] shadow-2xl backdrop-blur-sm">
+            <div className="relative bg-white/[0.02] border border-white/5 rounded-[32px] p-6 md:p-12 flex flex-col items-center justify-center min-h-[500px] md:min-h-[600px] shadow-2xl backdrop-blur-sm overflow-hidden">
               
-              {/* Stacked Carousel */}
-              <div className="relative w-full max-w-[320px] h-[240px] flex items-center justify-center">
-                <AnimatePresence mode="popLayout">
-                  {[2, 1, 0].map((offset) => {
-                    const index = (activeIndex + offset) % INSTRUCTIONS.length;
-                    const isActive = offset === 0;
-                    
-                    return (
-                      <motion.div
-                        key={index}
-                        initial={false}
-                        animate={{
-                          scale: isActive ? 1 : 1 - offset * 0.08,
-                          y: offset * -15,
-                          z: -offset * 50,
-                          opacity: isActive ? 1 : 0.2 - offset * 0.05,
-                        }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        style={{ zIndex: 10 - offset }}
-                        className={cn(
-                          "absolute inset-0 rounded-[24px] flex flex-col items-center justify-center p-8 text-center shadow-2xl backdrop-blur-md border",
-                          isActive 
-                            ? "bg-[#DCD0E8] text-[#1F1F1F] border-white/40" 
-                            : "bg-white/10 border-white/5"
-                        )}
-                      >
-                        <p className={cn(
-                          "text-xl md:text-2xl font-black leading-tight tracking-tight",
-                          !isActive && "blur-[2px] text-white"
-                        )}>
-                          "{INSTRUCTIONS[index]}"
+              {/* Sliding Carousel */}
+              <div className="relative w-full max-w-[400px] h-[320px] flex items-center justify-center">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={activeIndex}
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                    className="absolute inset-0 rounded-[32px] flex flex-col items-center justify-center p-8 text-center shadow-2xl backdrop-blur-md border bg-[#DCD0E8] text-[#1F1F1F] border-white/40"
+                  >
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Instruction</span>
+                        <p className="text-xl md:text-2xl font-black leading-tight tracking-tight">
+                          "{SCENARIOS[activeIndex].instruction}"
                         </p>
-                        
-                        {isActive && (
-                          <motion.button
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="absolute bottom-6 h-12 w-12 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
-                          >
-                            <Play className="h-5 w-5 fill-current ml-1" />
-                          </motion.button>
-                        )}
-                      </motion.div>
-                    );
-                  })}
+                      </div>
+
+                      <div className="h-px w-12 bg-black/10 mx-auto" />
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
+                          <Quote className="h-3 w-3 fill-current" />
+                          <span>Reference Text</span>
+                        </div>
+                        <p className="text-sm md:text-base font-medium leading-relaxed italic text-black/70 px-4">
+                          {SCENARIOS[activeIndex].reference}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handlePlayToggle}
+                      className="absolute -bottom-6 h-16 w-16 rounded-full bg-[#1F1F1F] text-white flex items-center justify-center shadow-2xl border-4 border-[#0B0B0F] z-20 group"
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-6 w-6 fill-current" />
+                      ) : (
+                        <Play className="h-6 w-6 fill-current ml-1 group-hover:text-primary transition-colors" />
+                      )}
+                    </motion.button>
+                  </motion.div>
                 </AnimatePresence>
 
                 {/* Navigation Arrows */}
                 <button 
                   onClick={prevInstruction}
-                  className="absolute -left-12 md:-left-16 top-1/2 -translate-y-1/2 p-3 text-white/20 hover:text-white transition-colors"
+                  className="absolute -left-4 md:-left-12 top-1/2 -translate-y-1/2 p-3 text-white/20 hover:text-white transition-colors z-30"
                 >
                   <ChevronLeft className="h-8 w-8" />
                 </button>
                 <button 
                   onClick={nextInstruction}
-                  className="absolute -right-12 md:-right-16 top-1/2 -translate-y-1/2 p-3 text-white/20 hover:text-white transition-colors"
+                  className="absolute -right-4 md:-right-12 top-1/2 -translate-y-1/2 p-3 text-white/20 hover:text-white transition-colors z-30"
                 >
                   <ChevronRight className="h-8 w-8" />
                 </button>
               </div>
 
               {/* Character Pills */}
-              <div className="mt-16 flex flex-wrap justify-center gap-3">
+              <div className="mt-20 flex flex-wrap justify-center gap-3">
                 {CHARACTERS.map((char) => (
                   <button
                     key={char.id}
-                    onClick={() => setActiveChar(char.id)}
+                    onClick={() => {
+                      stopAudio();
+                      setActiveChar(char.id);
+                    }}
                     className={cn(
                       "flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 border",
                       activeChar === char.id 
-                        ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
+                        ? "bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.15)] scale-105" 
                         : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10"
                     )}
                   >
                     <div className={cn(
-                      "h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black",
+                      "h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black transition-colors",
                       activeChar === char.id ? "bg-black text-white" : "bg-white/10"
                     )}>
                       {char.initials}
