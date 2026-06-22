@@ -64,7 +64,7 @@ const ComparisonCard = () => (
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-24 pb-20 lg:pt-48 lg:pb-40 overflow-hidden">
+    <section className="relative pt-24 pb-0 lg:pt-48 lg:pb-0 overflow-hidden">
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
