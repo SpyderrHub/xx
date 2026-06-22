@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +13,7 @@ export default function ComparisonSlider() {
   const savings = ((elevenLabsPrice - quantisaiPrice) / elevenLabsPrice) * 100;
 
   return (
-    <section className="py-32 relative overflow-hidden">
+    <section className="pt-32 pb-0 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="max-w-4xl mx-auto text-center mb-20">
            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase tracking-[0.2em] mb-4">
