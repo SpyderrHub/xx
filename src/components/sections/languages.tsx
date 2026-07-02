@@ -1,27 +1,28 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Globe2, Sparkles } from 'lucide-react';
+import { Globe2, Sparkles, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const languages = [
-  { name: 'Hindi', flagId: 'flag-hindi' },
-  { name: 'Bengali', flagId: 'flag-hindi' },
-  { name: 'Telugu', flagId: 'flag-telugu' },
-  { name: 'Marathi', flagId: 'flag-hindi' },
-  { name: 'Tamil', flagId: 'flag-tamil' },
-  { name: 'Kannada', flagId: 'flag-hindi' },
-  { name: 'Gujarati', flagId: 'flag-hindi' },
-  { name: 'Malayalam', flagId: 'flag-hindi' },
-  { name: 'Punjabi', flagId: 'flag-hindi' },
+  { name: 'Hindi', flagId: 'flag-hindi', top: '20%', left: '30%', size: 'h-2 w-2' },
+  { name: 'Bengali', flagId: 'flag-hindi', top: '40%', left: '15%', size: 'h-3 w-3' },
+  { name: 'Telugu', flagId: 'flag-telugu', top: '65%', left: '25%', size: 'h-2 w-2' },
+  { name: 'Marathi', flagId: 'flag-hindi', top: '80%', left: '50%', size: 'h-4 w-4' },
+  { name: 'Tamil', flagId: 'flag-tamil', top: '60%', left: '75%', size: 'h-3 w-3' },
+  { name: 'Kannada', flagId: 'flag-hindi', top: '35%', left: '85%', size: 'h-2 w-2' },
+  { name: 'Gujarati', flagId: 'flag-hindi', top: '15%', left: '65%', size: 'h-3 w-3' },
+  { name: 'Malayalam', flagId: 'flag-hindi', top: '85%', left: '80%', size: 'h-2 w-2' },
+  { name: 'Punjabi', flagId: 'flag-hindi', top: '10%', left: '45%', size: 'h-4 w-4' },
 ];
 
-// Doubling the array for the vertical marquee
-const marqueeLanguages = [...languages, ...languages];
+export default function LanguagesSection() {
+  const [hoveredLang, setHoveredLang] = useState<string | null>(null);
 
-const LanguagesSection = () => {
   return (
     <section className="py-24 sm:py-32 bg-transparent relative overflow-hidden border-t border-white/5">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
@@ -39,7 +40,7 @@ const LanguagesSection = () => {
                 Fluent in Every <br />
                 <span className="text-primary">Regional Dialect.</span>
               </h2>
-              <p className="text-sm sm:text-xl text-muted-foreground leading-relaxed font-medium">
+              <p className="text-sm sm:xl text-muted-foreground leading-relaxed font-medium">
                 QuantisAI Labs is optimized for the linguistic diversity of the Indian subcontinent. Experience perfect prosody in 12+ Indic languages, capturing the true soul of every region.
               </p>
             </div>
@@ -61,63 +62,94 @@ const LanguagesSection = () => {
             </div>
           </div>
 
-          {/* Right Column: Vertical Marquee */}
-          <div className="relative h-[400px] sm:h-[600px] w-full overflow-hidden">
-            {/* Gradient Overlays for smooth fading edges */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#0B0B0F] to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0B0B0F] to-transparent z-10" />
+          {/* Right Column: Interactive Galaxy */}
+          <div className="relative h-[500px] sm:h-[600px] w-full flex items-center justify-center">
+            {/* Galaxy Background Effects */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,102,0,0.05)_0%,transparent_70%)]" />
+            <motion.div 
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.6, 0.3]
+              }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute h-64 w-64 bg-primary/20 blur-[100px] rounded-full" 
+            />
 
-            <motion.div
-              className="flex flex-col gap-4"
-              animate={{
-                y: ['0%', '-50%'],
-              }}
-              transition={{
-                duration: 25,
-                ease: 'linear',
-                repeat: Infinity,
-              }}
+            {/* Orbiting Language Stars */}
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
+              className="relative w-full h-full"
             >
-              {marqueeLanguages.map((lang, i) => {
-                const flagImage = PlaceHolderImages.find((img) => img.id === lang.flagId);
+              {languages.map((lang, i) => (
+                <div
+                  key={lang.name}
+                  className="absolute"
+                  style={{ top: lang.top, left: lang.left }}
+                >
+                  <div className="relative group">
+                    {/* Star Point */}
+                    <motion.div
+                      onMouseEnter={() => setHoveredLang(lang.name)}
+                      onMouseLeave={() => setHoveredLang(null)}
+                      animate={{ 
+                        scale: hoveredLang === lang.name ? 1.5 : [1, 1.2, 1],
+                        opacity: hoveredLang === lang.name ? 1 : [0.4, 0.8, 0.4]
+                      }}
+                      transition={{ 
+                        duration: 2 + i % 3, 
+                        repeat: Infinity, 
+                        ease: "easeInOut" 
+                      }}
+                      className={cn(
+                        "rounded-full cursor-pointer transition-colors duration-300",
+                        lang.size,
+                        hoveredLang === lang.name ? "bg-primary shadow-[0_0_20px_rgba(255,102,0,0.8)]" : "bg-white/40"
+                      )}
+                    />
 
-                return (
-                  <div key={`${lang.name}-${i}`} className="w-full">
-                    <Card className="bg-white/[0.02] backdrop-blur-md border-white/5 hover:border-primary/30 transition-all duration-500 group cursor-default shadow-2xl rounded-2xl overflow-hidden">
-                      <CardContent className="p-5 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="relative h-10 w-14 overflow-hidden rounded-lg border border-white/10 shadow-lg shrink-0">
-                            {flagImage ? (
+                    {/* Popover Language Card */}
+                    <AnimatePresence>
+                      {hoveredLang === lang.name && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                          animate={{ opacity: 1, y: -40, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                          className="absolute bottom-full left-1/2 -translate-x-1/2 z-50 pointer-events-none pb-4"
+                        >
+                          <div className="bg-black/80 backdrop-blur-xl border border-primary/40 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-3 min-w-[160px]">
+                            <div className="relative h-8 w-10 overflow-hidden rounded-md border border-white/10 shrink-0">
                               <Image
-                                src={flagImage.imageUrl}
+                                src={PlaceHolderImages.find(img => img.id === lang.flagId)?.imageUrl || ''}
                                 alt={lang.name}
                                 fill
                                 unoptimized
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="object-cover"
                               />
-                            ) : (
-                              <div className="h-full w-full bg-primary/10" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <h3 className="font-black text-white text-base group-hover:text-primary transition-colors truncate">
-                              {lang.name}
-                            </h3>
-                            <div className="flex items-center gap-1.5">
-                              <Sparkles className="h-2.5 w-2.5 text-primary/40" />
-                              <p className="text-[8px] uppercase tracking-widest text-muted-foreground font-black opacity-40">
-                                Neural Engine Active
-                              </p>
+                            </div>
+                            <div className="text-left">
+                              <p className="text-xs font-black text-white uppercase tracking-widest">{lang.name}</p>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <Sparkles className="h-2 w-2 text-primary" />
+                                <span className="text-[8px] font-bold text-primary/60 uppercase">Neural Enabled</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse hidden sm:block" />
-                      </CardContent>
-                    </Card>
+                          {/* Triangle Pointer */}
+                          <div className="absolute top-[calc(100%-16px)] left-1/2 -translate-x-1/2 w-3 h-3 bg-black/80 border-r border-b border-primary/40 rotate-45" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </motion.div>
+
+            {/* Static Central Core Label */}
+            <div className="absolute pointer-events-none text-center">
+              <p className="text-[8px] font-black uppercase tracking-[0.4em] text-primary/40 mb-1">Neural Hub</p>
+              <div className="h-1 w-1 bg-primary rounded-full mx-auto shadow-[0_0_10px_#ff6600]" />
+            </div>
           </div>
 
         </div>
@@ -127,6 +159,4 @@ const LanguagesSection = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
     </section>
   );
-};
-
-export default LanguagesSection;
+}
