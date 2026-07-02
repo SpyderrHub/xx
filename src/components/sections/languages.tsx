@@ -16,8 +16,6 @@ const languages = [
   { name: 'Gujarati', flagId: 'flag-hindi' },
   { name: 'Malayalam', flagId: 'flag-hindi' },
   { name: 'Punjabi', flagId: 'flag-hindi' },
-  { name: 'English (US)', flagId: 'flag-english-us' },
-  { name: 'Japanese', flagId: 'flag-japanese' },
 ];
 
 // Double the languages array for a seamless loop
