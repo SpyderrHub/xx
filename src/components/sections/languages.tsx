@@ -4,52 +4,53 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Globe2 } from 'lucide-react';
 
 const languages = [
   { name: 'Hindi', flagId: 'flag-hindi' },
-  { name: 'English (US)', flagId: 'flag-english-us' },
+  { name: 'Bengali', flagId: 'flag-hindi' },
   { name: 'Telugu', flagId: 'flag-telugu' },
+  { name: 'Marathi', flagId: 'flag-hindi' },
   { name: 'Tamil', flagId: 'flag-tamil' },
-  { name: 'Spanish', flagId: 'flag-spanish' },
-  { name: 'Arabic', flagId: 'flag-arabic' },
-  { name: 'French', flagId: 'flag-french' },
-  { name: 'German', flagId: 'flag-german' },
+  { name: 'Kannada', flagId: 'flag-hindi' },
+  { name: 'Gujarati', flagId: 'flag-hindi' },
+  { name: 'Malayalam', flagId: 'flag-hindi' },
+  { name: 'Punjabi', flagId: 'flag-hindi' },
+  { name: 'English (US)', flagId: 'flag-english-us' },
   { name: 'Japanese', flagId: 'flag-japanese' },
 ];
 
 // Double the languages array for a seamless loop
-const marqueeLanguages = [...languages, ...languages];
+const marqueeLanguages = [...languages, ...languages, ...languages];
 
 const LanguagesSection = () => {
   return (
-    <section className="py-24 bg-black/20 relative overflow-hidden">
-      <div className="container mx-auto px-6 sm:px-10 lg:px-16 mb-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Global Language Support
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Speak to your audience in their native tongue with studio-quality voices in 40+ languages.
-            </p>
-          </motion.div>
+    <section className="py-32 bg-transparent relative overflow-hidden border-t border-white/5">
+      <div className="container mx-auto px-6 sm:px-10 lg:px-16 mb-20">
+        <div className="mx-auto max-w-3xl text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+            <Globe2 className="h-3 w-3" />
+            <span>Native Indic Support</span>
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-6xl leading-tight">
+            Fluent in Every <br />
+            <span className="text-primary">Regional Dialect.</span>
+          </h2>
+          <p className="mt-6 text-sm sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            QuantisAI Labs is optimized for the linguistic diversity of the Indian subcontinent. Experience perfect prosody in 12+ Indic languages.
+          </p>
         </div>
       </div>
 
       {/* Infinite Marquee Container */}
-      <div className="relative flex overflow-x-hidden py-10">
+      <div className="relative flex overflow-x-hidden py-4">
         <motion.div
           className="flex whitespace-nowrap"
           animate={{
-            x: ['0%', '-50%'],
+            x: ['0%', '-33.33%'],
           }}
           transition={{
-            duration: 30,
+            duration: 40,
             ease: 'linear',
             repeat: Infinity,
           }}
@@ -59,27 +60,27 @@ const LanguagesSection = () => {
 
             return (
               <div key={`${lang.name}-${i}`} className="mx-4">
-                <Card className="w-64 bg-white/5 backdrop-blur-md border-white/10 hover:border-primary/50 transition-all duration-300 group cursor-default">
+                <Card className="w-64 bg-white/[0.02] backdrop-blur-md border-white/5 hover:border-primary/30 transition-all duration-500 group cursor-default shadow-2xl rounded-2xl overflow-hidden">
                   <CardContent className="p-6 flex items-center gap-4">
-                    <div className="relative h-10 w-14 overflow-hidden rounded-md border border-white/10 shadow-lg">
+                    <div className="relative h-10 w-14 overflow-hidden rounded-lg border border-white/10 shadow-lg shrink-0">
                       {flagImage ? (
                         <Image
                           src={flagImage.imageUrl}
                           alt={lang.name}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
-                          data-ai-hint={flagImage.imageHint}
+                          unoptimized
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                       ) : (
                         <div className="h-full w-full bg-primary/10" />
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-bold text-white text-lg group-hover:text-primary transition-colors">
+                    <div className="min-w-0">
+                      <h3 className="font-black text-white text-lg group-hover:text-primary transition-colors truncate">
                         {lang.name}
                       </h3>
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-                        Ready to Use
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-black opacity-40">
+                        Neural Engine Active
                       </p>
                     </div>
                   </CardContent>
@@ -90,14 +91,14 @@ const LanguagesSection = () => {
         </motion.div>
 
         {/* Gradient Overlays for smooth fading edges */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-48 bg-gradient-to-r from-[#0B0B0F] to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-48 bg-gradient-to-l from-[#0B0B0F] to-transparent z-10" />
       </div>
       
       <div className="mt-16 text-center">
-         <p className="text-sm text-muted-foreground font-medium flex items-center justify-center gap-2">
-           <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-           New regional dialects added every month
+         <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3">
+           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+           New regional voices added weekly
          </p>
       </div>
     </section>
