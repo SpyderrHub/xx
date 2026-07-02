@@ -8,7 +8,6 @@ import CodeIntegrationSection from '@/components/sections/code-integration';
 import PricingSection from '@/components/sections/pricing';
 import FinalCTASection from '@/components/sections/final-cta';
 import LanguagesSection from '@/components/sections/languages';
-import VoiceQualitySection from '@/components/sections/voice-quality';
 
 export default function Home() {
   return (
@@ -18,7 +17,6 @@ export default function Home() {
         <HeroSection />
         <ComparisonSlider />
         <VoiceSamplesSection />
-        <VoiceQualitySection />
         <LanguagesSection />
         <CodeIntegrationSection />
         <FeaturesSection />
