@@ -33,14 +33,14 @@ export default function Header() {
     <header 
       className={cn(
         "fixed left-0 right-0 z-50 flex justify-center px-4 transition-all duration-500",
-        isScrolled ? "top-4" : "top-8"
+        "top-6" // Fixed position to ensure no shifting while scrolling
       )}
     >
       <nav 
         className={cn(
           "flex items-center justify-between w-[95%] max-w-7xl px-8 md:px-14 rounded-full border border-white/10 transition-all duration-500",
           "bg-black/30 backdrop-blur-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]",
-          "py-5 md:py-6"
+          "py-4 md:py-5" // Reduced height by ~15% (from py-5 md:py-6)
         )}
       >
         <div className="flex items-center gap-12 md:gap-16">
@@ -48,7 +48,7 @@ export default function Header() {
             <Logo className="h-9 md:h-12 transition-transform group-hover:scale-105" />
           </Link>
 
-          {/* Desktop Nav - Moved to Left */}
+          {/* Desktop Nav - Grouped on the Left */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link 
