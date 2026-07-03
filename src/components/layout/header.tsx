@@ -32,7 +32,7 @@ export default function Header() {
   return (
     <header 
       className={cn(
-        "fixed top-8 left-0 right-0 z-50 flex justify-center px-4 transition-all duration-500",
+        "fixed left-0 right-0 z-50 flex justify-center px-4 transition-all duration-500",
         isScrolled ? "top-4" : "top-8"
       )}
     >
@@ -40,7 +40,7 @@ export default function Header() {
         className={cn(
           "flex items-center justify-between w-[95%] max-w-7xl px-8 md:px-14 rounded-full border border-white/10 transition-all duration-500",
           "bg-black/30 backdrop-blur-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]",
-          isScrolled ? "py-3 scale-95 md:scale-100" : "py-5 md:py-6"
+          "py-5 md:py-6"
         )}
       >
         <div className="flex items-center gap-12 md:gap-16">
