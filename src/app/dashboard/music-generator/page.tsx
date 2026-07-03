@@ -247,7 +247,7 @@ export default function MusicGeneratorPage() {
   return (
     <div className="min-h-screen pb-32">
       {/* Top Studio Header - Responsive Row */}
-      <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl text-[0.9em]">
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-full text-[0.9em]">
         <div className="flex items-center gap-2 sm:gap-4 w-auto">
           <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
             <Music className="h-4 w-4 md:h-5 md:w-5" />

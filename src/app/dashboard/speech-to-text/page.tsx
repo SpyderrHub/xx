@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
@@ -175,7 +174,7 @@ export default function SpeechToTextPage() {
   return (
     <div className="flex flex-col h-auto lg:h-[calc(100vh-theme(spacing.32))] -mx-4 sm:-mx-6 lg:-mx-10 -mb-4 sm:-mb-6 lg:-mb-10 overflow-hidden bg-transparent">
       {/* Top Studio Header - Mobile Responsive Single Row */}
-      <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-2xl text-[0.9em]">
+      <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-full text-[0.9em]">
         <div className="flex items-center gap-2 sm:gap-4 w-auto">
           <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
             <Ear className="h-4 w-4 md:h-5 md:w-5" />
