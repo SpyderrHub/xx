@@ -44,6 +44,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-universal-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     background-color: #0B0B0F;
     background-image: 
       radial-gradient(at 0% 0%, hsla(24, 100%, 50%, 0.08) 0px, transparent 50%),
