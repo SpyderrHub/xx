@@ -38,29 +38,31 @@ export default function Header() {
     >
       <nav 
         className={cn(
-          "flex items-center gap-10 md:gap-24 px-10 md:px-20 rounded-full border border-white/10 transition-all duration-500",
+          "flex items-center justify-between w-[95%] max-w-7xl px-8 md:px-14 rounded-full border border-white/10 transition-all duration-500",
           "bg-black/30 backdrop-blur-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]",
           isScrolled ? "py-3 scale-95 md:scale-100" : "py-5 md:py-6"
         )}
       >
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <Logo className="h-9 md:h-12 transition-transform group-hover:scale-105" />
-        </Link>
+        <div className="flex items-center gap-12 md:gap-16">
+          <Link href="/" className="flex items-center gap-2 group shrink-0">
+            <Logo className="h-9 md:h-12 transition-transform group-hover:scale-105" />
+          </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-16 px-4">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.name} 
-              href={link.href}
-              target={link.name === 'Docs' ? "_blank" : undefined}
-              rel={link.name === 'Docs' ? "noopener noreferrer" : undefined}
-              className="text-[14px] font-black text-white/50 hover:text-white transition-colors relative group uppercase tracking-[0.2em]"
-            >
-              {link.name}
-              <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+          {/* Desktop Nav - Moved to Left */}
+          <div className="hidden lg:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                href={link.href}
+                target={link.name === 'Docs' ? "_blank" : undefined}
+                rel={link.name === 'Docs' ? "noopener noreferrer" : undefined}
+                className="text-[13px] font-black text-white/50 hover:text-white transition-colors relative group uppercase tracking-[0.2em]"
+              >
+                {link.name}
+                <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-6 md:gap-10 shrink-0">
