@@ -38,7 +38,7 @@ export default function Header() {
     >
       <nav 
         className={cn(
-          "flex items-center gap-8 md:gap-16 px-8 md:px-12 rounded-full border border-white/10 transition-all duration-500",
+          "flex items-center gap-10 md:gap-24 px-10 md:px-20 rounded-full border border-white/10 transition-all duration-500",
           "bg-black/30 backdrop-blur-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]",
           isScrolled ? "py-3 scale-95 md:scale-100" : "py-5 md:py-6"
         )}
@@ -48,7 +48,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-12 px-4">
+        <div className="hidden lg:flex items-center gap-16 px-4">
           {navLinks.map((link) => (
             <Link 
               key={link.name} 
@@ -63,7 +63,7 @@ export default function Header() {
           ))}
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6 shrink-0">
+        <div className="flex items-center gap-6 md:gap-10 shrink-0">
           {!user ? (
             <>
               <Link 
