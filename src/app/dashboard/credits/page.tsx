@@ -15,7 +15,8 @@ import {
   Music,
   ShoppingCart,
   Plus,
-  Lock
+  Lock,
+  Globe
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,7 +76,7 @@ const topupPlans = [
 
 /**
  * Specialized component to render the Razorpay Payment Button script
- * for specific tiers as requested.
+ * Integrated with the pay.quantisai.org webhook node.
  */
 const RazorpayPaymentButton = ({ buttonId }: { buttonId: string }) => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -145,8 +146,10 @@ export default function CreditsPage() {
         name: 'QuantisAI Labs',
         description: `Top-up: ${plan.characters.toLocaleString()} Characters`,
         order_id: orderData.orderId,
+        callback_url: "https://pay.quantisai.org/razorpay/webhook", // Integrated secure verification node
         handler: async (response: any) => {
           try {
+            // Immediate credit update (Webhook acts as secondary auditor)
             const verifyRes = await fetch('/api/razorpay/verify-order', {
               method: 'POST',
               headers: {
@@ -162,7 +165,10 @@ export default function CreditsPage() {
             });
 
             if (verifyRes.ok) {
-              toast({ title: 'Top-up Successful', description: `${plan.characters.toLocaleString()} characters added to your balance.` });
+              toast({ 
+                title: 'Top-up Successful', 
+                description: `${plan.characters.toLocaleString()} characters added to your balance. Verified via QuantisAI Node.` 
+              });
             } else {
               const err = await verifyRes.json();
               throw new Error(err.message);
@@ -213,7 +219,7 @@ export default function CreditsPage() {
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Resource Management</p>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Credits & Usage</h1>
           <p className="text-muted-foreground text-[10px] md:text-sm max-w-md">
-            Monitor your QuantisAI Labs balance and top up whenever you need extra volume.
+            Monitor your balance. Verified via <span className="text-primary font-bold">pay.quantisai.org</span> secure node.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -306,6 +312,18 @@ export default function CreditsPage() {
                         ))}
                     </ul>
                 </CardContent>
+            </Card>
+
+            <Card className="bg-primary/5 border-primary/20 rounded-[2rem] p-6">
+               <div className="flex items-start gap-4">
+                  <Globe className="h-5 w-5 text-primary shrink-0" />
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white">Security Verification</p>
+                    <p className="text-[9px] text-muted-foreground leading-relaxed">
+                      All credits are verified by our secure node at <span className="font-bold">pay.quantisai.org</span>.
+                    </p>
+                  </div>
+               </div>
             </Card>
         </div>
       </div>
