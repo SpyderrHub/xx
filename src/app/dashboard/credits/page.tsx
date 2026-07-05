@@ -126,7 +126,7 @@ export default function CreditsPage() {
 
   const { data: userData, isLoading } = useDoc(userDocRef);
 
-  // Real-time Balance Monitor
+  // Real-time Balance Monitor: Celebrates when the database updates
   useEffect(() => {
     if (userData?.credits !== undefined) {
       if (prevCreditsRef.current !== null && userData.credits > prevCreditsRef.current) {
@@ -183,7 +183,7 @@ export default function CreditsPage() {
             credits: plan.characters.toString()
         },
         handler: async (response: any) => {
-          // Client-side quick verification to speed up the UX
+          // Client-side quick verification - Webhook handles the heavy lifting
           fetch('/api/razorpay/verify-order', {
             method: 'POST',
             headers: {
@@ -241,7 +241,7 @@ export default function CreditsPage() {
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Resource Management</p>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Credits & Usage</h1>
           <p className="text-muted-foreground text-[10px] md:text-sm max-w-md">
-            Monitor your balance. Verified via <span className="text-primary font-bold">pay.quantisai.org</span> secure node.
+            Monitor your balance. Verified via <span className="text-primary font-bold">quantisai.org</span> secure node.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -340,9 +340,9 @@ export default function CreditsPage() {
                <div className="flex items-start gap-4">
                   <Globe className="h-5 w-5 text-primary shrink-0" />
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white">Security Node Active</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white">Secure Verification</p>
                     <p className="text-[9px] text-muted-foreground leading-relaxed">
-                      Transactions verified by <span className="font-bold">pay.quantisai.org</span>. Credits added instantly upon capture.
+                      Transactions verified by <span className="font-bold">QuantisAI API Node</span>. Credits added instantly upon capture.
                     </p>
                   </div>
                </div>
