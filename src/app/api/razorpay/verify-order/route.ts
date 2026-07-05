@@ -33,11 +33,10 @@ export async function POST(request: NextRequest) {
       topupType,
     } = await request.json();
 
-    console.log(`[VERIFY_ORDER] Start verification for Payment: ${razorpay_payment_id}, User: ${uid}`);
+    console.log(`[VERIFY_ORDER] Verifying Payment: ${razorpay_payment_id} for User: ${uid}`);
 
     const secret = process.env.RAZORPAY_KEY_SECRET;
     if (!secret) {
-      console.error('[VERIFY_ORDER] RAZORPAY_KEY_SECRET missing');
       return NextResponse.json({ message: 'Secret key not configured' }, { status: 500 });
     }
 
@@ -48,19 +47,16 @@ export async function POST(request: NextRequest) {
       .digest('hex');
 
     if (generated_signature !== razorpay_signature) {
-      console.error(`[VERIFY_ORDER] Signature mismatch for ${razorpay_payment_id}`);
       return NextResponse.json({ message: 'Invalid signature' }, { status: 400 });
     }
 
     // 2. Resolve Credit Amount
     const creditsToAdd = TOPUP_CREDITS[topupType];
     if (!creditsToAdd) {
-      console.error(`[VERIFY_ORDER] Invalid pack: ${topupType}`);
       return NextResponse.json({ message: 'Invalid top-up pack' }, { status: 400 });
     }
 
     // 3. Atomically Update Credits with Idempotency
-    // We use the payment ID as the document ID for the transaction log to prevent double-crediting
     const userRef = adminDb.collection('users').doc(uid);
     const logRef = adminDb.collection('user_topups').doc(razorpay_payment_id);
     
@@ -78,7 +74,7 @@ export async function POST(request: NextRequest) {
       
       const currentCredits = userSnap.data()?.credits || 0;
 
-      // Increment credits
+      // Update Credits Additively
       transaction.update(userRef, {
         credits: currentCredits + creditsToAdd,
         lastTopupAt: new Date().toISOString(),
@@ -90,20 +86,20 @@ export async function POST(request: NextRequest) {
         userId: uid,
         packId: topupType,
         creditsAdded: creditsToAdd,
+        previousBalance: currentCredits,
+        newBalance: currentCredits + creditsToAdd,
         razorpayOrderId: razorpay_order_id,
         razorpayPaymentId: razorpay_payment_id,
         createdAt: new Date().toISOString(),
         status: 'success',
-        method: 'razorpay_modal_verify'
+        method: 'client_verification'
       });
     });
 
     if (alreadyProcessed) {
-      console.log(`[VERIFY_ORDER] Payment ${razorpay_payment_id} was already handled.`);
       return NextResponse.json({ success: true, message: 'Already processed' });
     }
 
-    console.log(`[VERIFY_ORDER] Successfully added ${creditsToAdd} credits to ${uid}`);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('[VERIFY_ORDER] Fatal Error:', error);

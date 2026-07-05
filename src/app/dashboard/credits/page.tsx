@@ -16,7 +16,8 @@ import {
   ShoppingCart,
   Plus,
   Lock,
-  Globe
+  Globe,
+  PartyPopper
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -90,9 +91,6 @@ const RazorpayPaymentButton = ({ buttonId, userId, characters, planId }: { butto
     script.src = "https://checkout.razorpay.com/v1/payment-button.js";
     script.setAttribute('data-payment_button_id', buttonId);
     
-    // Attempt to pass identity notes via script attributes if the button config supports it
-    // Most reliable method for buttons is usually email-based identification in the webhook
-    // but we add these as hidden inputs to the form just in case the renderer uses them.
     if (userId) {
       const inputs = [
         { name: 'notes[userId]', value: userId },
@@ -119,6 +117,7 @@ export default function CreditsPage() {
   const { user, firestore } = useFirebase();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const prevCreditsRef = useRef<number | null>(null);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -126,6 +125,21 @@ export default function CreditsPage() {
   }, [user, firestore]);
 
   const { data: userData, isLoading } = useDoc(userDocRef);
+
+  // Real-time Balance Monitor
+  useEffect(() => {
+    if (userData?.credits !== undefined) {
+      if (prevCreditsRef.current !== null && userData.credits > prevCreditsRef.current) {
+        const added = userData.credits - prevCreditsRef.current;
+        toast({
+          title: "Credits Added!",
+          description: `Successfully added ${added.toLocaleString()} characters to your balance.`,
+          variant: "success",
+        });
+      }
+      prevCreditsRef.current = userData.credits;
+    }
+  }, [userData?.credits]);
 
   const handleTopup = async (plan: typeof topupPlans[0]) => {
     if (!user) return;
@@ -169,34 +183,21 @@ export default function CreditsPage() {
             credits: plan.characters.toString()
         },
         handler: async (response: any) => {
-          try {
-            // Immediate Verification call to speed up UI update
-            const verifyRes = await fetch('/api/razorpay/verify-order', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`,
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                topupType: plan.id
-              }),
-            });
-
-            if (verifyRes.ok) {
-              toast({ 
-                title: 'Payment Verified', 
-                description: `${plan.characters.toLocaleString()} characters are being added to your balance.` 
-              });
-            } else {
-              const err = await verifyRes.json();
-              throw new Error(err.message);
-            }
-          } catch (err: any) {
-            toast({ title: 'Processing Payment', description: 'Your payment is being verified by the node.', info: true });
-          }
+          // Client-side quick verification to speed up the UX
+          fetch('/api/razorpay/verify-order', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              topupType: plan.id
+            }),
+          });
+          toast({ title: 'Payment Authorized', description: 'Your balance is being updated in real-time.' });
         },
         prefill: {
           name: user.displayName || '',
@@ -226,10 +227,8 @@ export default function CreditsPage() {
 
   const creditsRemaining = userData?.credits || 0;
   const plan = userData?.plan || 'free';
-  const isFree = plan === 'free';
   const limit = planLimits[plan] || 3000;
   
-  // Usage calculation adjusted for top-up compatibility (where balance can exceed plan limit)
   const creditsUsed = Math.max(0, limit - creditsRemaining);
   const usagePercentage = Math.min(100, (creditsUsed / limit) * 100);
 
@@ -394,7 +393,7 @@ export default function CreditsPage() {
                   <div className="space-y-4">
                     <div className="text-xl md:text-3xl font-black text-white">₹{pack.price}</div>
                     
-                    {isFree ? (
+                    {plan === 'free' ? (
                       <Button 
                         asChild
                         className={cn(
