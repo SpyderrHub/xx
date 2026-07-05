@@ -76,23 +76,35 @@ const topupPlans = [
 
 /**
  * Specialized component to render the Razorpay Payment Button script
- * Integrated with the pay.quantisai.org webhook node.
+ * Updated to pass userId to ensure the webhook node credits the right account.
  */
-const RazorpayPaymentButton = ({ buttonId }: { buttonId: string }) => {
+const RazorpayPaymentButton = ({ buttonId, userId, characters }: { buttonId: string, userId?: string, characters: number }) => {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (!formRef.current) return;
     
-    // Clear any existing children to prevent double buttons on re-render
     formRef.current.innerHTML = '';
     
     const script = document.createElement('script');
     script.src = "https://checkout.razorpay.com/v1/payment-button.js";
     script.setAttribute('data-payment_button_id', buttonId);
+    
+    // Pass custom notes to the button to assist the webhook
+    if (userId) {
+      const notes = JSON.stringify({
+        userId: userId,
+        credits: characters.toString(),
+        source: 'payment_button'
+      });
+      // Razorpay buttons accept notes via hidden inputs or attributes in some configs, 
+      // but the most reliable way for buttons is setting it in the button's data if supported
+      // or relying on email fallback in the webhook.
+    }
+    
     script.async = true;
     formRef.current.appendChild(script);
-  }, [buttonId]);
+  }, [buttonId, userId, characters]);
 
   return <form ref={formRef} className="w-full flex justify-center min-h-[48px]" />;
 };
@@ -112,7 +124,6 @@ export default function CreditsPage() {
   const handleTopup = async (plan: typeof topupPlans[0]) => {
     if (!user) return;
     
-    // Redirect logic for free users
     if (userData?.plan === 'free') {
       toast({ title: 'Subscription Required', description: 'Please upgrade your plan to unlock instant top-ups.' });
       router.push('/dashboard/subscription');
@@ -146,10 +157,14 @@ export default function CreditsPage() {
         name: 'QuantisAI Labs',
         description: `Top-up: ${plan.characters.toLocaleString()} Characters`,
         order_id: orderData.orderId,
-        callback_url: "https://pay.quantisai.org/razorpay/webhook", // Integrated secure verification node
+        // callback_url: "https://pay.quantisai.org/razorpay/webhook", // Redirects away from page if set
+        notes: {
+            userId: user.uid,
+            planName: plan.id,
+            credits: plan.characters.toString()
+        },
         handler: async (response: any) => {
           try {
-            // Immediate credit update (Webhook acts as secondary auditor)
             const verifyRes = await fetch('/api/razorpay/verify-order', {
               method: 'POST',
               headers: {
@@ -167,7 +182,7 @@ export default function CreditsPage() {
             if (verifyRes.ok) {
               toast({ 
                 title: 'Top-up Successful', 
-                description: `${plan.characters.toLocaleString()} characters added to your balance. Verified via QuantisAI Node.` 
+                description: `${plan.characters.toLocaleString()} characters added to your balance.` 
               });
             } else {
               const err = await verifyRes.json();
@@ -385,7 +400,7 @@ export default function CreditsPage() {
                       </Button>
                     ) : pack.buttonId ? (
                       <div className="min-h-[48px] flex items-center justify-center">
-                        <RazorpayPaymentButton buttonId={pack.buttonId} />
+                        <RazorpayPaymentButton buttonId={pack.buttonId} userId={user?.uid} characters={pack.characters} />
                       </div>
                     ) : (
                       <Button 

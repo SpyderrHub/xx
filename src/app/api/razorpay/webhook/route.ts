@@ -15,7 +15,7 @@ const BUTTON_CREDIT_MAP: Record<string, number> = {
 /**
  * Razorpay Webhook Handler for QuantisAI Labs
  * Processes payment.captured events to automatically add credits to user accounts.
- * Now integrated with the external verification node at pay.quantisai.org.
+ * Integrated with the external verification node at pay.quantisai.org.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -28,14 +28,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized or service unavailable' }, { status: 401 });
     }
 
-    // 1. Verify Webhook Signature (Security Audit Pass)
+    // 1. Verify Webhook Signature
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(body)
       .digest('hex');
 
     if (signature !== expectedSignature) {
-      console.error('[WEBHOOK] Invalid signature detected. Request rejected.');
+      console.error('[WEBHOOK] Invalid signature detected.');
       return NextResponse.json({ message: 'Invalid signature' }, { status: 400 });
     }
 
@@ -43,8 +43,11 @@ export async function POST(request: NextRequest) {
     const event = eventData.event;
 
     // 2. Handle Payment Captured Event
-    if (event === 'payment.captured') {
-      const payment = eventData.payload.payment.entity;
+    if (event === 'payment.captured' || event === 'order.paid') {
+      const payload = eventData.payload.payment?.entity || eventData.payload.order?.entity;
+      if (!payload) return NextResponse.json({ status: 'ok', message: 'No entity found' });
+
+      const payment = event === 'payment.captured' ? payload : eventData.payload.payment.entity;
       const paymentId = payment.id;
       const orderId = payment.order_id;
       const email = payment.email;
@@ -54,15 +57,25 @@ export async function POST(request: NextRequest) {
                        payment.payment_link_id || 
                        payment.notes?.planName;
 
-      console.log(`[WEBHOOK] Verifying captured payment ${paymentId} for user ${email}`);
+      console.log(`[WEBHOOK] Verifying ${event} ${paymentId} for ${email}. Pack: ${buttonId}`);
 
       // 3. Identify Reward Credits
-      const creditsToAdd = BUTTON_CREDIT_MAP[buttonId] || 0;
+      let creditsToAdd = BUTTON_CREDIT_MAP[buttonId] || 0;
 
       if (creditsToAdd === 0) {
-        // Fallback check for credits in custom metadata notes
+        // Fallback check for credits in custom metadata notes or amount calculation
         const noteCredits = parseInt(payment.notes?.credits || '0');
-        if (!noteCredits) {
+        if (noteCredits > 0) {
+          creditsToAdd = noteCredits;
+        } else {
+            // Last resort: Amount-based fallback (₹49 -> 25k, ₹99 -> 50k, ₹149 -> 100k)
+            const amountInInr = payment.amount / 100;
+            if (amountInInr === 49) creditsToAdd = 25000;
+            else if (amountInInr === 99) creditsToAdd = 50000;
+            else if (amountInInr === 149) creditsToAdd = 100000;
+        }
+
+        if (creditsToAdd === 0) {
           console.warn(`[WEBHOOK] Unrecognized ID: ${buttonId}. No credits assigned.`);
           return NextResponse.json({ status: 'ok', message: 'No reward found for this ID' });
         }
@@ -88,7 +101,10 @@ export async function POST(request: NextRequest) {
       // 5. Execute Atomic Transaction to apply credits
       await adminDb.runTransaction(async (transaction) => {
         const freshUserDoc = await transaction.get(userDocRef);
-        if (!freshUserDoc.exists) return;
+        if (!freshUserDoc.exists) {
+            console.error(`[WEBHOOK] User document ${uid} disappeared during transaction.`);
+            return;
+        }
         
         const currentCredits = freshUserDoc.data()?.credits || 0;
 
@@ -124,7 +140,7 @@ export async function POST(request: NextRequest) {
         });
       });
 
-      console.log(`[WEBHOOK] Success: Credited ${creditsToAdd} chars to user ${uid} (Verified via pay.quantisai.org)`);
+      console.log(`[WEBHOOK] Success: Credited ${creditsToAdd} chars to user ${uid}`);
     }
 
     return NextResponse.json({ status: 'ok', verified: true });
@@ -135,5 +151,5 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  return new NextResponse('QuantisAI Labs Webhook Verification Node active.', { status: 200 });
+  return new NextResponse('QuantisAI Labs Webhook Node active.', { status: 200 });
 }

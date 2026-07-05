@@ -29,8 +29,11 @@ export async function POST(request: NextRequest) {
       topupType,
     } = await request.json();
 
+    console.log(`[VERIFY_ORDER] Verifying payment ${razorpay_payment_id} for user ${uid}, pack ${topupType}`);
+
     const secret = process.env.RAZORPAY_KEY_SECRET;
     if (!secret) {
+      console.error('[VERIFY_ORDER] RAZORPAY_KEY_SECRET is not set');
       return NextResponse.json({ message: 'Secret key not configured' }, { status: 500 });
     }
 
@@ -41,12 +44,14 @@ export async function POST(request: NextRequest) {
       .digest('hex');
 
     if (generated_signature !== razorpay_signature) {
+      console.error(`[VERIFY_ORDER] Signature mismatch. Expected ${generated_signature}, got ${razorpay_signature}`);
       return NextResponse.json({ message: 'Invalid signature' }, { status: 400 });
     }
 
     // 2. Identify Credit Amount
     const creditsToAdd = TOPUP_CREDITS[topupType];
     if (!creditsToAdd) {
+      console.error(`[VERIFY_ORDER] Invalid topup pack: ${topupType}`);
       return NextResponse.json({ message: 'Invalid top-up pack' }, { status: 400 });
     }
 
@@ -59,6 +64,17 @@ export async function POST(request: NextRequest) {
       
       const currentCredits = userDoc.data()?.credits || 0;
       
+      // Idempotency check for verify-order too
+      const existingTx = await adminDb.collection('user_topups')
+        .where('razorpayPaymentId', '==', razorpay_payment_id)
+        .limit(1)
+        .get();
+        
+      if (!existingTx.empty) {
+        console.log(`[VERIFY_ORDER] Payment ${razorpay_payment_id} already processed.`);
+        return;
+      }
+
       transaction.update(userRef, {
         credits: currentCredits + creditsToAdd,
         lastTopupAt: new Date().toISOString(),
@@ -74,13 +90,15 @@ export async function POST(request: NextRequest) {
         razorpayOrderId: razorpay_order_id,
         razorpayPaymentId: razorpay_payment_id,
         createdAt: new Date().toISOString(),
-        status: 'success'
+        status: 'success',
+        method: 'razorpay_modal'
       });
     });
 
+    console.log(`[VERIFY_ORDER] Success: Added ${creditsToAdd} credits to user ${uid}`);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Error verifying order payment:', error);
+    console.error('[VERIFY_ORDER] Error:', error);
     return NextResponse.json({ message: error.message || 'Verification failed' }, { status: 500 });
   }
 }
