@@ -1,30 +1,26 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { 
   Loader2, 
   Zap, 
   Download, 
-  User, 
-  Volume2, 
-  Mic2, 
   Play, 
   Pause,
   Sparkles,
-  Globe2,
-  Settings2,
   Library,
   CalendarDays,
-  Clock
+  Clock,
+  Volume2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useFirebase, useDoc, useMemoFirebase, errorEmitter, FirestorePermissionError, type SecurityRuleContext } from '@/firebase';
-import { doc, collection, runTransaction } from 'firebase/firestore';
+import { doc, collection, runTransaction, getDocs, query, where, setDoc } from 'firebase/firestore';
 import Link from 'next/link';
 
 const MAX_PROMPT_CHARS = 500;
@@ -55,13 +51,13 @@ const StudioTextArea = ({
         dir="ltr"
         placeholder={placeholder}
         className="w-full min-h-[200px] p-6 text-[18px] text-left leading-relaxed outline-none bg-white/[0.02] border border-white/5 rounded-[2rem] placeholder:text-muted-foreground/20 font-medium text-white/90 selection:bg-primary/30 resize-none focus:ring-1 focus:ring-primary/20 transition-all shadow-inner"
-        style={{ fontFamily: "'Inter', sans-serif" }}
+        style={{ fontFamily: "var(--font-universal-sans), sans-serif" }}
       />
     </div>
   );
 };
 
-const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) => {
+const AudioPlayerFooter = ({ audioUrl, isPlaying, onTogglePlay, onSave, isSaving }: any) => {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -96,13 +92,6 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
     }
   }, [audioUrl, onTogglePlay]);
 
-  const handleSaveToLibrary = () => {
-    toast({
-      title: "Voice Saved",
-      description: "This designed voice has been added to your library.",
-    });
-  };
-
   if (!audioUrl) return null;
 
   return (
@@ -130,8 +119,14 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
-              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" onClick={handleSaveToLibrary}>
-                <Library className="h-4 w-4" />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-10 w-10 rounded-xl border-white/10 bg-white/5" 
+                onClick={onSave}
+                disabled={isSaving}
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Library className="h-4 w-4" />}
               </Button>
           </div>
         </div>
@@ -153,9 +148,10 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
             size="icon" 
             className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" 
             title="Save to Library"
-            onClick={handleSaveToLibrary}
+            onClick={onSave}
+            disabled={isSaving}
           >
-            <Library className="h-5 w-5" />
+            {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Library className="h-5 w-5" />}
           </Button>
           <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -172,14 +168,10 @@ export default function VoiceDesignerPage() {
   const [prompt, setPrompt] = useState('');
   const [referenceText, setReferenceText] = useState('This is how my new designed voice sounds. You can customize my tone and style using the prompt above.');
   const [isDesigning, setIsDesigning] = useState(false);
+  const [isSavingToLibrary, setIsSavingToLibrary] = useState(false);
   const [generatedAudio, setGeneratedAudio] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
-  const [settings, setSettings] = useState({
-    stability: 75,
-    clarity: 85
-  });
-
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
@@ -201,21 +193,19 @@ export default function VoiceDesignerPage() {
   const handleGenerate = async () => {
     if (!prompt || !referenceText || isDesigning || !user || !firestore) return;
     
-    // 1. Check daily limit
     if (remainingGenerations <= 0) {
       toast({
         title: "Daily Limit Reached",
-        description: `You have used your ${dailyLimit} free designs for today. Please try again tomorrow.`,
+        description: `You have used your ${dailyLimit} free designs for today.`,
         variant: "destructive"
       });
       return;
     }
 
-    // 2. Check credits
     if (credits < cost) {
       toast({
         title: "Insufficient Credits",
-        description: `This prompt requires ${cost.toLocaleString()} credits. Please upgrade your plan.`,
+        description: `This prompt requires ${cost.toLocaleString()} credits.`,
         variant: "destructive"
       });
       return;
@@ -228,7 +218,6 @@ export default function VoiceDesignerPage() {
     try {
       const token = await user.getIdToken();
       
-      // Call the secure proxy
       const response = await fetch('/api/voice-designer', {
         method: "POST",
         headers: {
@@ -243,31 +232,22 @@ export default function VoiceDesignerPage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Voice design engine error');
-      }
+      if (!response.ok) throw new Error(data.message || 'Voice design engine error');
 
       const audioUrl = data.audio_download_url || data.audio_url || data.url;
-      
-      if (!audioUrl) {
-        throw new Error("No audio URL was returned by the design engine.");
-      }
+      if (!audioUrl) throw new Error("No audio URL returned.");
 
-      // 2. Atomic Transaction for quota, credit deduction, and history
       await runTransaction(firestore, async (transaction) => {
         const uRef = doc(firestore, 'users', user.uid);
         const uSnap = await transaction.get(uRef);
-        
         if (!uSnap.exists()) throw new Error("User record not found");
         
         const dbCredits = uSnap.data().credits || 0;
         const dbLastDate = uSnap.data().lastVoiceDesignDate || '';
         const dbDailyCount = dbLastDate === todayStr ? (uSnap.data().dailyVoiceDesignCount || 0) : 0;
 
-        // Verify limits again in transaction
         if (dbCredits < cost) throw new Error("Insufficient credits");
 
-        // Update User Doc
         transaction.update(uRef, {
           credits: dbCredits - cost,
           dailyVoiceDesignCount: dbDailyCount + 1,
@@ -275,7 +255,6 @@ export default function VoiceDesignerPage() {
           lastVoiceDesignedAt: new Date().toISOString()
         });
 
-        // Add to history
         const historyRef = doc(collection(firestore, 'users', user.uid, 'generations'));
         transaction.set(historyRef, {
           text: prompt.substring(0, 150) + (prompt.length > 150 ? '...' : ''),
@@ -286,40 +265,73 @@ export default function VoiceDesignerPage() {
           characters: cost,
           audioUrl: audioUrl,
           createdAt: new Date().toISOString(),
-          settings: settings
+          settings: {}
         });
-      }).catch(async (serverError) => {
-        if (serverError.code === 'permission-denied') {
-          const permissionError = new FirestorePermissionError({
-            path: `users/${user.uid}/generations`,
-            operation: 'write',
-            requestResourceData: { text: prompt.substring(0, 50), cost },
-          } satisfies SecurityRuleContext);
-          errorEmitter.emit('permission-error', permissionError);
-        }
-        throw serverError;
       });
 
       setGeneratedAudio(audioUrl);
-      toast({
-        title: "Voice Designed",
-        description: "Your unique custom voice is ready to preview.",
-      });
+      toast({ title: "Voice Designed", description: "Your unique custom voice is ready to preview." });
     } catch (error: any) {
-      console.error('Voice Design failed:', error);
-      toast({
-        title: "Design Error",
-        description: error.message || "Failed to design voice profile.",
-        variant: "destructive"
-      });
+      toast({ title: "Design Error", description: error.message, variant: "destructive" });
     } finally {
       setIsDesigning(false);
     }
   };
 
+  const handleSaveToLibrary = async () => {
+    if (!user || !firestore || !generatedAudio || isSavingToLibrary) return;
+
+    setIsSavingToLibrary(true);
+    try {
+      // 1. Get current count for sequential naming
+      const voicesRef = collection(firestore, 'voices');
+      const q = query(voicesRef, where('userId', '==', user.uid));
+      const snapshot = await getDocs(q);
+      const voiceCount = snapshot.size;
+      const customName = `custom_${voiceCount + 1}`;
+
+      // 2. Create the voice document
+      const voiceId = crypto.randomUUID();
+      const voiceData = {
+        id: voiceId,
+        userId: user.uid,
+        voiceName: customName,
+        audioUrl: generatedAudio,
+        description: `Designed voice from prompt: ${prompt.substring(0, 50)}...`,
+        referenceText: referenceText,
+        languages: ['English'],
+        language: 'English',
+        gender: 'Neutral',
+        style: 'Custom',
+        styles: ['Custom'],
+        avatarUrl: `weavy:${Math.floor(Math.random() * 8)}`,
+        status: 'approved',
+        isPublic: false, // Ensure it's private
+        createdAt: new Date().toISOString()
+      };
+
+      await setDoc(doc(firestore, 'voices', voiceId), voiceData);
+
+      // 3. Add to user's 'myVoices' collection for TTS access
+      await setDoc(doc(firestore, 'users', user.uid, 'myVoices', voiceId), {
+        voiceId,
+        addedAt: new Date().toISOString()
+      });
+
+      toast({ 
+        title: "Saved to Library", 
+        description: `Voice saved as ${customName}. You can now use it in the Studio.` 
+      });
+    } catch (error: any) {
+      toast({ title: "Save Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSavingToLibrary(false);
+    }
+  };
+
   return (
     <div className="min-h-screen pb-32">
-      {/* Top Studio Header - Responsive Row */}
+      {/* Top Studio Header */}
       <div className="shrink-0 z-40 glass-card border border-white/5 py-3 px-3 md:py-4 md:px-10 flex flex-row items-center justify-between gap-2 sm:gap-6 mt-4 md:mt-6 mx-4 md:mx-6 rounded-full text-[0.9em]">
         <div className="flex items-center gap-2 sm:gap-4 w-auto">
           <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
@@ -328,23 +340,6 @@ export default function VoiceDesignerPage() {
           <div>
             <h2 className="text-[10px] md:text-sm font-black text-white uppercase tracking-wider leading-tight">Designer</h2>
             <p className="text-[7px] md:text-[10px] text-muted-foreground uppercase tracking-widest font-black hidden sm:block">Neural Engine v2.0</p>
-          </div>
-        </div>
-
-        <div className="flex-1 max-w-md hidden lg:flex items-center gap-8 px-8">
-          <div className="flex-1 space-y-2">
-            <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-              <Label>Stability</Label>
-              <span>{settings.stability}%</span>
-            </div>
-            <Slider value={[settings.stability]} onValueChange={(v) => setSettings({...settings, stability: v[0]})} className="h-4" />
-          </div>
-          <div className="flex-1 space-y-2">
-            <div className="flex justify-between text-[10px] font-black uppercase text-muted-foreground">
-              <Label>Clarity</Label>
-              <span>{settings.clarity}%</span>
-            </div>
-            <Slider value={[settings.clarity]} onValueChange={(v) => setSettings({...settings, clarity: v[0]})} className="h-4" />
           </div>
         </div>
 
@@ -370,7 +365,6 @@ export default function VoiceDesignerPage() {
       </div>
 
       <main className="container mx-auto px-4 md:px-6 max-w-5xl space-y-12 pt-8">
-        {/* Text Area Workspaces */}
         <div className="grid grid-cols-1 gap-10">
           <StudioTextArea 
             label="Voice Prompt"
@@ -389,12 +383,11 @@ export default function VoiceDesignerPage() {
           />
         </div>
 
-        {/* Informational Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12">
           {[
             { title: "Daily Limit", desc: `${dailyLimit} designs per day.`, icon: Clock },
             { title: "Neural Synthesis", desc: "Expressive vocal range.", icon: Volume2 },
-            { title: "Library Sync", desc: "Save clones to library.", icon: Library },
+            { title: "Private Identity", desc: "Accessible only to you.", icon: Library },
           ].map((feature, i) => (
             <div key={i} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 flex items-start gap-4 hover:bg-white/[0.04] transition-colors group">
               <feature.icon className="h-5 w-5 text-primary mt-1 group-hover:scale-110 transition-transform" />
@@ -407,12 +400,12 @@ export default function VoiceDesignerPage() {
         </div>
       </main>
 
-      {/* Audio Player Footer */}
       <AudioPlayerFooter 
         audioUrl={generatedAudio} 
-        voice="Custom Designed Voice"
         isPlaying={isPlaying}
         onTogglePlay={setIsPlaying}
+        onSave={handleSaveToLibrary}
+        isSaving={isSavingToLibrary}
       />
     </div>
   );

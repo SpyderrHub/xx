@@ -37,7 +37,8 @@ service cloud.firestore {
 
     // Public Voice Profiles
     match /voices/{voiceId} {
-      allow read: if true; // Publicly readable for the library
+      // Enhanced read rule: Allow read if voice is public OR if the user is the owner
+      allow read: if (resource.data.isPublic == true || resource.data.status == 'approved') || (isSignedIn() && resource.data.userId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
