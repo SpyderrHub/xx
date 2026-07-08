@@ -66,10 +66,35 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.ontimeupdate = () => setProgress((audioRef.current?.currentTime || 0) / (audioRef.current?.duration || 1) * 100);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.play().catch(() => onTogglePlay(false));
+    } else {
+      audio.pause();
     }
-  }, [audioUrl]);
+  }, [isPlaying, onTogglePlay]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audioUrl && audio) {
+      audio.src = audioUrl;
+      audio.load();
+      setProgress(0);
+      
+      const handleTime = () => setProgress((audio.currentTime / (audio.duration || 1)) * 100);
+      const handleEnded = () => onTogglePlay(false);
+
+      audio.addEventListener('timeupdate', handleTime);
+      audio.addEventListener('ended', handleEnded);
+
+      return () => {
+        audio.removeEventListener('timeupdate', handleTime);
+        audio.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, [audioUrl, onTogglePlay]);
 
   const handleSaveToLibrary = () => {
     toast({
@@ -89,7 +114,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-4 md:gap-6">
         <div className="flex items-center gap-4 shrink-0 w-full md:w-auto">
           <Button 
-            onClick={onTogglePlay}
+            onClick={() => onTogglePlay(!isPlaying)}
             className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-white text-black hover:bg-white/90 btn-glow"
           >
             {isPlaying ? <Pause className="h-5 w-5 md:h-6 md:w-6 fill-current" /> : <Play className="h-5 w-5 md:h-6 md:w-6 fill-current ml-1" />}
@@ -101,7 +126,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
 
           <div className="ml-auto flex items-center gap-2 md:hidden">
              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5" asChild>
-                <a href={audioUrl} download="quantisai-designed-voice.mp3">
+                <a href={audioUrl} download="quantisai-designed-voice.wav" target="_blank" rel="noopener noreferrer">
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -119,7 +144,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
 
         <div className="hidden md:flex items-center gap-3 shrink-0">
           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/10 bg-white/5 hover:bg-white/10" asChild>
-            <a href={audioUrl} download="quantisai-designed-voice.mp3" title="Download Audio">
+            <a href={audioUrl} download="quantisai-designed-voice.wav" title="Download Audio" target="_blank" rel="noopener noreferrer">
               <Download className="h-5 w-5" />
             </a>
           </Button>
@@ -137,7 +162,7 @@ const AudioPlayerFooter = ({ audioUrl, voice, isPlaying, onTogglePlay }: any) =>
           </div>
         </div>
       </div>
-      <audio ref={audioRef} src={audioUrl} />
+      <audio ref={audioRef} className="hidden" />
     </motion.div>
   );
 };
@@ -198,12 +223,35 @@ export default function VoiceDesignerPage() {
 
     setIsDesigning(true);
     setGeneratedAudio(null);
+    setIsPlaying(false);
 
     try {
-      // 1. Mock Design Logic (Simulated neural processing)
-      const audioUrl = await new Promise<string>((resolve) => {
-        setTimeout(() => resolve('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'), 2500);
+      const token = await user.getIdToken();
+      
+      // Call the secure proxy
+      const response = await fetch('/api/voice-designer', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          prompt,
+          referenceText
+        })
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Voice design engine error');
+      }
+
+      const audioUrl = data.audio_download_url || data.audio_url || data.url;
+      
+      if (!audioUrl) {
+        throw new Error("No audio URL was returned by the design engine.");
+      }
 
       // 2. Atomic Transaction for quota, credit deduction, and history
       await runTransaction(firestore, async (transaction) => {
@@ -212,16 +260,12 @@ export default function VoiceDesignerPage() {
         
         if (!uSnap.exists()) throw new Error("User record not found");
         
-        const data = uSnap.data();
-        const dbCredits = data.credits || 0;
-        const dbLastDate = data.lastVoiceDesignDate || '';
-        const dbDailyCount = dbLastDate === todayStr ? (data.dailyVoiceDesignCount || 0) : 0;
-        const dbPlan = data.plan || 'free';
-        const dbLimit = dbPlan === 'starter' ? 10 : dbPlan === 'creator' ? 20 : 30;
+        const dbCredits = uSnap.data().credits || 0;
+        const dbLastDate = uSnap.data().lastVoiceDesignDate || '';
+        const dbDailyCount = dbLastDate === todayStr ? (uSnap.data().dailyVoiceDesignCount || 0) : 0;
 
         // Verify limits again in transaction
         if (dbCredits < cost) throw new Error("Insufficient credits");
-        if (dbDailyCount >= dbLimit) throw new Error("Daily limit reached");
 
         // Update User Doc
         transaction.update(uRef, {
@@ -236,6 +280,7 @@ export default function VoiceDesignerPage() {
         transaction.set(historyRef, {
           text: prompt.substring(0, 150) + (prompt.length > 150 ? '...' : ''),
           fullText: prompt,
+          referenceText: referenceText,
           voiceId: 'voice-designer-v2',
           voiceName: 'Designed Voice',
           characters: cost,
@@ -367,7 +412,7 @@ export default function VoiceDesignerPage() {
         audioUrl={generatedAudio} 
         voice="Custom Designed Voice"
         isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
+        onTogglePlay={setIsPlaying}
       />
     </div>
   );
