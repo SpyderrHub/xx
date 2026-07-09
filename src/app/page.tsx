@@ -5,7 +5,6 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import HeroSection from '@/components/sections/hero';
 import VoiceDesignerDemo from '@/components/sections/voice-designer-demo';
-import VoiceSamplesSection from '@/components/sections/voice-samples';
 import FeaturesSection from '@/components/sections/features';
 import ExamplePrompts from '@/components/sections/example-prompts';
 import LanguagesSection from '@/components/sections/languages';
@@ -32,7 +31,6 @@ export default function Home() {
         <HeroSection />
         {mounted && (
           <>
-            <VoiceSamplesSection />
             <VoiceDesignerDemo />
             <ExamplePrompts />
             <HowItWorks />
