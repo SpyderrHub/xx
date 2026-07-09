@@ -116,11 +116,12 @@ export default function SettingsPage() {
       if (!presignRes.ok) throw new Error(presignData.message);
 
       // 2. Upload to R2 with Immutable Cache System Headers
+      // Signature will fail if these headers don't match the backend exactly
       const uploadRes = await fetch(presignData.presignedUrl, {
         method: 'PUT',
         headers: { 
-          'Content-Type': webpFile.type,
-          'Cache-Control': 'public, max-age=31536000, immutable'
+          'Content-Type': presignData.enforcedMimeType || webpFile.type,
+          'Cache-Control': presignData.enforcedCacheControl || 'public, max-age=31536000, immutable'
         },
         body: webpFile,
       });
@@ -194,7 +195,7 @@ export default function SettingsPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 rounded-full transition-opacity backdrop-blur-[2px]">
-                  {isUploading ? <Loader2 className="h-5 md:h-6 w-5 md:w-6 text-white animate-spin" /> : <Upload className="h-5 md:h-6 w-5 md:w-6 text-white" />}
+                  {isUploading ? <Loader2 className="h-5 md:h-6 w-5 md:w-6 text-white animate-spin" /> : <Camera className="h-5 md:h-6 w-5 md:w-6 text-white" />}
                 </div>
                 <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} accept="image/*" className="hidden" />
               </div>

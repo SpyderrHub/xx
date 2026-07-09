@@ -6,7 +6,7 @@ import { adminAuth } from '@/lib/firebase-admin';
 
 /**
  * Generates a presigned URL for secure client-side upload to R2.
- * Also generates a temporary signedReadUrl for secure access by external engines.
+ * Enforces 1-year immutable Cache-Control metadata for all assets.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid storage root.' }, { status: 400 });
     }
 
-    // Cache System: Every file gets a unique path via UUID. 
+    // Cache System: Every file gets a unique path via UUID to support 'immutable' caching.
     const key = `${safePath}/${uid}/${crypto.randomUUID()}-${fileName}`;
     
     // Enforcement: Map paths to specific MIME types
@@ -52,15 +52,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 1. Create Upload URL (PUT)
+    const CACHE_HEADER = 'public, max-age=31536000, immutable';
+
+    // 1. Create Upload URL (PUT) - Headers here MUST match the client upload request exactly
     const putCommand = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
       ContentType: mimeType,
-      CacheControl: 'public, max-age=31536000, immutable',
+      CacheControl: CACHE_HEADER,
     });
 
-    // 2. Create Read URL (GET) - Valid for 1 hour
+    // 2. Create Read URL (GET) - Valid for 1 hour for secure processing (like STT)
     const getCommand = new GetObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
@@ -78,7 +80,8 @@ export async function POST(request: NextRequest) {
       signedReadUrl,
       key,
       publicUrl: publicDomain ? `${publicDomain}/${key}` : key,
-      enforcedMimeType: mimeType
+      enforcedMimeType: mimeType,
+      enforcedCacheControl: CACHE_HEADER
     });
   } catch (error: any) {
     console.error('Presign error:', error);

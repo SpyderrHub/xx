@@ -48,7 +48,7 @@ export function useVoiceUpload() {
       throw new Error(presignData.message || 'Failed to get upload authorization');
     }
 
-    const { presignedUrl, publicUrl, key, enforcedMimeType } = presignData;
+    const { presignedUrl, publicUrl, key, enforcedMimeType, enforcedCacheControl } = presignData;
 
     // 2. Perform XHR upload with Cache-Control and Content-Type enforcement
     return new Promise((resolve, reject) => {
@@ -56,9 +56,8 @@ export function useVoiceUpload() {
       xhr.open('PUT', presignedUrl, true);
       
       // Headers must match the presigned command exactly for the signature to be valid
-      // We explicitly set the 1-year immutable cache header and the enforced MIME type
       xhr.setRequestHeader('Content-Type', enforcedMimeType || contentType);
-      xhr.setRequestHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      xhr.setRequestHeader('Cache-Control', enforcedCacheControl || 'public, max-age=31536000, immutable');
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -116,6 +115,7 @@ export function useVoiceUpload() {
       setProgress(95);
       const voiceDocRef = doc(firestore, 'voices', voiceId);
       const voiceData = {
+        id: voiceId,
         voiceId,
         userId: user.uid,
         ...formData,
@@ -126,6 +126,7 @@ export function useVoiceUpload() {
         audioDuration,
         audioFormat: 'audio/mpeg',
         status: "approved",
+        isPublic: true,
         createdAt: new Date().toISOString(),
         language: formData.languages[0] || "",
         style: formData.styles[0] || "",
