@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-40 overflow-hidden">
+    <section className="relative pt-32 pb-0 lg:pt-48 lg:pb-0 overflow-hidden">
       <div className="container mx-auto px-6 max-w-7xl relative z-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -41,7 +41,7 @@ const HeroSection = () => {
             </Button>
           </div>
 
-          <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-20 opacity-30">
+          <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-20 opacity-30 pb-16 lg:pb-24">
              {['Native Accents', 'Low Latency', 'Commercial Rights', 'API First'].map((item) => (
                <div key={item} className="flex items-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-white">
                  <div className="h-1 w-1 rounded-full bg-primary" />
