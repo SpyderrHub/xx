@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { CheckCircle, Zap } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -12,6 +12,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 const plans = [
   {
@@ -54,60 +55,67 @@ const plans = [
 
 const PricingSection = () => {
   return (
-    <section id="pricing" className="py-32 relative overflow-hidden">
-      <div className="container mx-auto px-6 sm:px-10 lg:px-16 relative z-10">
+    <section id="pricing" className="py-24 sm:py-32 relative overflow-hidden border-t border-white/5">
+      <div className="container mx-auto px-6 max-w-7xl relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-20 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 text-xs font-black uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-widest">
             <span>Transparent Billing</span>
           </div>
           <h2 className="text-3xl font-black tracking-tight text-white sm:text-5xl leading-tight">
             Predictable <span className="text-primary">Pricing.</span>
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground font-medium">
+          <p className="text-base sm:text-lg text-muted-foreground font-medium opacity-80">
             No enterprise taxes. No hidden tiers. Just pure synthesis at scale.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {plans.map((plan) => (
-            <div key={plan.name} className="flex h-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {plans.map((plan, i) => (
+            <motion.div 
+              key={plan.name} 
+              className="flex h-full"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
               <Card
                 className={cn(
                   'glass-card flex flex-col rounded-[2.5rem] shadow-3d w-full transition-all duration-500',
                   plan.highlight 
-                    ? 'border-primary/50 bg-primary/[0.04] ring-2 ring-primary/20 z-10 scale-[1.02]' 
+                    ? 'border-primary/50 bg-primary/[0.03] ring-2 ring-primary/20 z-10 scale-[1.03]' 
                     : 'border-white/5 bg-white/[0.01] hover:bg-white/[0.02]'
                 )}
               >
-                <CardHeader className="p-8 pb-4">
+                <CardHeader className="p-8 sm:p-10 pb-6">
                   {plan.highlight && (
-                    <div className="bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-primary/20">
+                    <div className="bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mb-6 shadow-lg shadow-primary/20">
                       Most Popular
                     </div>
                   )}
-                  <CardTitle className="text-xl sm:text-2xl font-black text-white">{plan.name}</CardTitle>
+                  <CardTitle className="text-2xl font-black text-white tracking-tight">{plan.name}</CardTitle>
                   <CardDescription className="text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-widest pt-2">
                     {plan.description}
                   </CardDescription>
-                  <div className="flex items-baseline pt-6">
-                    <span className="text-3xl sm:text-5xl font-black text-white">{plan.price}</span>
-                    <span className="text-muted-foreground text-xs sm:text-sm ml-2 font-bold uppercase tracking-tighter opacity-50">{plan.period}</span>
+                  <div className="flex items-baseline pt-8">
+                    <span className="text-4xl sm:text-5xl font-black text-white tracking-tighter">{plan.price}</span>
+                    <span className="text-muted-foreground text-xs font-bold uppercase tracking-widest ml-2 opacity-50">{plan.period}</span>
                   </div>
                 </CardHeader>
-                <CardContent className="flex-1 p-8 pt-4 space-y-4">
+                <CardContent className="flex-1 p-8 sm:p-10 pt-4 space-y-5">
                   {plan.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
                       <CheckCircle className="h-4 w-4 text-primary shrink-0 opacity-80" />
-                      <span className="text-sm font-medium text-white/70">{feature}</span>
+                      <span className="text-[13px] sm:text-sm font-medium text-white/70">{feature}</span>
                     </div>
                   ))}
                 </CardContent>
-                <CardFooter className="p-8 pt-4">
+                <CardFooter className="p-8 sm:p-10 pt-4">
                   <Button
                     asChild
                     size="lg"
                     className={cn(
-                      "w-full h-14 rounded-2xl font-black text-sm transition-all",
+                      "w-full h-14 sm:h-16 rounded-2xl font-black text-sm transition-all",
                       plan.highlight 
                         ? "bg-primary text-white btn-glow" 
                         : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
@@ -117,7 +125,7 @@ const PricingSection = () => {
                   </Button>
                 </CardFooter>
               </Card>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
