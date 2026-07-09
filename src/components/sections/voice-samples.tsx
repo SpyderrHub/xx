@@ -27,7 +27,7 @@ const VoiceCard = ({ voice }: { voice: any }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    setRandomBars(Array.from({ length: 12 }, () => Math.random() * 100));
+    setRandomBars(Array.from({ length: 8 }, () => Math.random() * 100));
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -60,9 +60,9 @@ const VoiceCard = ({ voice }: { voice: any }) => {
   const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
 
   return (
-    <div className="glass-card rounded-[2.5rem] p-6 group transition-all hover:border-primary/40 flex flex-col items-center text-center h-full bg-white/[0.02] border-white/5 shadow-2xl relative">
-      {/* Voice Avatar - Top Centered */}
-      <div className="relative h-20 w-20 rounded-full overflow-hidden border-4 border-white/5 group-hover:border-primary/30 transition-all mb-6 shrink-0 flex items-center justify-center bg-white/5 shadow-inner">
+    <div className="glass-card rounded-2xl p-3 sm:p-4 group transition-all hover:border-primary/40 flex items-center gap-4 h-24 sm:h-28 bg-white/[0.02] border-white/5 shadow-2xl relative w-full">
+      {/* Voice Avatar - Left */}
+      <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-xl overflow-hidden border-2 border-white/5 group-hover:border-primary/30 transition-all shrink-0 flex items-center justify-center bg-white/5 shadow-inner">
         {isGradient ? (
           <WeavyPattern presetIndex={gradientIndex} />
         ) : voice.avatarUrl ? (
@@ -74,62 +74,61 @@ const VoiceCard = ({ voice }: { voice: any }) => {
             className="object-cover" 
           />
         ) : (
-          <User className="h-10 w-10 text-white/10" />
+          <User className="h-6 w-6 text-white/10" />
         )}
       </div>
 
-      {/* Voice Info */}
-      <div className="space-y-3 mb-8 w-full">
-        <h4 className="font-black text-white text-lg sm:text-xl tracking-tight truncate">{voice.voiceName}</h4>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Badge variant="outline" className="bg-white/5 border-none text-[8px] uppercase font-black text-muted-foreground px-3 py-0.5">
-            {languages[0] || 'Global'}
-          </Badge>
-          <Badge variant="outline" className="bg-primary/10 border-none text-[8px] uppercase font-black text-primary px-3 py-0.5">
+      {/* Voice Info & Waveform - Middle */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1 sm:space-y-2">
+        <div className="flex items-center justify-between">
+          <h4 className="font-black text-white text-sm sm:text-lg tracking-tight truncate">{voice.voiceName}</h4>
+          <Badge variant="outline" className="bg-primary/10 border-none text-[7px] sm:text-[9px] uppercase font-black text-primary px-2 py-0.5">
             {voice.gender}
           </Badge>
         </div>
-        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest pt-1 italic line-clamp-1">
-          {voice.style || 'Studio Quality'}
-        </p>
+        
+        <div className="flex items-center gap-3">
+          <div className="h-4 flex items-end gap-0.5 shrink-0">
+            {randomBars.map((height, i) => (
+              <div 
+                key={i}
+                className={cn(
+                  "w-1 rounded-full transition-all duration-300",
+                  isPlaying ? "bg-primary" : "bg-primary/20"
+                )}
+                style={{ height: isPlaying ? `${height}%` : '20%' }}
+              />
+            ))}
+          </div>
+          <p className="text-[8px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest truncate italic">
+            {voice.style || 'Studio Quality'}
+          </p>
+        </div>
       </div>
 
-      {/* Visualization & Controls */}
-      <div className="w-full mt-auto space-y-6">
-        <div className="h-8 flex items-end justify-center gap-1 px-4">
-          {randomBars.map((height, i) => (
-            <div 
-              key={i}
-              className={cn(
-                "w-1.5 rounded-full transition-all duration-300",
-                isPlaying ? "bg-primary" : "bg-primary/20"
-              )}
-              style={{ height: isPlaying ? `${height}%` : '20%' }}
-            />
-          ))}
-        </div>
-
+      {/* Control - Right */}
+      <div className="shrink-0 flex flex-col items-center justify-center h-full border-l border-white/5 pl-4">
         <Button 
-          size="lg" 
+          size="icon" 
           variant="secondary" 
           onClick={togglePlay}
           className={cn(
-            "h-12 w-full rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest",
+            "h-10 w-10 sm:h-12 sm:w-12 rounded-full transition-all duration-300",
             isPlaying 
-              ? "bg-white text-black scale-95 shadow-inner" 
-              : "bg-white/10 text-white hover:bg-white/20"
+              ? "bg-white text-black scale-90 shadow-inner" 
+              : "bg-white/5 text-white/60 hover:bg-primary/20 hover:text-primary"
           )}
         >
           {isPlaying ? (
-            <><Pause className="h-3.5 w-3.5 mr-2 fill-current" /> Stop</>
+            <Pause className="h-4 w-4 sm:h-5 sm:w-5 fill-current" />
           ) : (
-            <><Play className="h-3.5 w-3.5 mr-2 fill-current" /> Preview</>
+            <Play className="h-4 w-4 sm:h-5 sm:w-5 fill-current ml-0.5" />
           )}
         </Button>
       </div>
       
-      <div className="absolute top-4 right-4 opacity-10">
-        <Volume2 className="h-4 w-4 text-white" />
+      <div className="absolute top-2 right-2 opacity-5">
+        <Volume2 className="h-3 w-3 text-white" />
       </div>
     </div>
   );
@@ -152,30 +151,30 @@ export default function VoiceSamplesSection() {
   return (
     <section id="voice-samples" className="pt-20 pb-0 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="text-center mb-24 space-y-4">
+        <div className="text-center mb-20 space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
             <span>The Library</span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-7xl leading-tight">
+          <h2 className="text-3xl font-bold tracking-tighter text-white sm:text-6xl leading-tight">
             Hear the <br />
             <span className="text-primary">Difference.</span>
           </h2>
-          <p className="text-sm sm:text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
+          <p className="text-xs sm:text-lg text-muted-foreground max-w-2xl mx-auto font-medium">
             Discover the most realistic neural voices in the industry. Trained on thousands of hours of expressive speech.
           </p>
         </div>
 
         <div className="relative max-w-7xl mx-auto">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="glass-card rounded-[2.5rem] p-6 space-y-8 flex flex-col items-center">
-                  <Skeleton className="h-20 w-20 rounded-full shrink-0" />
-                  <div className="space-y-4 w-full flex flex-col items-center">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="glass-card rounded-2xl h-28 flex items-center p-4 gap-4">
+                  <Skeleton className="h-16 w-16 rounded-xl shrink-0" />
+                  <div className="flex-1 space-y-3">
+                    <Skeleton className="h-5 w-1/3" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
-                  <Skeleton className="h-12 w-full rounded-2xl mt-auto" />
+                  <Skeleton className="h-12 w-12 rounded-full" />
                 </div>
               ))}
             </div>
@@ -189,8 +188,8 @@ export default function VoiceSamplesSection() {
             >
               <CarouselContent className="-ml-6">
                 {voices.map((voice) => (
-                  <CarouselItem key={voice.id} className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                    <div className="h-full">
+                  <CarouselItem key={voice.id} className="pl-6 basis-full sm:basis-1/2 lg:basis-1/3">
+                    <div className="h-full py-2">
                       <VoiceCard voice={voice} />
                     </div>
                   </CarouselItem>
@@ -202,10 +201,10 @@ export default function VoiceSamplesSection() {
               </div>
             </Carousel>
           ) : (
-            <div className="text-center py-32 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
-              <Volume2 className="h-16 w-16 text-white/10 mx-auto mb-6" />
-              <p className="text-base sm:text-lg text-muted-foreground italic font-medium">No speakers found in the studio library.</p>
-              <Button asChild variant="link" className="text-primary font-black uppercase tracking-widest mt-4">
+            <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-[3rem] bg-white/[0.02]">
+              <Volume2 className="h-12 w-12 text-white/10 mx-auto mb-4" />
+              <p className="text-sm sm:text-base text-muted-foreground italic font-medium">No speakers found in the studio library.</p>
+              <Button asChild variant="link" className="text-primary font-black uppercase tracking-widest mt-2">
                 <a href="/dashboard">Upload First Voice →</a>
               </Button>
             </div>
