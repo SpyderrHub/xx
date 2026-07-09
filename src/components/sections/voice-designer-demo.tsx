@@ -115,7 +115,7 @@ export default function VoiceDesignerDemo() {
                    <div className="w-full flex flex-col items-center gap-6">
                       <div className={cn(
                         "h-32 w-32 rounded-full flex items-center justify-center border-2 border-white/5 bg-white/[0.02] transition-all duration-500",
-                        isGenerating ? "border-primary/50 shadow-[0_0_50px_rgba(255,102,0,0.2)]" : ""
+                        isGenerating ? "border-primary/50 shadow-[0_0_50px_rgba(59,130,246,0.2)]" : ""
                       )}>
                          {isGenerating ? (
                            <Loader2 className="h-12 w-12 text-primary animate-spin" />

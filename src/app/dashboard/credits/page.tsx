@@ -204,7 +204,7 @@ export default function CreditsPage() {
           email: user.email || '',
         },
         theme: {
-          color: '#FF6600',
+          color: '#3B82F6', // Neural Blue
         },
       };
 
@@ -437,7 +437,7 @@ export default function CreditsPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-                { label: 'Voice Synthesis', value: '72%', icon: MessageSquare, color: 'text-purple-400' },
+                { label: 'Voice Synthesis', value: '72%', icon: MessageSquare, color: 'text-blue-400' },
                 { label: 'Voice Designer', value: '18%', icon: Sparkles, color: 'text-amber-400' },
                 { label: 'Music Generator', value: '6%', icon: Music, color: 'text-emerald-400' },
                 { label: 'Other Studio Tools', value: '4%', icon: Zap, color: 'text-blue-400' },

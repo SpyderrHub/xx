@@ -59,7 +59,7 @@ const HeroSection = () => {
       
       {/* Refined Glowing Orbs */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-primary/5 blur-[140px] rounded-full -z-10" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full -z-10" />
     </section>
   );
 };

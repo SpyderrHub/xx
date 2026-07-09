@@ -94,7 +94,7 @@ export default function PlanCard({
           email: user.email || '',
         },
         theme: {
-          color: '#FF6600',
+          color: '#3B82F6', // Neural Blue
         },
       };
 

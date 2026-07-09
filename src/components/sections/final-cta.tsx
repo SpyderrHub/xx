@@ -13,7 +13,7 @@ const FinalCTASection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-card rounded-[4rem] p-10 sm:p-24 relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-indigo-900/20 border-white/5 shadow-3d"
+          className="glass-card rounded-[4rem] p-10 sm:p-24 relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-blue-900/20 border-white/5 shadow-3d"
         >
           <div className="relative z-10 max-w-4xl mx-auto space-y-12">
             <div className="flex flex-col items-center gap-4">
@@ -25,7 +25,7 @@ const FinalCTASection = () => {
 
             <h2 className="text-4xl font-black tracking-tighter text-white sm:text-7xl leading-tight">
               Start Designing <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Your Voice today.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Your Voice today.</span>
             </h2>
             
             <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
