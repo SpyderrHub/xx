@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -53,18 +54,6 @@ export default function ReferralsPage() {
   }, [user, firestore]);
 
   const { data: referrals, isLoading: isRefsLoading } = useCollection(referralsQuery);
-
-  // Global Leaderboard (Top 10 users by referralCount)
-  const leaderboardQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(
-      collection(firestore, 'users'),
-      orderBy('referralCount', 'desc'),
-      limit(10)
-    );
-  }, [firestore]);
-
-  const { data: topReferrers, isLoading: isLeaderboardLoading } = useCollection(leaderboardQuery);
 
   const isSubscribed = userData?.plan && userData.plan !== 'free';
   
@@ -279,8 +268,8 @@ export default function ReferralsPage() {
             </div>
           </div>
 
-          {/* Sidebar Stats & Leaderboard */}
-          <div className="lg:col-span-4 space-y-6">
+          {/* Sidebar Stats */}
+          <aside className="lg:col-span-4 space-y-6">
             <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
               <CardHeader className="p-6 md:p-8 border-b border-white/5 bg-white/[0.01]">
                 <div className="flex items-center gap-2 mb-1">
@@ -319,58 +308,6 @@ export default function ReferralsPage() {
               </CardContent>
             </Card>
 
-            {/* Real-time Leaderboard Module */}
-            <Card className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-[2rem] overflow-hidden">
-              <CardHeader className="p-6 md:p-8 pb-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-8 md:h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 w-8 md:w-10">
-                    <Trophy className="h-4 md:h-5 w-4 md:w-5 text-primary" />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Global Rank</span>
-                </div>
-                <CardTitle className="text-lg md:text-xl font-black text-white">Top Referrers</CardTitle>
-                <CardDescription className="text-[10px] md:text-xs text-primary/70 font-bold uppercase tracking-wider">Most verified invites</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 md:p-8 pt-2">
-                <div className="space-y-4">
-                  {isLeaderboardLoading ? (
-                    [...Array(3)].map((_, i) => (
-                      <div key={i} className="h-10 bg-white/5 rounded-xl animate-pulse" />
-                    ))
-                  ) : topReferrers && topReferrers.length > 0 ? (
-                    topReferrers.map((leader, i) => (
-                      <div key={leader.id} className={cn(
-                        "flex items-center justify-between group",
-                        leader.id === user?.uid && "bg-primary/5 -mx-4 px-4 py-2 rounded-xl"
-                      )}>
-                        <div className="flex items-center gap-3">
-                          <span className="text-[10px] md:text-xs font-black text-white/20 w-4">{i + 1}</span>
-                          <div className="h-7 md:h-8 w-7 md:w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[10px] font-bold text-white group-hover:border-primary/30 transition-colors">
-                            {leader.name?.[0] || 'U'}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs md:text-sm font-bold text-white/90 truncate max-w-[80px] md:max-w-[100px]">{leader.name || 'User'}</span>
-                            {leader.id === user?.uid && <span className="text-[8px] font-black text-primary uppercase">You</span>}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs md:text-sm font-black text-primary">{leader.referralCount || 0}</span>
-                          {i === 0 && <Trophy className="h-3 w-3 text-amber-400 fill-current" />}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-4 text-center">
-                       <p className="text-[10px] text-muted-foreground italic">No rankings available yet.</p>
-                    </div>
-                  )}
-                </div>
-                <Button variant="link" className="w-full mt-4 md:mt-6 text-primary text-[10px] font-black uppercase tracking-widest p-0 h-auto" asChild>
-                  <Link href="/dashboard/referrals">Community Stats →</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
             <div className="p-4 md:p-6 rounded-2xl bg-white/[0.02] border border-white/5">
               <div className="flex gap-3 items-start">
                 <div className="mt-1 h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
@@ -379,7 +316,7 @@ export default function ReferralsPage() {
                 </p>
               </div>
             </div>
-          </div>
+          </aside>
 
         </div>
       )}

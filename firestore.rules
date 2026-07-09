@@ -20,6 +20,7 @@ service cloud.firestore {
     // Explicit rules for Top-ups (Root Collection)
     match /user_topups/{id} {
       allow read: if isSignedIn() && (
+        isAdmin() || 
         (resource != null && resource.data.userId == request.auth.uid) ||
         (request.query.filters.userId == request.auth.uid)
       );
@@ -29,6 +30,7 @@ service cloud.firestore {
     // Explicit rules for Subscriptions (Root Collection)
     match /user_subscriptions/{id} {
       allow read: if isSignedIn() && (
+        isAdmin() ||
         (resource != null && resource.data.userId == request.auth.uid) ||
         (request.query.filters.userId == request.auth.uid)
       );
@@ -37,10 +39,10 @@ service cloud.firestore {
 
     // Public Voice Profiles
     match /voices/{voiceId} {
-      // Enhanced read rule: Allow read if voice is public OR if the user is the owner
-      allow read: if (resource.data.isPublic == true || resource.data.status == 'approved') || (isSignedIn() && resource.data.userId == request.auth.uid);
+      // Allow read if voice is public OR if the user is the owner OR if admin
+      allow read: if (resource.data.isPublic == true) || (isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()));
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // Public Documentation
@@ -61,31 +63,31 @@ service cloud.firestore {
       allow get: if isSignedIn();
       
       // 2. Full Document Access (Owner/Admin)
-      // Sensitive data like 'apiKey' and 'email' are only readable by owner.
+      // Sensitive data like 'apiKey' and 'email' are only readable by owner or admin.
       allow read, write: if isOwner(userId) || isAdmin();
       
-      // 3. Referral Code Lookup (Sign-up flow)
-      // Allows the specific query used during sign-up to find a referrer by code.
-      allow list: if isSignedIn() && 
-                    request.query.limit <= 1 && 
-                    request.query.filters.referralCode != null;
+      // 3. Referral Code Lookup (Sign-up flow) / Admin Management
+      allow list: if isSignedIn() && (
+                    isAdmin() || 
+                    (request.query.limit <= 1 && request.query.filters.referralCode != null)
+                  );
 
       // SUBCOLLECTIONS
       
       match /myVoices/{voiceId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isOwner(userId) || isAdmin();
       }
 
       match /generations/{genId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isOwner(userId) || isAdmin();
       }
 
       match /api_logs/{logId} {
-        allow read: if isOwner(userId);
+        allow read: if isOwner(userId) || isAdmin();
       }
 
       match /referrals/{refId} {
-        allow read: if isOwner(userId);
+        allow read: if isOwner(userId) || isAdmin();
         allow write: if isSignedIn(); // Allow recording new referrals during sign-up
       }
     }
