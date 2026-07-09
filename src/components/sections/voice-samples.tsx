@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { collection, query, limit, where } from 'firebase/firestore';
 import { WeavyPattern } from '@/components/author/avatar-upload';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -18,6 +18,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+
+const PREVIEW_NAMES = ['Ruda', 'Divya', 'Kumal', 'Naveen', 'Roshan', 'Devi', 'Aditi', 'Kanak', 'Madhuri', 'Kriti', 'Kaanchi', 'Tejas', 'Dev', 'Ranveer'];
 
 const VoiceCard = ({ voice }: { voice: any }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -58,9 +60,9 @@ const VoiceCard = ({ voice }: { voice: any }) => {
   const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
 
   return (
-    <div className="glass-card rounded-[2.5rem] p-8 group transition-all hover:border-primary/40 flex flex-col items-center text-center h-full bg-white/[0.02] border-white/5 shadow-2xl relative">
+    <div className="glass-card rounded-[2.5rem] p-6 group transition-all hover:border-primary/40 flex flex-col items-center text-center h-full bg-white/[0.02] border-white/5 shadow-2xl relative">
       {/* Voice Avatar - Top Centered */}
-      <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-white/5 group-hover:border-primary/30 transition-all mb-6 shrink-0 flex items-center justify-center bg-white/5 shadow-inner">
+      <div className="relative h-20 w-20 rounded-full overflow-hidden border-4 border-white/5 group-hover:border-primary/30 transition-all mb-6 shrink-0 flex items-center justify-center bg-white/5 shadow-inner">
         {isGradient ? (
           <WeavyPattern presetIndex={gradientIndex} />
         ) : voice.avatarUrl ? (
@@ -78,23 +80,23 @@ const VoiceCard = ({ voice }: { voice: any }) => {
 
       {/* Voice Info */}
       <div className="space-y-3 mb-8 w-full">
-        <h4 className="font-black text-white text-xl sm:text-2xl tracking-tight truncate">{voice.voiceName}</h4>
+        <h4 className="font-black text-white text-lg sm:text-xl tracking-tight truncate">{voice.voiceName}</h4>
         <div className="flex flex-wrap justify-center gap-2">
-          <Badge variant="outline" className="bg-white/5 border-none text-[9px] uppercase font-black text-muted-foreground px-3 py-1">
+          <Badge variant="outline" className="bg-white/5 border-none text-[8px] uppercase font-black text-muted-foreground px-3 py-0.5">
             {languages[0] || 'Global'}
           </Badge>
-          <Badge variant="outline" className="bg-primary/10 border-none text-[9px] uppercase font-black text-primary px-3 py-1">
+          <Badge variant="outline" className="bg-primary/10 border-none text-[8px] uppercase font-black text-primary px-3 py-0.5">
             {voice.gender}
           </Badge>
         </div>
-        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest pt-2 italic line-clamp-1">
+        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest pt-1 italic line-clamp-1">
           {voice.style || 'Studio Quality'}
         </p>
       </div>
 
       {/* Visualization & Controls */}
       <div className="w-full mt-auto space-y-6">
-        <div className="h-10 flex items-end justify-center gap-1 px-4">
+        <div className="h-8 flex items-end justify-center gap-1 px-4">
           {randomBars.map((height, i) => (
             <div 
               key={i}
@@ -112,22 +114,22 @@ const VoiceCard = ({ voice }: { voice: any }) => {
           variant="secondary" 
           onClick={togglePlay}
           className={cn(
-            "h-14 w-full rounded-2xl transition-all font-black text-xs uppercase tracking-widest",
+            "h-12 w-full rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest",
             isPlaying 
               ? "bg-white text-black scale-95 shadow-inner" 
               : "bg-white/10 text-white hover:bg-white/20"
           )}
         >
           {isPlaying ? (
-            <><Pause className="h-4 w-4 mr-2 fill-current" /> Stop Preview</>
+            <><Pause className="h-3.5 w-3.5 mr-2 fill-current" /> Stop</>
           ) : (
-            <><Play className="h-4 w-4 mr-2 fill-current" /> Hear Voice</>
+            <><Play className="h-3.5 w-3.5 mr-2 fill-current" /> Preview</>
           )}
         </Button>
       </div>
       
       <div className="absolute top-4 right-4 opacity-10">
-        <Volume2 className="h-6 w-6 text-white" />
+        <Volume2 className="h-4 w-4 text-white" />
       </div>
     </div>
   );
@@ -140,15 +142,15 @@ export default function VoiceSamplesSection() {
     if (!firestore) return null;
     return query(
       collection(firestore, 'voices'),
-      orderBy('createdAt', 'desc'),
-      limit(10)
+      where('voiceName', 'in', PREVIEW_NAMES),
+      limit(20)
     );
   }, [firestore]);
 
   const { data: voices, isLoading } = useCollection(voicesQuery);
 
   return (
-    <section id="voice-samples" className="pt-32 pb-0 relative overflow-hidden">
+    <section id="voice-samples" className="pt-20 pb-0 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="text-center mb-24 space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
@@ -167,13 +169,13 @@ export default function VoiceSamplesSection() {
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="glass-card rounded-[2.5rem] p-10 space-y-8 flex flex-col items-center">
-                  <Skeleton className="h-24 w-24 rounded-full shrink-0" />
+                <div key={i} className="glass-card rounded-[2.5rem] p-6 space-y-8 flex flex-col items-center">
+                  <Skeleton className="h-20 w-20 rounded-full shrink-0" />
                   <div className="space-y-4 w-full flex flex-col items-center">
                     <Skeleton className="h-6 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
                   </div>
-                  <Skeleton className="h-14 w-full rounded-2xl mt-auto" />
+                  <Skeleton className="h-12 w-full rounded-2xl mt-auto" />
                 </div>
               ))}
             </div>

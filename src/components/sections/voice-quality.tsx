@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from 'framer-motion';
@@ -7,22 +6,27 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, limit } from 'firebase/firestore';
+import { collection, query, limit, where } from 'firebase/firestore';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { WeavyPattern } from '@/components/author/avatar-upload';
 
 const COLORS = ['bg-primary', 'bg-indigo-500', 'bg-purple-500', 'bg-pink-500'];
+const PREVIEW_NAMES = ['Ruda', 'Divya', 'Kumal', 'Naveen', 'Roshan', 'Devi', 'Aditi', 'Kanak', 'Madhuri', 'Kriti', 'Kaanchi', 'Tejas', 'Dev', 'Ranveer'];
 
 const VoiceQualitySection = () => {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { firestore } = useFirebase();
 
-  // Fetch 4 speakers from the database for preview
+  // Fetch speakers from the requested list for preview
   const voicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'voices'), limit(4));
+    return query(
+      collection(firestore, 'voices'), 
+      where('voiceName', 'in', PREVIEW_NAMES.slice(0, 4)), // Show top 4 in this grid
+      limit(4)
+    );
   }, [firestore]);
 
   const { data: voices, isLoading } = useCollection(voicesQuery);
@@ -102,14 +106,14 @@ const VoiceQualitySection = () => {
                   <motion.div
                     key={voice.id}
                     whileHover={{ y: -5 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 relative overflow-hidden group"
+                    className="bg-white/5 border border-white/10 rounded-2xl p-3 sm:p-4 relative overflow-hidden group"
                   >
                     <div className={cn("absolute top-0 right-0 h-24 w-24 opacity-5 blur-[40px] rounded-full", colorClass)} />
                     
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                         <div 
-                          className="relative h-10 w-10 sm:h-14 sm:w-14 rounded-full overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center shrink-0 cursor-pointer group/avatar shadow-lg transition-transform active:scale-95"
+                          className="relative h-8 w-8 sm:h-12 sm:w-12 rounded-full overflow-hidden border border-white/10 bg-white/5 flex items-center justify-center shrink-0 cursor-pointer group/avatar shadow-lg transition-transform active:scale-95"
                           onClick={() => togglePlay(voice)}
                         >
                           {isGradient ? (
@@ -135,23 +139,23 @@ const VoiceQualitySection = () => {
                             playingId === voice.id ? "opacity-100" : "opacity-0 group-hover/avatar:opacity-100"
                           )}>
                             {playingId === voice.id ? (
-                              <Pause className="h-5 w-5 sm:h-6 sm:w-6 text-white fill-current" />
+                              <Pause className="h-4 w-4 sm:h-5 sm:w-5 text-white fill-current" />
                             ) : (
-                              <Play className="h-5 w-5 sm:h-6 sm:w-6 text-white fill-current ml-1" />
+                              <Play className="h-4 w-4 sm:h-5 sm:w-5 text-white fill-current ml-1" />
                             )}
                           </div>
                         </div>
                         <div className="min-w-0">
-                          <h4 className="font-bold text-white text-sm sm:text-base truncate">{voice.voiceName}</h4>
-                          <p className="text-[10px] text-muted-foreground truncate">{voice.language}</p>
+                          <h4 className="font-bold text-white text-xs sm:text-sm truncate">{voice.voiceName}</h4>
+                          <p className="text-[9px] text-muted-foreground truncate">{voice.language}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="border-white/10 text-[8px] sm:text-[10px] uppercase font-bold tracking-widest bg-black/20 h-fit w-fit">
+                      <Badge variant="outline" className="border-white/10 text-[7px] sm:text-[9px] uppercase font-bold tracking-widest bg-black/20 h-fit w-fit">
                         {voice.style || 'Premium'}
                       </Badge>
                     </div>
                     
-                    <div className="h-10 sm:h-12 flex flex-col justify-center">
+                    <div className="h-8 sm:h-10 flex flex-col justify-center">
                       {playingId === voice.id ? (
                         <div className="flex items-end gap-0.5 h-6 sm:h-8">
                           {[...Array(20)].map((_, i) => (
@@ -171,7 +175,7 @@ const VoiceQualitySection = () => {
                       )}
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between text-[8px] sm:text-[10px] text-muted-foreground font-mono">
+                    <div className="mt-4 flex items-center justify-between text-[7px] sm:text-[9px] text-muted-foreground font-mono">
                       <span>48kHz / 24-bit</span>
                       <span className="uppercase truncate ml-2">{voice.gender}</span>
                     </div>
@@ -180,7 +184,7 @@ const VoiceQualitySection = () => {
               })
             ) : (
               <div className="col-span-full flex flex-col items-center justify-center text-center p-8 border border-dashed rounded-2xl border-white/10 opacity-50">
-                <p className="text-sm">No voices found in database.</p>
+                <p className="text-sm">No speakers matching the selection criteria found.</p>
               </div>
             )}
           </div>

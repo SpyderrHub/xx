@@ -188,7 +188,7 @@ export default function VoiceDesignerDemo() {
           </div>
         </motion.div>
       </div>
-      <audio ref={audioRef} className="hidden" src={audioUrl || ''} onEnded={() => setIsPlaying(false)} />
+      <audio ref={audioRef} className="hidden" src={audioUrl || undefined} onEnded={() => setIsPlaying(false)} />
     </section>
   );
 }
