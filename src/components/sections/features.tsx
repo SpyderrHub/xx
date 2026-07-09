@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Zap, Layers, BarChart3, Cloud } from 'lucide-react';
@@ -32,11 +31,11 @@ const FeaturesSection = () => {
     <section id="features" className="pt-32 pb-0">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-3xl text-center mb-20">
-          <h2 className="text-xl font-black tracking-tight text-white sm:text-5xl leading-tight">
+          <h2 className="text-3xl font-black tracking-tight text-white sm:text-5xl leading-tight">
             Built for High-Throughput <br />
             <span className="text-primary">Vocal Production.</span>
           </h2>
-          <p className="mt-6 text-[10px] sm:text-lg text-muted-foreground leading-relaxed">
+          <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed">
             QuantisAI Labs is a developer-first platform designed to replace legacy TTS providers with unmatched speed and efficiency.
           </p>
         </div>
@@ -51,7 +50,7 @@ const FeaturesSection = () => {
                   <CardTitle className="text-lg sm:text-xl font-black text-white">
                     {feature.title}
                   </CardTitle>
-                  <CardDescription className="pt-4 text-[10px] sm:text-sm text-muted-foreground leading-relaxed">
+                  <CardDescription className="pt-4 text-sm text-muted-foreground leading-relaxed">
                     {feature.description}
                   </CardDescription>
                 </CardHeader>

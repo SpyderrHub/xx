@@ -57,13 +57,13 @@ const PricingSection = () => {
     <section id="pricing" className="py-32 relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-20 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 text-xs font-black uppercase tracking-widest">
             <span>Transparent Billing</span>
           </div>
-          <h2 className="text-3xl font-black tracking-tight text-white sm:text-6xl leading-tight">
+          <h2 className="text-3xl font-black tracking-tight text-white sm:text-5xl leading-tight">
             Predictable <span className="text-primary">Pricing.</span>
           </h2>
-          <p className="text-sm sm:text-lg text-muted-foreground font-medium">
+          <p className="text-base sm:text-lg text-muted-foreground font-medium">
             No enterprise taxes. No hidden tiers. Just pure synthesis at scale.
           </p>
         </div>
@@ -81,24 +81,24 @@ const PricingSection = () => {
               >
                 <CardHeader className="p-8 pb-4">
                   {plan.highlight && (
-                    <div className="bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-primary/20">
+                    <div className="bg-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mb-4 shadow-lg shadow-primary/20">
                       Most Popular
                     </div>
                   )}
                   <CardTitle className="text-xl sm:text-2xl font-black text-white">{plan.name}</CardTitle>
-                  <CardDescription className="text-muted-foreground text-[8px] sm:text-[10px] font-bold uppercase tracking-widest pt-2">
+                  <CardDescription className="text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-widest pt-2">
                     {plan.description}
                   </CardDescription>
                   <div className="flex items-baseline pt-6">
                     <span className="text-3xl sm:text-5xl font-black text-white">{plan.price}</span>
-                    <span className="text-muted-foreground text-[10px] sm:text-xs ml-2 font-bold uppercase tracking-tighter opacity-50">{plan.period}</span>
+                    <span className="text-muted-foreground text-xs sm:text-sm ml-2 font-bold uppercase tracking-tighter opacity-50">{plan.period}</span>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1 p-8 pt-4 space-y-4">
                   {plan.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
                       <CheckCircle className="h-4 w-4 text-primary shrink-0 opacity-80" />
-                      <span className="text-[10px] sm:text-sm font-medium text-white/70">{feature}</span>
+                      <span className="text-sm font-medium text-white/70">{feature}</span>
                     </div>
                   ))}
                 </CardContent>
@@ -107,7 +107,7 @@ const PricingSection = () => {
                     asChild
                     size="lg"
                     className={cn(
-                      "w-full h-14 rounded-2xl font-black text-[10px] sm:text-sm transition-all",
+                      "w-full h-14 rounded-2xl font-black text-sm transition-all",
                       plan.highlight 
                         ? "bg-primary text-white btn-glow" 
                         : "bg-white/5 border border-white/10 text-white hover:bg-white/10"

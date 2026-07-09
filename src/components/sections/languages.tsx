@@ -33,13 +33,13 @@ export default function LanguagesSection() {
           
           {/* Left Column: Text Content */}
           <div className="space-y-10 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em]">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-[0.2em]">
               <Globe2 className="h-3 w-3" />
               <span>Native Dialect Support</span>
             </div>
             
             <div className="space-y-6">
-              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-7xl leading-tight">
+              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-6xl leading-tight">
                 500+ Global <br />
                 <span className="text-primary">Languages.</span>
               </h2>
@@ -50,17 +50,17 @@ export default function LanguagesSection() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                {LangGrid.slice(0, 12).map(l => (
-                 <div key={l} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors cursor-default text-center">
+                 <div key={l} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors cursor-default text-center">
                     {l}
                  </div>
                ))}
-               <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary text-center">
+               <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs font-black uppercase tracking-widest text-primary text-center">
                   & 500+ More
                </div>
             </div>
 
             <div className="pt-6">
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em] flex items-center gap-3">
+              <p className="text-xs text-muted-foreground font-black uppercase tracking-[0.3em] flex items-center gap-3">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                 Automatic Language Detection Enabled
               </p>
@@ -134,7 +134,7 @@ export default function LanguagesSection() {
                               <p className="text-xs font-black text-white uppercase tracking-widest">{lang.name}</p>
                               <div className="flex items-center gap-1 mt-0.5">
                                 <Sparkles className="h-2 w-2 text-primary" />
-                                <span className="text-[8px] font-bold text-primary/60 uppercase">Native Enabled</span>
+                                <span className="text-[10px] font-bold text-primary/60 uppercase">Native Enabled</span>
                               </div>
                             </div>
                           </div>
@@ -149,7 +149,7 @@ export default function LanguagesSection() {
 
             <div className="absolute pointer-events-none text-center">
               <LangIcon className="h-10 w-10 text-primary/40 mx-auto mb-2" />
-              <p className="text-[8px] font-black uppercase tracking-[0.5em] text-primary/40">Global Hub</p>
+              <p className="text-xs font-black uppercase tracking-[0.5em] text-primary/40">Global Hub</p>
             </div>
           </div>
 

@@ -52,14 +52,14 @@ export default function VoiceDesignerDemo() {
     <section id="tts-demo" className="py-24 relative">
       <div className="container mx-auto px-6 max-w-6xl">
         <div className="text-center mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest">
             <Mic2 className="h-3 w-3" />
             <span>Interactive Studio Preview</span>
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
             Prompt-Based Voice Design
           </h2>
-          <p className="text-muted-foreground text-sm sm:text-lg max-w-2xl mx-auto font-medium">
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto font-medium">
             Describe any character or emotion. Our neural engine builds a unique vocal identity in real-time.
           </p>
         </div>
@@ -82,7 +82,7 @@ export default function VoiceDesignerDemo() {
                 </div>
                 <div className="flex items-center gap-2">
                    <Terminal className="h-3 w-3 text-muted-foreground" />
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">studio.quantisai.org</span>
+                   <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">studio.quantisai.org</span>
                 </div>
               </div>
 
@@ -90,7 +90,7 @@ export default function VoiceDesignerDemo() {
                 <div className="space-y-10">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">1. Describe the voice</label>
+                      <label className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">1. Describe the voice</label>
                     </div>
                     <Textarea 
                       value={prompt}
@@ -101,7 +101,7 @@ export default function VoiceDesignerDemo() {
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">2. Enter your script</label>
+                    <label className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">2. Enter your script</label>
                     <Textarea 
                       value={text}
                       onChange={(e) => setText(e.target.value)}
@@ -129,10 +129,10 @@ export default function VoiceDesignerDemo() {
                       </div>
                       
                       <div className="text-center space-y-2">
-                        <h4 className="font-bold text-white uppercase text-xs tracking-widest">
+                        <h4 className="font-bold text-white uppercase text-sm tracking-widest">
                           {isGenerating ? 'Synthesizing Neural Path...' : audioUrl ? 'Identity Prepared' : 'Neural Core Idle'}
                         </h4>
-                        <p className="text-[10px] text-muted-foreground font-medium italic">
+                        <p className="text-xs text-muted-foreground font-medium italic">
                           {isGenerating ? 'Computing frequency response and prosody...' : 'Ready to generate studio-quality output.'}
                         </p>
                       </div>
@@ -176,13 +176,13 @@ export default function VoiceDesignerDemo() {
           </Card>
           
           <div className="mt-8 flex justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
-             <div className="flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest">
+             <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
                <Globe className="h-4 w-4" /> 500+ Languages
              </div>
-             <div className="flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest">
+             <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
                <Zap className="h-4 w-4" /> 2s Latency
              </div>
-             <div className="flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest">
+             <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
                <Sparkles className="h-4 w-4" /> 48kHz Quality
              </div>
           </div>
