@@ -4,12 +4,13 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 /**
- * Standard Firebase Initialization with specialized Firestore SDK caching.
- * Uses persistentLocalCache to store data in the browser's IndexedDB.
+ * Standard Firebase Initialization.
+ * Firestore is initialized using getFirestore to ensure compatibility across 
+ * development environments and prevent primary lease acquisition failures.
  */
 export function initializeFirebase() {
   const apps = getApps();
@@ -17,20 +18,7 @@ export function initializeFirebase() {
   
   const auth = getAuth(firebaseApp);
   const storage = getStorage(firebaseApp);
-
-  // Initialize Firestore with Persistent Local Cache (SDK Cache)
-  // We check if it's already initialized to prevent errors during hot-reloading
-  let firestore;
-  try {
-    firestore = initializeFirestore(firebaseApp, {
-      localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager(),
-      }),
-    });
-  } catch (e) {
-    // If already initialized, fallback to getFirestore
-    firestore = getFirestore(firebaseApp);
-  }
+  const firestore = getFirestore(firebaseApp);
 
   return {
     firebaseApp,
