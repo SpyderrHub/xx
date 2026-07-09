@@ -59,7 +59,7 @@ export default function Testimonials() {
                   </p>
                   <div className="flex items-center gap-4 pt-4 border-t border-white/5">
                     <Avatar className="h-10 w-10 border border-white/10">
-                      <AvatarImage src={rev.avatar} unoptimized />
+                      <AvatarImage src={rev.avatar} />
                       <AvatarFallback>{rev.name[0]}</AvatarFallback>
                     </Avatar>
                     <div>
