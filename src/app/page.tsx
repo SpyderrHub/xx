@@ -7,7 +7,6 @@ import FeaturesSection from '@/components/sections/features';
 import ExamplePrompts from '@/components/sections/example-prompts';
 import LanguagesSection from '@/components/sections/languages';
 import HowItWorks from '@/components/sections/how-it-works';
-import VoiceQualitySection from '@/components/sections/voice-quality';
 import CodeIntegrationSection from '@/components/sections/code-integration';
 import Testimonials from '@/components/sections/testimonials';
 import PricingSection from '@/components/sections/pricing';
@@ -24,7 +23,6 @@ export default function Home() {
         <VoiceDesignerDemo />
         <ExamplePrompts />
         <HowItWorks />
-        <VoiceQualitySection />
         <FeaturesSection />
         <LanguagesSection />
         <CodeIntegrationSection />
