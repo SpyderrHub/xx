@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, limit } from 'firebase/firestore';
+import { collection, query, limit, where } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,7 +28,12 @@ export default function TtsDemoSection() {
 
   const voicesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'voices'), limit(6));
+    return query(
+      collection(firestore, 'voices'), 
+      where('isPublic', '==', true),
+      where('status', '==', 'approved'),
+      limit(6)
+    );
   }, [firestore]);
 
   const { data: voices, isLoading: voicesLoading } = useCollection(voicesQuery);
@@ -57,10 +62,11 @@ export default function TtsDemoSection() {
     setIsPlaying(false);
 
     try {
+      // Simulation of a public synthesis path
       const mockAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
       await new Promise(resolve => setTimeout(resolve, 2000));
       setAudioUrl(mockAudioUrl);
-      toast({ title: 'Success', description: 'Audio generated successfully!' });
+      toast({ title: 'Preview Ready', description: 'Audio generated successfully.' });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -122,7 +128,7 @@ export default function TtsDemoSection() {
                         className="h-12 sm:h-14 px-8 rounded-2xl bg-primary text-white font-black text-xs sm:text-sm btn-glow shadow-3d flex-1"
                       >
                         {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4 fill-current" />}
-                        {isGenerating ? 'Processing...' : 'Generate Neural Audio'}
+                        {isGenerating ? 'Synthesizing...' : 'Generate Preview Audio'}
                       </Button>
 
                       {audioUrl && (
@@ -187,6 +193,7 @@ export default function TtsDemoSection() {
           </motion.div>
         </div>
       </div>
+      <audio ref={audioRef} className="hidden" src={audioUrl || undefined} onEnded={() => setIsPlaying(false)} />
     </section>
   );
 }
