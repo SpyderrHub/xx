@@ -27,7 +27,7 @@ export default function LanguagesSection() {
   const [hoveredLang, setHoveredLang] = useState<string | null>(null);
 
   return (
-    <section className="py-24 sm:py-40 bg-transparent relative overflow-hidden">
+    <section className="pt-0 pb-24 sm:pt-0 sm:pb-40 bg-transparent relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           
