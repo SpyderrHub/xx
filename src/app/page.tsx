@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import HeroSection from '@/components/sections/hero';
@@ -14,22 +17,34 @@ import FaqSection from '@/components/sections/faq';
 import FinalCTASection from '@/components/sections/final-cta';
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  // Defer rendering of complex interactive components until after hydration
+  // to prevent client-side exceptions during the initial load on mobile.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="dark min-h-screen bg-[#0B0B0F] scroll-smooth selection:bg-primary/30">
       <Header />
       <main className="flex-1">
         <HeroSection />
-        <VoiceSamplesSection />
-        <VoiceDesignerDemo />
-        <ExamplePrompts />
-        <HowItWorks />
-        <FeaturesSection />
-        <LanguagesSection />
-        <CodeIntegrationSection />
-        <Testimonials />
-        <PricingSection />
-        <FaqSection />
-        <FinalCTASection />
+        {mounted && (
+          <>
+            <VoiceSamplesSection />
+            <VoiceDesignerDemo />
+            <ExamplePrompts />
+            <HowItWorks />
+            <FeaturesSection />
+            <LanguagesSection />
+            <CodeIntegrationSection />
+            <Testimonials />
+            <PricingSection />
+            <FaqSection />
+            <FinalCTASection />
+          </>
+        )}
       </main>
       <Footer />
     </div>

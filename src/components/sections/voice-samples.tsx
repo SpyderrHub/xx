@@ -19,7 +19,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-const PREVIEW_NAMES = ['Ruda', 'Divya', 'Kumal', 'Naveen', 'Roshan', 'Devi', 'Aditi', 'Kanak', 'Madhuri', 'Kriti', 'Kaanchi', 'Tejas', 'Dev', 'Ranveer'];
+// Reduced to 10 names to satisfy Firestore 'in' query limit (Max 10)
+const PREVIEW_NAMES = ['Ruda', 'Divya', 'Kumal', 'Naveen', 'Roshan', 'Devi', 'Aditi', 'Kanak', 'Madhuri', 'Kriti'];
 
 const VoiceCard = ({ voice }: { voice: any }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -55,7 +56,6 @@ const VoiceCard = ({ voice }: { voice: any }) => {
     };
   }, []);
 
-  const languages = Array.isArray(voice.languages) ? voice.languages : [voice.language].filter(Boolean);
   const isGradient = voice.avatarUrl?.startsWith('weavy:');
   const gradientIndex = isGradient ? parseInt(voice.avatarUrl.split(':')[1]) : 0;
 

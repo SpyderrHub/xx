@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Edit3, Type, Zap, Download } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const steps = [
   {
@@ -80,5 +81,3 @@ export default function HowItWorks() {
     </section>
   );
 }
-
-const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
