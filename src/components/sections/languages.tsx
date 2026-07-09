@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Globe2, Sparkles, Star } from 'lucide-react';
+import { Globe2, Sparkles, Star, Languages as LangIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const languages = [
@@ -15,49 +14,55 @@ const languages = [
   { name: 'Marathi', flagId: 'flag-hindi', top: '80%', left: '50%', size: 'h-4 w-4' },
   { name: 'Tamil', flagId: 'flag-tamil', top: '60%', left: '75%', size: 'h-3 w-3' },
   { name: 'Kannada', flagId: 'flag-hindi', top: '35%', left: '85%', size: 'h-2 w-2' },
-  { name: 'Gujarati', flagId: 'flag-hindi', top: '15%', left: '65%', size: 'h-3 w-3' },
-  { name: 'Malayalam', flagId: 'flag-hindi', top: '85%', left: '80%', size: 'h-2 w-2' },
-  { name: 'Punjabi', flagId: 'flag-hindi', top: '10%', left: '45%', size: 'h-4 w-4' },
+  { name: 'English', flagId: 'flag-english-us', top: '15%', left: '65%', size: 'h-3 w-3' },
+  { name: 'Spanish', flagId: 'flag-spanish', top: '85%', left: '80%', size: 'h-2 w-2' },
+  { name: 'Japanese', flagId: 'flag-japanese', top: '10%', left: '45%', size: 'h-4 w-4' },
+];
+
+const LangGrid = [
+  "Hindi", "Sanskrit", "Arabic", "Chinese", "Korean", "French", "German", "Spanish", "Portuguese", "Italian", "Russian", "Turkish", "Vietnamese", "Thai", "Indonesian", "Dutch", "Polish", "Hebrew", "Swahili"
 ];
 
 export default function LanguagesSection() {
   const [hoveredLang, setHoveredLang] = useState<string | null>(null);
 
   return (
-    <section className="py-24 sm:py-32 bg-transparent relative overflow-hidden border-t border-white/5">
+    <section className="py-24 sm:py-40 bg-transparent relative overflow-hidden">
       <div className="container mx-auto px-6 sm:px-10 lg:px-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           
           {/* Left Column: Text Content */}
-          <div className="space-y-8 max-w-xl">
+          <div className="space-y-10 max-w-xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em]">
               <Globe2 className="h-3 w-3" />
-              <span>Native Indic Support</span>
+              <span>Native Dialect Support</span>
             </div>
             
             <div className="space-y-6">
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-6xl leading-tight">
-                Fluent in Every <br />
-                <span className="text-primary">Regional Dialect.</span>
+              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-7xl leading-tight">
+                500+ Global <br />
+                <span className="text-primary">Languages.</span>
               </h2>
-              <p className="text-sm sm:xl text-muted-foreground leading-relaxed font-medium">
-                QuantisAI Labs is optimized for the linguistic diversity of the Indian subcontinent. Experience perfect prosody in 12+ Indic languages, capturing the true soul of every region.
+              <p className="text-base sm:text-xl text-muted-foreground leading-relaxed font-medium">
+                Optimized for native Indic support and world dialects. Capture the authentic prosody, local accents, and cultural nuances of every region.
               </p>
             </div>
 
-            <ul className="space-y-4 pt-4">
-              {['Natural Intonation & Dialects', 'Real-time Phonetic Accuracy', 'Context-aware Synthesis'].map((item) => (
-                <li key={item} className="flex items-center gap-3 text-xs sm:text-sm font-bold text-white/80">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+               {LangGrid.slice(0, 12).map(l => (
+                 <div key={l} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors cursor-default text-center">
+                    {l}
+                 </div>
+               ))}
+               <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary text-center">
+                  & 500+ More
+               </div>
+            </div>
 
             <div className="pt-6">
               <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.3em] flex items-center gap-3">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                New regional voices added weekly
+                Automatic Language Detection Enabled
               </p>
             </div>
           </div>
@@ -88,7 +93,6 @@ export default function LanguagesSection() {
                   style={{ top: lang.top, left: lang.left }}
                 >
                   <div className="relative group">
-                    {/* Star Point */}
                     <motion.div
                       onMouseEnter={() => setHoveredLang(lang.name)}
                       onMouseLeave={() => setHoveredLang(null)}
@@ -108,7 +112,6 @@ export default function LanguagesSection() {
                       )}
                     />
 
-                    {/* Popover Language Card */}
                     <AnimatePresence>
                       {hoveredLang === lang.name && (
                         <motion.div
@@ -117,7 +120,7 @@ export default function LanguagesSection() {
                           exit={{ opacity: 0, y: 10, scale: 0.9 }}
                           className="absolute bottom-full left-1/2 -translate-x-1/2 z-50 pointer-events-none pb-4"
                         >
-                          <div className="bg-black/80 backdrop-blur-xl border border-primary/40 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-3 min-w-[160px]">
+                          <div className="bg-black/80 backdrop-blur-xl border border-primary/40 rounded-2xl p-4 shadow-3d flex items-center gap-3 min-w-[160px]">
                             <div className="relative h-8 w-10 overflow-hidden rounded-md border border-white/10 shrink-0">
                               <Image
                                 src={PlaceHolderImages.find(img => img.id === lang.flagId)?.imageUrl || ''}
@@ -131,11 +134,10 @@ export default function LanguagesSection() {
                               <p className="text-xs font-black text-white uppercase tracking-widest">{lang.name}</p>
                               <div className="flex items-center gap-1 mt-0.5">
                                 <Sparkles className="h-2 w-2 text-primary" />
-                                <span className="text-[8px] font-bold text-primary/60 uppercase">Neural Enabled</span>
+                                <span className="text-[8px] font-bold text-primary/60 uppercase">Native Enabled</span>
                               </div>
                             </div>
                           </div>
-                          {/* Triangle Pointer */}
                           <div className="absolute top-[calc(100%-16px)] left-1/2 -translate-x-1/2 w-3 h-3 bg-black/80 border-r border-b border-primary/40 rotate-45" />
                         </motion.div>
                       )}
@@ -145,18 +147,14 @@ export default function LanguagesSection() {
               ))}
             </motion.div>
 
-            {/* Static Central Core Label */}
             <div className="absolute pointer-events-none text-center">
-              <p className="text-[8px] font-black uppercase tracking-[0.4em] text-primary/40 mb-1">Neural Hub</p>
-              <div className="h-1 w-1 bg-primary rounded-full mx-auto shadow-[0_0_10px_#ff6600]" />
+              <LangIcon className="h-10 w-10 text-primary/40 mx-auto mb-2" />
+              <p className="text-[8px] font-black uppercase tracking-[0.5em] text-primary/40">Global Hub</p>
             </div>
           </div>
 
         </div>
       </div>
-      
-      {/* Decorative background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
     </section>
   );
 }
