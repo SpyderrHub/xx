@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'QuantisAI Labs',
@@ -24,6 +25,12 @@ export default function RootLayout({
     <html lang="en" className="!scroll-smooth">
       <head>
         <meta name="google-site-verification" content="m00rKo1DV2-YssOfdEk3d8NKaOgh7mFd9W3HxZDIXiQ" />
+        <Script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7467637204633571"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <link rel="canonical" href="https://www.quantisai.org/" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
