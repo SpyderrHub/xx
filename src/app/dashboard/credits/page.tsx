@@ -16,7 +16,8 @@ import {
   Plus,
   Globe,
   Video,
-  AlertCircle
+  AlertCircle,
+  Play
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,6 @@ import { doc, runTransaction } from 'firebase/firestore';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import Script from 'next/script';
 import { toast } from '@/hooks/use-toast';
 
 const AD_REWARD_AMOUNT = 100;
@@ -47,6 +47,12 @@ const planNames: Record<string, string> = {
   creator: 'Professional Creator',
   pro: 'Premium Pro',
 };
+
+declare global {
+  interface Window {
+    googletag: any;
+  }
+}
 
 export default function CreditsPage() {
   const { user, firestore } = useFirebase();
@@ -69,6 +75,7 @@ export default function CreditsPage() {
         // Detect WebView environment for better targeting
         const isWebView = /wv|Version\/[\d\.]+.*Mobile|Android.*(?!.Chrome)/i.test(navigator.userAgent);
         
+        // Define rewarded ad slot
         const rewardedSlot = window.googletag.defineOutOfPageSlot(
           '/22581208631/23360735470',
           window.googletag.enums.OutOfPageFormat.REWARDED
@@ -114,9 +121,10 @@ export default function CreditsPage() {
               setIsAdLoading(false);
             }
           });
-        }
 
-        window.googletag.display(rewardedSlot);
+          // Pre-display the slot to prepare it
+          window.googletag.display(rewardedSlot);
+        }
       });
     }
   }, [user, firestore]);
@@ -125,7 +133,7 @@ export default function CreditsPage() {
     if (!window.googletag || !rewardedSlotRef.current) {
       toast({ 
         title: "Ad Service Unavailable", 
-        description: "Please disable your ad blocker to earn credits.",
+        description: "Ad scripts are still loading or blocked. Please disable ad blockers.",
         variant: "destructive" 
       });
       return;
@@ -144,7 +152,7 @@ export default function CreditsPage() {
 
     setIsAdLoading(true);
     
-    // Safety timeout for network failures/blockers
+    // Safety timeout for network failures
     setTimeout(() => setIsAdLoading(false), 8000);
 
     window.googletag.cmd.push(() => {
@@ -152,7 +160,7 @@ export default function CreditsPage() {
     });
   };
 
-  // Real-time Balance Monitor: Celebrates when the database updates
+  // Real-time Balance Monitor
   useEffect(() => {
     if (userData?.credits !== undefined) {
       if (prevCreditsRef.current !== null && userData.credits > prevCreditsRef.current) {
@@ -192,7 +200,7 @@ export default function CreditsPage() {
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Resource Management</p>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Credits & Usage</h1>
           <p className="text-muted-foreground text-[10px] md:text-sm max-w-md">
-            Monitor your balance. Verified via <span className="text-primary font-bold">quantisai.org</span> secure node.
+            Monitor your balance and earn characters through the reward engine.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -260,7 +268,6 @@ export default function CreditsPage() {
         </Card>
 
         <div className="space-y-6">
-            {/* Reward Ad Engine Card */}
             <Card className="bg-primary/5 border-primary/20 rounded-[2rem] overflow-hidden relative">
               <div className="absolute top-0 right-0 p-4 opacity-10">
                 <Video className="h-12 w-12 text-primary" />
@@ -301,7 +308,7 @@ export default function CreditsPage() {
                   <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-white">Secure Verification</p>
                     <p className="text-[9px] text-muted-foreground leading-relaxed">
-                      All credits verified by <span className="font-bold">QuantisAI API Node</span>. Ad rewards added instantly.
+                      All credits verified by <span className="font-bold">QuantisAI Labs API</span>. Ad rewards added instantly to your balance.
                     </p>
                   </div>
                </div>
