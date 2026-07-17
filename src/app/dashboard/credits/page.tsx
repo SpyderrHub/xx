@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Coins, 
   Zap, 
@@ -13,24 +13,25 @@ import {
   MessageSquare,
   Sparkles,
   Music,
-  ShoppingCart,
   Plus,
-  Lock,
   Globe,
-  PartyPopper
+  Video,
+  AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { doc, runTransaction } from 'firebase/firestore';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import Script from 'next/script';
 import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+
+const AD_REWARD_AMOUNT = 100;
+const DAILY_AD_LIMIT = 30;
 
 const planLimits: Record<string, number> = {
   free: 3000,
@@ -47,84 +48,109 @@ const planNames: Record<string, string> = {
   pro: 'Premium Pro',
 };
 
-const topupPlans = [
-  { 
-    id: 'topup_25k', 
-    name: 'Lite Pack', 
-    characters: 25000, 
-    price: 49, 
-    desc: 'Great for small projects',
-    buttonId: 'pl_T0oXNYcMxeNBOG' 
-  },
-  { 
-    id: 'topup_50k', 
-    name: 'Power Pack', 
-    characters: 50000, 
-    price: 99, 
-    desc: 'Our most popular pack', 
-    popular: true,
-    buttonId: 'pl_T0opo07PIT6g6U'
-  },
-  { 
-    id: 'topup_100k', 
-    name: 'Studio Pack', 
-    characters: 100000, 
-    price: 149, 
-    desc: 'Best value for high volume',
-    buttonId: 'pl_T0os3gC0kF4oVi'
-  },
-];
-
-/**
- * Specialized component to render the Razorpay Payment Button script
- * Automatically passes identity notes to the webhook to ensure reliable crediting.
- */
-const RazorpayPaymentButton = ({ buttonId, userId, characters, planId }: { buttonId: string, userId?: string, characters: number, planId: string }) => {
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (!formRef.current) return;
-    
-    formRef.current.innerHTML = '';
-    
-    const script = document.createElement('script');
-    script.src = "https://checkout.razorpay.com/v1/payment-button.js";
-    script.setAttribute('data-payment_button_id', buttonId);
-    
-    if (userId) {
-      const inputs = [
-        { name: 'notes[userId]', value: userId },
-        { name: 'notes[planName]', value: planId },
-        { name: 'notes[credits]', value: characters.toString() }
-      ];
-      inputs.forEach(data => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = data.name;
-        input.value = data.value;
-        formRef.current?.appendChild(input);
-      });
-    }
-    
-    script.async = true;
-    formRef.current.appendChild(script);
-  }, [buttonId, userId, characters, planId]);
-
-  return <form ref={formRef} className="w-full flex justify-center min-h-[48px]" />;
-};
-
 export default function CreditsPage() {
   const { user, firestore } = useFirebase();
-  const router = useRouter();
-  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [isAdLoading, setIsAdLoading] = useState(false);
   const prevCreditsRef = useRef<number | null>(null);
+  const rewardedSlotRef = useRef<any>(null);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [user, firestore]);
 
-  const { data: userData, isLoading } = useDoc(userDocRef);
+  const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
+
+  // Initialize Google Ad Manager
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.googletag = window.googletag || { cmd: [] };
+      window.googletag.cmd.push(() => {
+        // Detect WebView environment for better targeting
+        const isWebView = /wv|Version\/[\d\.]+.*Mobile|Android.*(?!.Chrome)/i.test(navigator.userAgent);
+        
+        const rewardedSlot = window.googletag.defineOutOfPageSlot(
+          '/22581208631/23360735470',
+          window.googletag.enums.OutOfPageFormat.REWARDED
+        );
+
+        if (rewardedSlot) {
+          rewardedSlot.addService(window.googletag.pubads());
+          rewardedSlotRef.current = rewardedSlot;
+          
+          window.googletag.pubads().setTargeting('is_webview', isWebView ? 'true' : 'false');
+          window.googletag.pubads().enableSingleRequest();
+          window.googletag.enableServices();
+
+          window.googletag.pubads().addEventListener('rewardedSlotGranted', async (event: any) => {
+            if (user && firestore) {
+              try {
+                await runTransaction(firestore, async (transaction) => {
+                  const uRef = doc(firestore, 'users', user.uid);
+                  const uSnap = await transaction.get(uRef);
+                  if (!uSnap.exists()) return;
+
+                  const data = uSnap.data();
+                  const today = new Date().toISOString().split('T')[0];
+                  const dailyAdsCount = data.lastAdViewDate === today ? (data.dailyAdsViewedCount || 0) : 0;
+
+                  if (dailyAdsCount < DAILY_AD_LIMIT) {
+                    transaction.update(uRef, {
+                      credits: (data.credits || 0) + AD_REWARD_AMOUNT,
+                      dailyAdsViewedCount: dailyAdsCount + 1,
+                      lastAdViewDate: today,
+                      updatedAt: new Date().toISOString()
+                    });
+                  }
+                });
+              } catch (e) {
+                console.error('Failed to grant reward:', e);
+              }
+            }
+          });
+
+          window.googletag.pubads().addEventListener('slotRenderEnded', (event: any) => {
+            if (event.slot === rewardedSlotRef.current) {
+              setIsAdLoading(false);
+            }
+          });
+        }
+
+        window.googletag.display(rewardedSlot);
+      });
+    }
+  }, [user, firestore]);
+
+  const handleWatchAd = () => {
+    if (!window.googletag || !rewardedSlotRef.current) {
+      toast({ 
+        title: "Ad Service Unavailable", 
+        description: "Please disable your ad blocker to earn credits.",
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const dailyAdsCount = userData?.lastAdViewDate === today ? (userData?.dailyAdsViewedCount || 0) : 0;
+
+    if (dailyAdsCount >= DAILY_AD_LIMIT) {
+      toast({ 
+        title: "Daily Limit Reached", 
+        description: "You've viewed your 30 rewarded ads for today. Come back tomorrow!",
+      });
+      return;
+    }
+
+    setIsAdLoading(true);
+    
+    // Safety timeout for network failures/blockers
+    setTimeout(() => setIsAdLoading(false), 8000);
+
+    window.googletag.cmd.push(() => {
+      window.googletag.pubads().refresh([rewardedSlotRef.current]);
+    });
+  };
 
   // Real-time Balance Monitor: Celebrates when the database updates
   useEffect(() => {
@@ -141,83 +167,7 @@ export default function CreditsPage() {
     }
   }, [userData?.credits]);
 
-  const handleTopup = async (plan: typeof topupPlans[0]) => {
-    if (!user) return;
-    
-    if (userData?.plan === 'free') {
-      toast({ title: 'Subscription Required', description: 'Please upgrade your plan to unlock instant top-ups.' });
-      router.push('/dashboard/subscription');
-      return;
-    }
-
-    setIsProcessing(plan.id);
-
-    try {
-      const idToken = await user.getIdToken();
-      
-      const orderRes = await fetch('/api/razorpay/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ 
-          planName: plan.id, 
-          billingCycle: 'one-time' 
-        }),
-      });
-
-      const orderData = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderData.message);
-
-      const options = {
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'QuantisAI Labs',
-        description: `Top-up: ${plan.characters.toLocaleString()} Characters`,
-        order_id: orderData.orderId,
-        notes: {
-            userId: user.uid,
-            planName: plan.id,
-            credits: plan.characters.toString()
-        },
-        handler: async (response: any) => {
-          // Client-side quick verification - Webhook handles the heavy lifting
-          fetch('/api/razorpay/verify-order', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${idToken}`,
-            },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              topupType: plan.id
-            }),
-          });
-          toast({ title: 'Payment Authorized', description: 'Your balance is being updated in real-time.' });
-        },
-        prefill: {
-          name: user.displayName || '',
-          email: user.email || '',
-        },
-        theme: {
-          color: '#3B82F6', // Neural Blue
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } finally {
-      setIsProcessing(null);
-    }
-  };
-
-  if (isLoading) {
+  if (isUserLoading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary/50" />
@@ -232,10 +182,11 @@ export default function CreditsPage() {
   const creditsUsed = Math.max(0, limit - creditsRemaining);
   const usagePercentage = Math.min(100, (creditsUsed / limit) * 100);
 
+  const today = new Date().toISOString().split('T')[0];
+  const dailyAdsCount = userData?.lastAdViewDate === today ? (userData?.dailyAdsViewedCount || 0) : 0;
+
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-32">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-      
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2">
         <div className="space-y-1">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Resource Management</p>
@@ -247,9 +198,6 @@ export default function CreditsPage() {
         <div className="flex items-center gap-3">
             <Button variant="outline" className="rounded-xl border-white/10 bg-white/5 h-10 md:h-12 px-4 md:px-6 font-bold text-[10px] md:text-sm" asChild>
                 <Link href="/dashboard/subscription">View Billing</Link>
-            </Button>
-            <Button className="rounded-xl bg-primary hover:bg-primary/90 h-10 md:h-12 px-4 md:px-6 font-black shadow-lg shadow-primary/20 btn-glow text-[10px] md:text-sm" asChild>
-                <Link href="#topup-section">Instant Top-up</Link>
             </Button>
         </div>
       </header>
@@ -312,122 +260,54 @@ export default function CreditsPage() {
         </Card>
 
         <div className="space-y-6">
-            <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
-                <CardHeader className="p-6 border-b border-white/5 bg-white/[0.01]">
-                    <div className="flex items-center gap-2 mb-1">
-                        <ShieldCheck className="h-3.5 md:h-4 w-3.5 md:h-4 text-primary" />
-                        <CardTitle className="text-[10px] md:text-sm font-bold">Plan Benefits</CardTitle>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                    <ul className="space-y-4">
-                        {[
-                            { label: 'Session Limit', value: plan === 'pro' ? '360 Min' : plan === 'creator' ? '120 Min' : '60 Min' },
-                            { label: 'Audio Quality', value: '48kHz Neural' },
-                            { label: 'Parallel Synthesis', value: plan === 'free' ? 'None' : 'Unlimited' },
-                            { label: 'Custom Branding', value: plan === 'free' ? 'No' : 'Yes' },
-                        ].map((benefit, i) => (
-                            <li key={i} className="flex items-center justify-between text-[9px] md:text-xs">
-                                <span className="text-muted-foreground font-medium">{benefit.label}</span>
-                                <span className="text-white font-bold">{benefit.value}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </CardContent>
+            {/* Reward Ad Engine Card */}
+            <Card className="bg-primary/5 border-primary/20 rounded-[2rem] overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Video className="h-12 w-12 text-primary" />
+              </div>
+              <CardHeader className="p-6 pb-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="h-4 w-4 text-primary fill-primary" />
+                  <CardTitle className="text-sm font-black uppercase tracking-widest">Reward Engine</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <span>Daily Progress</span>
+                    <span className="text-white">{dailyAdsCount} / {DAILY_AD_LIMIT}</span>
+                  </div>
+                  <Progress value={(dailyAdsCount / DAILY_AD_LIMIT) * 100} className="h-1.5 bg-white/5" />
+                </div>
+                <div className="space-y-4">
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Watch a video ad to earn <span className="text-primary font-bold">{AD_REWARD_AMOUNT} characters</span> instantly.
+                  </p>
+                  <Button 
+                    onClick={handleWatchAd}
+                    disabled={isAdLoading || dailyAdsCount >= DAILY_AD_LIMIT}
+                    className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 font-black btn-glow text-xs uppercase tracking-widest"
+                  >
+                    {isAdLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Play className="h-4 w-4 mr-2 fill-current" />}
+                    {dailyAdsCount >= DAILY_AD_LIMIT ? "Limit Reached" : "Watch & Earn"}
+                  </Button>
+                </div>
+              </CardContent>
             </Card>
 
-            <Card className="bg-primary/5 border-primary/20 rounded-[2rem] p-6">
+            <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] p-6">
                <div className="flex items-start gap-4">
                   <Globe className="h-5 w-5 text-primary shrink-0" />
                   <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-white">Secure Verification</p>
                     <p className="text-[9px] text-muted-foreground leading-relaxed">
-                      Transactions verified by <span className="font-bold">QuantisAI API Node</span>. Credits added instantly upon capture.
+                      All credits verified by <span className="font-bold">QuantisAI API Node</span>. Ad rewards added instantly.
                     </p>
                   </div>
                </div>
             </Card>
         </div>
       </div>
-
-      <section id="topup-section" className="space-y-8 pt-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2">
-          <div>
-            <h2 className="text-lg md:text-2xl font-bold text-white flex items-center gap-3">
-              <ShoppingCart className="h-4 md:h-6 w-4 md:w-6 text-primary" />
-              Instant Top-ups
-            </h2>
-            <p className="text-muted-foreground text-[10px] md:text-sm mt-1">Add character volume to your account. Credits never expire.</p>
-          </div>
-          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 px-3 md:px-4 py-1.5 rounded-full font-black text-[7px] md:text-[10px] uppercase tracking-widest">
-            High-Throughput Synthesis
-          </Badge>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {topupPlans.map((pack) => (
-            <motion.div key={pack.id} whileHover={{ y: -5 }} className="relative">
-              {pack.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 bg-primary text-white text-[7px] md:text-[10px] font-black uppercase px-3 md:px-4 py-1 rounded-full shadow-lg shadow-primary/20 ring-4 ring-[#0B0B0F]">
-                  Most Popular
-                </div>
-              )}
-              <Card className={cn(
-                "bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden transition-all",
-                pack.popular ? "border-primary/40 bg-primary/[0.03]" : "hover:border-white/20"
-              )}>
-                <CardContent className="p-6 md:p-8 text-center space-y-6">
-                  <div className="space-y-1">
-                    <h3 className="text-[8px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">{pack.name}</h3>
-                    <div className="flex items-center justify-center gap-1.5 text-white">
-                      <Plus className="h-3 md:h-4 w-3 md:h-4 text-primary" />
-                      <span className="text-2xl md:text-4xl font-black">{pack.characters.toLocaleString()}</span>
-                    </div>
-                    <p className="text-[7px] md:text-[10px] text-primary/60 font-bold uppercase tracking-widest">Characters</p>
-                  </div>
-
-                  <div className="py-4 border-y border-white/5">
-                    <p className="text-[10px] md:text-sm text-muted-foreground">{pack.desc}</p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="text-xl md:text-3xl font-black text-white">₹{pack.price}</div>
-                    
-                    {plan === 'free' ? (
-                      <Button 
-                        asChild
-                        className={cn(
-                          "w-full h-11 md:h-12 rounded-xl font-black text-[10px] md:text-sm transition-all bg-primary hover:bg-primary/90 btn-glow"
-                        )}
-                      >
-                        <Link href="/dashboard/subscription">
-                          <Lock className="mr-2 h-3.5 w-3.5" />
-                          Upgrade to Unlock
-                        </Link>
-                      </Button>
-                    ) : pack.buttonId ? (
-                      <div className="min-h-[48px] flex items-center justify-center">
-                        <RazorpayPaymentButton buttonId={pack.buttonId} userId={user?.uid} characters={pack.characters} planId={pack.id} />
-                      </div>
-                    ) : (
-                      <Button 
-                        onClick={() => handleTopup(pack)}
-                        disabled={!!isProcessing}
-                        className={cn(
-                          "w-full h-11 md:h-12 rounded-xl font-black text-[10px] md:text-sm transition-all",
-                          pack.popular ? "bg-primary hover:bg-primary/90 btn-glow" : "bg-white text-black hover:bg-white/90"
-                        )}
-                      >
-                        {isProcessing === pack.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Buy Now"}
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       <section className="space-y-6 pt-10">
         <div className="flex items-center gap-2 px-2">
