@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import PlanCard from '@/components/subscription/plan-card';
 import UsageStats from '@/components/subscription/usage-stats';
+import TransactionHistoryTable from '@/components/subscription/transaction-history-table';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Script from 'next/script';
+import { CreditCard, History, Zap } from 'lucide-react';
 
 const plans = {
   monthly: [
@@ -129,61 +131,70 @@ const plans = {
 };
 
 export default function SubscriptionPage() {
-  const [isYearly, setIsYearly] = useState(false);
   const { user, firestore } = useFirebase();
-
+  
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [user, firestore]);
 
   const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
+  
+  const [isYearly, setIsYearly] = useState(userData?.billingCycle === 'yearly');
 
   const displayPlans = isYearly ? plans.yearly : plans.monthly;
   const currentPlanName = userData?.plan || 'free';
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-12 pb-24"
-    >
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+    <div className="space-y-12 pb-32">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Subscription & Billing</h1>
-          <p className="mt-2 text-xs md:text-sm text-muted-foreground">
-            Manage your plan, usage, and billing settings.
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Billing Studio</p>
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">Plan & Billing</h1>
+          <p className="text-muted-foreground text-xs md:text-sm max-w-md">
+            Manage your subscription tier, monitor usage, and view transaction history.
           </p>
         </div>
-        <div className="flex items-center space-x-3 rounded-full bg-card/50 p-1 border">
-          <Label htmlFor="billing-cycle" className="pl-2 text-[10px] md:text-sm">Monthly</Label>
+        
+        <div className="flex items-center space-x-3 rounded-full bg-white/5 p-1.5 border border-white/10 shadow-inner backdrop-blur-md">
+          <Label htmlFor="billing-cycle" className={cn(
+            "pl-3 text-[10px] md:text-xs font-bold uppercase transition-colors",
+            !isYearly ? "text-white" : "text-white/40"
+          )}>Monthly</Label>
           <Switch
             id="billing-cycle"
             checked={isYearly}
             onCheckedChange={setIsYearly}
-            aria-label="Toggle billing cycle"
+            className="data-[state=checked]:bg-primary"
           />
-          <Label htmlFor="billing-cycle" className="text-[10px] md:text-sm">Yearly</Label>
-          <div className="rounded-full border border-green-500/50 bg-green-500/10 px-2 py-0.5 md:px-3 md:py-1 text-[8px] md:text-xs text-green-400">
-            Save ~20%
+          <Label htmlFor="billing-cycle" className={cn(
+            "text-[10px] md:text-xs font-bold uppercase transition-colors",
+            isYearly ? "text-white" : "text-white/40"
+          )}>Yearly</Label>
+          <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[8px] font-black uppercase text-emerald-400">
+            -20% Off
           </div>
         </div>
-      </div>
+      </header>
       
       {isUserLoading ? (
-          <Skeleton className="h-48 w-full rounded-2xl" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Skeleton className="h-48 w-full rounded-[2.5rem] bg-white/5" />
+            <Skeleton className="h-48 w-full rounded-[2.5rem] bg-white/5" />
+          </div>
       ) : (
           <UsageStats userData={userData} />
       )}
 
-      <div id="pricing-plans">
-        <h2 className="mb-8 text-xl md:text-2xl font-semibold tracking-tight text-center">
-          Choose the plan that's right for you
-        </h2>
-        <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
+      <section id="pricing-plans" className="space-y-10">
+        <div className="flex items-center gap-3 px-2">
+          <Zap className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-bold text-white">Available Tiers</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {displayPlans.map((plan) => (
             <PlanCard
               key={plan.name}
@@ -193,7 +204,15 @@ export default function SubscriptionPage() {
             />
           ))}
         </div>
-      </div>
-    </motion.div>
+      </section>
+
+      <section className="space-y-6 pt-10">
+        <div className="flex items-center gap-3 px-2">
+          <History className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-bold text-white">Audit Trail</h2>
+        </div>
+        <TransactionHistoryTable />
+      </section>
+    </div>
   );
 }
