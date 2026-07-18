@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PlanCard from '@/components/subscription/plan-card';
 import UsageStats from '@/components/subscription/usage-stats';
@@ -12,6 +12,7 @@ import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Script from 'next/script';
 import { CreditCard, History, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const plans = {
   monthly: [
@@ -140,7 +141,14 @@ export default function SubscriptionPage() {
 
   const { data: userData, isLoading: isUserLoading } = useDoc(userDocRef);
   
-  const [isYearly, setIsYearly] = useState(userData?.billingCycle === 'yearly');
+  const [isYearly, setIsYearly] = useState(false);
+
+  // Sync toggle with user's actual billing cycle once data is available
+  useEffect(() => {
+    if (userData?.billingCycle) {
+      setIsYearly(userData.billingCycle === 'yearly');
+    }
+  }, [userData?.billingCycle]);
 
   const displayPlans = isYearly ? plans.yearly : plans.monthly;
   const currentPlanName = userData?.plan || 'free';
