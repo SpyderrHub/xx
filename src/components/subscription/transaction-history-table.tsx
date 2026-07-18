@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 export default function TransactionHistoryTable() {
   const { user, firestore } = useFirebase();
 
-  // Fetch subscriptions - Filtered by userId and active status
+  // Fetch subscriptions - Strictly filtered by userId to comply with Security Rules
   const subsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(

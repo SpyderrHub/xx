@@ -19,7 +19,9 @@ service cloud.firestore {
     
     // Explicit rules for Subscriptions (Root Collection)
     match /user_subscriptions/{id} {
-      allow list: if isSignedIn() && (isAdmin() || request.query.filters.userId == request.auth.uid);
+      // Allow list if admin OR if querying specifically for own records
+      allow list: if isSignedIn() && (isAdmin() || (request.query.filters != null && request.query.filters.userId == request.auth.uid));
+      // Allow get if admin OR if document belongs to user
       allow get: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
       allow write: if false; // Only Admin SDK can write
     }
@@ -27,6 +29,7 @@ service cloud.firestore {
     // Public Voice Profiles
     match /voices/{voiceId} {
       // Allow read if voice is public OR if the user is the owner OR if admin
+      // Critical: Queries must include .where('isPublic', '==', true) to match this rule
       allow read: if (resource.data.isPublic == true) || (isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()));
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
@@ -46,11 +49,9 @@ service cloud.firestore {
     // USER-SPECIFIC DATA
     match /users/{userId} {
       // 1. Basic Profile Access (Name, Avatar, ReferralCode)
-      // Allow 'get' for everyone to see speaker names/avatars.
       allow get: if isSignedIn();
       
       // 2. Full Document Access (Owner/Admin)
-      // Sensitive data like 'apiKey' and 'email' are only readable by owner or admin.
       allow read, write: if isOwner(userId) || isAdmin();
       
       // 3. Referral Code Lookup (Sign-up flow) / Admin Management
