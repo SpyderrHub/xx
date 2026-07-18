@@ -39,7 +39,6 @@ export default function TransactionHistoryTable() {
     return query(
       collection(firestore, 'user_subscriptions'),
       where('userId', '==', user.uid),
-      where('status', '==', 'active'),
       orderBy('createdAt', 'desc'),
       limit(20)
     );
