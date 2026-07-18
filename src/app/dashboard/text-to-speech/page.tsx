@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -188,7 +189,7 @@ export default function TextToSpeechPage() {
 
   const myVoicesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    return collection(firestore, 'users', user.uid, 'myVoices');
+    return collection(firestore, 'users', user.uid, 'savedVoices');
   }, [user, firestore]);
 
   const { data: myVoicesDocs, isLoading: isMyVoicesLoading } = useCollection(myVoicesQuery);

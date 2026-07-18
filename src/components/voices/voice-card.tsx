@@ -66,7 +66,7 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
   
   const myVoiceRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    return doc(firestore, 'users', user.uid, 'myVoices', voice.id);
+    return doc(firestore, 'users', user.uid, 'savedVoices', voice.id);
   }, [user, firestore, voice.id]);
 
   const { data: myVoiceData, isLoading: isMyVoiceLoading } = useDoc(myVoiceRef);
@@ -104,7 +104,7 @@ export default function VoiceCard({ voice }: VoiceCardProps) {
 
     setIsToggling(true);
     try {
-      const docRef = doc(firestore, 'users', user.uid, 'myVoices', voice.id);
+      const docRef = doc(firestore, 'users', user.uid, 'savedVoices', voice.id);
       if (isAdded) {
         await deleteDoc(docRef);
       } else {

@@ -74,6 +74,10 @@ service cloud.firestore {
 
       // SUBCOLLECTIONS
       
+      match /savedVoices/{voiceId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
       match /myVoices/{voiceId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }

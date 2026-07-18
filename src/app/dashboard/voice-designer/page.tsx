@@ -312,8 +312,8 @@ export default function VoiceDesignerPage() {
 
       await setDoc(doc(firestore, 'voices', voiceId), voiceData);
 
-      // 3. Add to user's 'myVoices' collection for TTS access
-      await setDoc(doc(firestore, 'users', user.uid, 'myVoices', voiceId), {
+      // 3. Add to user's 'savedVoices' collection for TTS access
+      await setDoc(doc(firestore, 'users', user.uid, 'savedVoices', voiceId), {
         voiceId,
         addedAt: new Date().toISOString()
       });
