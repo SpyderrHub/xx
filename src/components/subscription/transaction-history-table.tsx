@@ -16,22 +16,11 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
-import { History, Zap, ShieldCheck, Loader2 } from 'lucide-react';
+import { History, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function TransactionHistoryTable() {
   const { user, firestore } = useFirebase();
-
-  // Fetch top-ups - Filtered by userId for security compliance
-  const topupsQuery = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return query(
-      collection(firestore, 'user_topups'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
-  }, [user?.uid, firestore]);
 
   // Fetch subscriptions - Filtered by userId and active status
   const subsQuery = useMemoFirebase(() => {
@@ -44,20 +33,10 @@ export default function TransactionHistoryTable() {
     );
   }, [user?.uid, firestore]);
 
-  const { data: topups, isLoading: isTopupsLoading } = useCollection(topupsQuery);
-  const { data: subs, isLoading: isSubsLoading } = useCollection(subsQuery);
+  const { data: subs, isLoading } = useCollection(subsQuery);
 
   const transactions = useMemo(() => {
     const all = [
-      ...(topups || []).map(t => ({
-        id: t.id,
-        date: new Date(t.createdAt),
-        type: 'Top-up',
-        description: t.packId?.replace('topup_', '').replace('k', ',000 Credits Pack') || 'Credit Pack',
-        status: t.status || 'success',
-        credits: t.creditsAdded || 0,
-        icon: <Zap className="h-3.5 w-3.5 text-amber-400" />
-      })),
       ...(subs || []).map(s => ({
         id: s.id,
         date: new Date(s.createdAt),
@@ -70,9 +49,7 @@ export default function TransactionHistoryTable() {
     ];
 
     return all.sort((a, b) => b.date.getTime() - a.date.getTime());
-  }, [topups, subs]);
-
-  const isLoading = isTopupsLoading || isSubsLoading;
+  }, [subs]);
 
   return (
     <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
@@ -83,7 +60,7 @@ export default function TransactionHistoryTable() {
             </div>
             <CardTitle className="text-xl font-bold">Transaction Details</CardTitle>
         </div>
-        <CardDescription>Comprehensive log of account credit movements and active plan statuses.</CardDescription>
+        <CardDescription>Comprehensive log of subscription activations and tier status.</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
@@ -144,7 +121,7 @@ export default function TransactionHistoryTable() {
                 <TableCell colSpan={5} className="h-48 text-center">
                   <div className="flex flex-col items-center justify-center gap-2 opacity-30">
                     <History className="h-8 w-8" />
-                    <p className="text-xs italic">No transactions found for your account.</p>
+                    <p className="text-xs italic">No active subscriptions found for your account.</p>
                   </div>
                 </TableCell>
               </TableRow>

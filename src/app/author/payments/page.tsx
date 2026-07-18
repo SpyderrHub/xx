@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -6,19 +7,12 @@ import {
   CreditCard, 
   Search, 
   TrendingUp, 
-  DollarSign, 
   ShieldCheck, 
-  Clock, 
-  ArrowUpRight,
-  ArrowDownRight,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
+  CheckCircle2, 
   History,
   Activity,
   Zap,
-  User as UserIcon,
-  Mail
+  Loader2
 } from 'lucide-react';
 import { 
   Table, 
@@ -41,35 +35,16 @@ export default function AuthorPaymentsPage() {
   const { firestore } = useFirebase();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch top-ups globally for admin
-  const topupsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'user_topups'), orderBy('createdAt', 'desc'), limit(100));
-  }, [firestore]);
-
   // Fetch subscriptions globally for admin
   const subsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'user_subscriptions'), orderBy('createdAt', 'desc'), limit(100));
   }, [firestore]);
 
-  const { data: topups, isLoading: isTopupsLoading } = useCollection(topupsQuery);
-  const { data: subs, isLoading: isSubsLoading } = useCollection(subsQuery);
+  const { data: subs, isLoading } = useCollection(subsQuery);
 
   const transactions = useMemo(() => {
     const all = [
-      ...(topups || []).map(t => ({
-        id: t.id,
-        date: new Date(t.createdAt),
-        userId: t.userId,
-        type: 'One-time Top-up',
-        pack: t.packId?.replace('topup_', '').toUpperCase() || 'Pack',
-        amount: t.packId === 'topup_100k' ? '₹149' : t.packId === 'topup_50k' ? '₹99' : '₹49',
-        status: t.status || 'success',
-        credits: t.creditsAdded || 0,
-        gateway: t.method === 'razorpay_button' ? 'Razorpay Webhook' : 'Razorpay API',
-        orderId: t.razorpayOrderId || t.razorpayPaymentId || 'N/A'
-      })),
       ...(subs || []).map(s => ({
         id: s.id,
         date: new Date(s.createdAt),
@@ -85,7 +60,7 @@ export default function AuthorPaymentsPage() {
     ];
 
     return all.sort((a, b) => b.date.getTime() - a.date.getTime());
-  }, [topups, subs]);
+  }, [subs]);
 
   const filteredTransactions = transactions.filter(tx => 
     tx.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -114,8 +89,6 @@ export default function AuthorPaymentsPage() {
     }, { totalVolume: 0, verifiedCount: 0, todayVolume: 0 });
   }, [transactions]);
 
-  const isLoading = isTopupsLoading || isSubsLoading;
-
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-24">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -125,13 +98,13 @@ export default function AuthorPaymentsPage() {
             Financial Audit
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Monitoring {transactions.length} verified transactions across QuantisAI Labs engines.
+            Monitoring {transactions.length} verified subscriptions across QuantisAI Labs engines.
           </p>
         </div>
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search by ID, User, or Pack..." 
+            placeholder="Search by ID, User, or Plan..." 
             className="pl-9 bg-white/5 border-white/10 rounded-xl h-11"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -163,7 +136,7 @@ export default function AuthorPaymentsPage() {
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Captures</p>
             </div>
             <p className="text-2xl font-bold text-white">{stats.verifiedCount}</p>
-            <p className="text-[10px] text-muted-foreground font-bold mt-1">Webhook Events</p>
+            <p className="text-[10px] text-muted-foreground font-bold mt-1">Subscription Events</p>
           </CardContent>
         </Card>
 
@@ -176,7 +149,7 @@ export default function AuthorPaymentsPage() {
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Today's Intake</p>
             </div>
             <p className="text-2xl font-bold text-white">₹{stats.todayVolume.toLocaleString()}</p>
-            <p className="text-[10px] text-indigo-400 font-bold mt-1">Real-time Capture</p>
+            <p className="text-[10px] text-indigo-400 font-bold mt-1">Real-time Activation</p>
           </CardContent>
         </Card>
 
@@ -186,18 +159,18 @@ export default function AuthorPaymentsPage() {
               <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                 <Activity className="h-5 w-5 text-amber-400" />
               </div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Engine Load</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Gateway Pulse</p>
             </div>
             <p className="text-2xl font-bold text-white">Active</p>
-            <p className="text-[10px] text-amber-400 font-bold mt-1">Webhook Pulse: OK</p>
+            <p className="text-[10px] text-amber-400 font-bold mt-1">API Status: OK</p>
           </CardContent>
         </Card>
       </div>
 
       <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
         <CardHeader className="p-8 border-b border-white/5 bg-white/[0.01]">
-          <CardTitle className="text-lg font-bold">Comprehensive Payment Logs</CardTitle>
-          <CardDescription>Direct webhook and API audit trail for all QuantisAI Labs transactions.</CardDescription>
+          <CardTitle className="text-lg font-bold">Comprehensive Billing Logs</CardTitle>
+          <CardDescription>Direct API audit trail for all QuantisAI Labs subscriptions.</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -206,7 +179,7 @@ export default function AuthorPaymentsPage() {
                 <TableRow className="border-white/5 hover:bg-transparent">
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-8 h-12">Timestamp</TableHead>
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Transaction Info</TableHead>
-                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Package</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12">Plan</TableHead>
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-center">Status</TableHead>
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground h-12 text-right px-8">Credits & Amount</TableHead>
                 </TableRow>
@@ -268,7 +241,7 @@ export default function AuthorPaymentsPage() {
                     <TableCell colSpan={5} className="h-64 text-center">
                       <div className="flex flex-col items-center justify-center gap-3 opacity-20">
                         <History className="h-10 w-10" />
-                        <p className="text-sm italic">No payment logs found matching your criteria.</p>
+                        <p className="text-sm italic">No billing logs found matching your criteria.</p>
                       </div>
                     </TableCell>
                   </TableRow>
