@@ -1,9 +1,6 @@
-
 import { NextResponse, type NextRequest } from 'next/server';
 import crypto from 'crypto';
 import { adminDb, adminAuth } from '@/lib/firebase-admin';
-
-const REFERRAL_REWARD_CREDITS = 5000;
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,17 +55,14 @@ export async function POST(request: NextRequest) {
       expiryDate.setMonth(expiryDate.getMonth() + 1);
     }
 
-    // Use a transaction to update the user's plan and potentially reward the referrer
+    // Use a transaction to update the user's plan
     await adminDb.runTransaction(async (transaction) => {
       const userRef = adminDb.collection('users').doc(uid);
       const userDoc = await transaction.get(userRef);
       
       if (!userDoc.exists) throw new Error("User document not found");
-      const userData = userDoc.data();
-      const previousPlan = userData?.subscriptionPlan || 'free';
-      const referredBy = userData?.referredBy;
 
-      // 1. Update the Buyer's Data - using subscriptionPlan and subscriptionType
+      // 1. Update the Buyer's Data
       transaction.update(userRef, {
         subscriptionPlan: planName,
         subscriptionType: billingCycle,
@@ -79,33 +73,7 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(),
       });
 
-      // 2. Handle Referral Reward (Only if it's the first purchase)
-      if (referredBy && previousPlan === 'free') {
-        const referrerRef = adminDb.collection('users').doc(referredBy);
-        const referrerDoc = await transaction.get(referrerRef);
-
-        if (referrerDoc.exists) {
-          const currentReferrerCredits = referrerDoc.data()?.credits || 0;
-          const currentReferralCount = referrerDoc.data()?.referralCount || 0;
-          
-          // Add 5000 credits to referrer and increment count
-          transaction.update(referrerRef, {
-            credits: currentReferrerCredits + REFERRAL_REWARD_CREDITS,
-            referralCount: currentReferralCount + 1,
-            updatedAt: new Date().toISOString()
-          });
-
-          // Update the referral log in the referrer's collection to 'completed'
-          const referralLogRef = adminDb.collection('users').doc(referredBy).collection('referrals').doc(uid);
-          transaction.update(referralLogRef, {
-            status: 'completed',
-            completedAt: new Date().toISOString(),
-            rewardClaimed: true
-          });
-        }
-      }
-
-      // 3. Log the subscription event
+      // 2. Log the subscription event
       const subLogRef = adminDb.collection('user_subscriptions').doc();
       transaction.set(subLogRef, {
         userId: uid,

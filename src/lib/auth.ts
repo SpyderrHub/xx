@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -12,12 +11,7 @@ import {
 import { 
   doc, 
   Firestore, 
-  setDoc, 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  limit 
+  setDoc
 } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
 
@@ -30,15 +24,6 @@ async function getPublicIp(): Promise<string> {
     console.error('Failed to capture IP address:', error);
     return 'unknown';
   }
-}
-
-function generateReferralCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
 }
 
 async function triggerServerSideOtp(user: any) {
@@ -68,8 +53,7 @@ export async function signUpWithEmail(
   firestore: Firestore,
   fullName: string,
   email: string,
-  password: string,
-  referralCodeFromUrl?: string | null
+  password: string
 ): Promise<UserCredential> {
   try {
     const userCredential = await createUserWithEmailAndPassword(
@@ -82,31 +66,6 @@ export async function signUpWithEmail(
 
     const user = userCredential.user;
     const userIp = await getPublicIp();
-    const referralCode = generateReferralCode();
-
-    let referredByUid: string | null = null;
-    
-    if (referralCodeFromUrl) {
-      const referrersQuery = query(
-        collection(firestore, 'users'), 
-        where('referralCode', '==', referralCodeFromUrl), 
-        limit(1)
-      );
-      const referrerSnapshot = await getDocs(referrersQuery);
-      if (!referrerSnapshot.empty) {
-        referredByUid = referrerSnapshot.docs[0].id;
-        
-        const referralRecordRef = doc(firestore, 'users', referredByUid, 'referrals', user.uid);
-        await setDoc(referralRecordRef, {
-          referredUserId: user.uid,
-          referredUserName: fullName,
-          referredUserEmail: email,
-          status: 'pending',
-          createdAt: new Date().toISOString(),
-          rewardClaimed: false
-        });
-      }
-    }
 
     const userData = {
       uid: user.uid,
@@ -122,9 +81,6 @@ export async function signUpWithEmail(
       currentPeriodStart: new Date().toISOString(),
       currentPeriodEnd: null,
       lastIp: userIp,
-      referralCode: referralCode,
-      referredBy: referredByUid,
-      referralCount: 0,
       isVerified: false,
     };
 

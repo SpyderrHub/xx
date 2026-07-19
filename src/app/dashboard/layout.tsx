@@ -17,7 +17,6 @@ import {
   Ear,
   Music,
   Coins,
-  Gift,
   Terminal,
 } from 'lucide-react';
 import {
@@ -197,7 +196,6 @@ const DashboardSidebar = () => {
   ], []);
 
   const footerNav = useMemo(() => [
-    { href: '/dashboard/referrals', label: 'Refer & Earn', icon: Gift },
     { href: '/dashboard/credits', label: 'Credits', icon: Coins },
     { href: '/dashboard/developer', label: 'API Access', icon: Code2 },
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
@@ -425,7 +423,6 @@ export default function DashboardLayout({
     if (pathname === '/dashboard/subscription') return 'Plan & Billing';
     if (pathname === '/dashboard/settings') return 'Account Settings';
     if (pathname === '/dashboard/credits') return 'Credits & Usage';
-    if (pathname === '/dashboard/referrals') return 'Refer & Earn';
     if (pathname === '/dashboard/developer') return 'Developer API Access';
     return 'Dashboard';
   };

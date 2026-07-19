@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -17,31 +16,10 @@
         "paymentStatus": { "type": "string" },
         "currentPeriodStart": { "type": "string", "format": "date-time" },
         "currentPeriodEnd": { "type": "string", "format": "date-time" },
-        "billingCycle": { "type": "string" },
-        "dailyMusicGenerationsCount": { "type": "number" },
-        "lastMusicGenerationDate": { "type": "string" },
-        "dailyVoiceDesignCount": { "type": "number" },
-        "lastVoiceDesignDate": { "type": "string" },
         "lastIp": { "type": "string", "description": "Stored for multi-account detection." },
-        "referralCode": { "type": "string", "description": "Unique code for referring others." },
-        "referredBy": { "type": "string", "description": "UID of the user who referred this user." },
-        "referralCount": { "type": "number", "description": "Total number of successfully verified referrals." },
         "isVerified": { "type": "boolean", "description": "Whether the user's email has been verified via OTP." }
       },
-      "required": ["uid", "name", "email", "createdAt", "subscriptionPlan", "subscriptionType", "credits", "role", "referralCode", "referralCount", "isVerified"]
-    },
-    "Referral": {
-      "title": "Referral",
-      "type": "object",
-      "properties": {
-        "referredUserId": { "type": "string" },
-        "referredUserName": { "type": "string" },
-        "referredUserEmail": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "completed"] },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "rewardClaimed": { "type": "boolean" }
-      },
-      "required": ["referredUserId", "status", "createdAt"]
+      "required": ["uid", "name", "email", "createdAt", "subscriptionPlan", "subscriptionType", "credits", "role", "isVerified"]
     },
     "Voice": {
       "title": "Voice",
@@ -128,10 +106,6 @@
     "/users/{userId}/generations/{genId}": {
       "schema": { "$ref": "#/entities/Generation" },
       "description": "Individual synthesis history records."
-    },
-    "/users/{userId}/referrals/{refId}": {
-      "schema": { "$ref": "#/entities/Referral" },
-      "description": "Log of users referred by this user."
     },
     "/user_subscriptions/{id}": {
       "schema": { "$ref": "#/entities/UserSubscription" },
