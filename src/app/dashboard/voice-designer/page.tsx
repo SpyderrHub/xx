@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -179,8 +178,16 @@ export default function VoiceDesignerPage() {
 
   const { data: userData } = useDoc(userDocRef);
 
-  // Dynamic daily quota based on plan
-  const dailyLimit = userData?.plan === 'starter' ? 10 : userData?.plan === 'creator' ? 20 : 30;
+  // Dynamic daily quota based on standardized subscriptionPlan
+  const getDailyLimit = (plan?: string) => {
+    const p = (plan || 'free').toLowerCase();
+    if (p === 'starter') return 10;
+    if (p === 'creator') return 20;
+    if (p === 'pro') return 30;
+    return 1; // Minimal trial for free
+  };
+
+  const dailyLimit = getDailyLimit(userData?.subscriptionPlan);
 
   // Daily quota logic
   const todayStr = new Date().toISOString().split('T')[0];
@@ -196,7 +203,7 @@ export default function VoiceDesignerPage() {
     if (remainingGenerations <= 0) {
       toast({
         title: "Daily Limit Reached",
-        description: `You have used your ${dailyLimit} free designs for today.`,
+        description: `You have used your ${dailyLimit} daily designs for your plan.`,
         variant: "destructive"
       });
       return;
@@ -245,8 +252,10 @@ export default function VoiceDesignerPage() {
         const dbCredits = uSnap.data().credits || 0;
         const dbLastDate = uSnap.data().lastVoiceDesignDate || '';
         const dbDailyCount = dbLastDate === todayStr ? (uSnap.data().dailyVoiceDesignCount || 0) : 0;
+        const dbLimit = getDailyLimit(uSnap.data().subscriptionPlan);
 
         if (dbCredits < cost) throw new Error("Insufficient credits");
+        if (dbDailyCount >= dbLimit) throw new Error("Daily limit reached");
 
         transaction.update(uRef, {
           credits: dbCredits - cost,

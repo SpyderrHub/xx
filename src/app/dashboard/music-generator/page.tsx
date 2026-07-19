@@ -134,8 +134,16 @@ export default function MusicGeneratorPage() {
 
   const { data: userData } = useDoc(userDocRef);
   
-  // Dynamic daily quota based on plan
-  const dailyLimit = userData?.plan === 'starter' ? 10 : userData?.plan === 'creator' ? 20 : 30;
+  // Dynamic daily quota based on standardized subscriptionPlan
+  const getDailyLimit = (plan?: string) => {
+    const p = (plan || 'free').toLowerCase();
+    if (p === 'starter') return 10;
+    if (p === 'creator') return 20;
+    if (p === 'pro') return 30;
+    return 1; // 1 trial for free users
+  };
+
+  const dailyLimit = getDailyLimit(userData?.subscriptionPlan);
   
   // Calculate daily quota
   const todayStr = new Date().toISOString().split('T')[0];
@@ -152,7 +160,7 @@ export default function MusicGeneratorPage() {
     if (remainingGenerations <= 0) {
       toast({
         title: "Daily Limit Reached",
-        description: `You have used your ${dailyLimit} free compositions for today. Please try again tomorrow.`,
+        description: `You have used your ${dailyLimit} daily compositions for your plan. Please try again tomorrow.`,
         variant: "destructive"
       });
       return;
@@ -188,8 +196,7 @@ export default function MusicGeneratorPage() {
         const dbCredits = data.credits || 0;
         const dbLastDate = data.lastMusicGenerationDate || '';
         const dbDailyCount = dbLastDate === todayStr ? (data.dailyMusicGenerationsCount || 0) : 0;
-        const dbPlan = data.plan || 'free';
-        const dbLimit = dbPlan === 'starter' ? 10 : dbPlan === 'creator' ? 20 : 30;
+        const dbLimit = getDailyLimit(data.subscriptionPlan);
 
         // Verify limits again in transaction
         if (dbCredits < cost) throw new Error("Insufficient credits");
