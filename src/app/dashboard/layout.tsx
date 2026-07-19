@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useEffect } from 'react';
@@ -294,7 +293,7 @@ const DashboardSidebar = () => {
                   <span>{item.label}</span>
                   {item.label === "API Access" && !isCollapsed && (
                     <span className="ml-auto rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-primary ring-1 ring-primary/20">
-                      New
+                      Soon
                     </span>
                   )}
                 </Link>
