@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -21,8 +22,8 @@ export default function UsageStats({ userData }: any) {
     return null;
   }
 
-  const { plan, credits, currentPeriodEnd, billingCycle } = userData;
-  const currentPlan = planDetails[plan] || planDetails['free'];
+  const { subscriptionPlan, credits, currentPeriodEnd, subscriptionType } = userData;
+  const currentPlan = planDetails[subscriptionPlan || 'free'] || planDetails['free'];
   
   const limit = currentPlan.characterLimit;
   const used = Math.max(0, limit - credits);
@@ -39,9 +40,9 @@ export default function UsageStats({ userData }: any) {
             <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 uppercase font-black text-[9px] px-3 py-1">
               Current Package
             </Badge>
-            {billingCycle && (
+            {subscriptionType && (
               <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                Billed {billingCycle}
+                Billed {subscriptionType}
               </span>
             )}
           </div>

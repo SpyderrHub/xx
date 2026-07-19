@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -112,7 +113,8 @@ export async function signUpWithEmail(
       name: fullName,
       email: user.email,
       createdAt: new Date().toISOString(),
-      plan: 'free',
+      subscriptionPlan: 'free',
+      subscriptionType: 'monthly',
       credits: 3000,
       role: 'user',
       subscriptionId: null,

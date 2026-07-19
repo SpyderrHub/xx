@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid signature' }, { status: 400 });
     }
 
-    const planName = planType.split('_')[0];
-    const billingCycle = planType.split('_')[1];
+    const planName = planType.split('_')[0]; // e.g., starter, creator, pro
+    const billingCycle = planType.split('_')[1]; // e.g., monthly, yearly
     
     const creditsMap: Record<string, number> = {
       starter: 50000,
@@ -65,17 +65,17 @@ export async function POST(request: NextRequest) {
       
       if (!userDoc.exists) throw new Error("User document not found");
       const userData = userDoc.data();
-      const previousPlan = userData?.plan || 'free';
+      const previousPlan = userData?.subscriptionPlan || 'free';
       const referredBy = userData?.referredBy;
 
-      // 1. Update the Buyer's Data
+      // 1. Update the Buyer's Data - using subscriptionPlan and subscriptionType
       transaction.update(userRef, {
-        plan: planName,
+        subscriptionPlan: planName,
+        subscriptionType: billingCycle,
         credits: newCredits,
         paymentStatus: 'active',
         subscriptionId: razorpay_subscription_id,
         currentPeriodEnd: expiryDate.toISOString(),
-        billingCycle: billingCycle,
         updatedAt: new Date().toISOString(),
       });
 

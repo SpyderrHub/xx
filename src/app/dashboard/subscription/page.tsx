@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -144,13 +145,13 @@ export default function SubscriptionPage() {
 
   // Sync toggle with user's actual billing cycle once data is available
   useEffect(() => {
-    if (userData?.billingCycle) {
-      setIsYearly(userData.billingCycle === 'yearly');
+    if (userData?.subscriptionType) {
+      setIsYearly(userData.subscriptionType === 'yearly');
     }
-  }, [userData?.billingCycle]);
+  }, [userData?.subscriptionType]);
 
   const displayPlans = isYearly ? plans.yearly : plans.monthly;
-  const currentPlanName = userData?.plan || 'free';
+  const currentPlanName = userData?.subscriptionPlan || 'free';
 
   return (
     <div className="space-y-12 pb-32">

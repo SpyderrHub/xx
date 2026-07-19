@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -75,7 +76,7 @@ export default function CreditsPage() {
   }
 
   const creditsRemaining = userData?.credits || 0;
-  const plan = userData?.plan || 'free';
+  const plan = userData?.subscriptionPlan || 'free';
   const limit = planLimits[plan] || 3000;
   
   const creditsUsed = Math.max(0, limit - creditsRemaining);
