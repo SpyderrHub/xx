@@ -1,12 +1,9 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
-import { Coins, Clock, Sparkles, BarChart3 } from 'lucide-react';
+import { Coins, Clock, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const planDetails: Record<string, { characterLimit: number, label: string }> = {
@@ -22,12 +19,14 @@ export default function UsageStats({ userData }: any) {
     return null;
   }
 
-  const { subscriptionPlan, credits, currentPeriodEnd, subscriptionType } = userData;
+  const { subscriptionPlan, credits, subscriptionType } = userData;
   const currentPlan = planDetails[subscriptionPlan || 'free'] || planDetails['free'];
   
   const limit = currentPlan.characterLimit;
   const used = Math.max(0, limit - credits);
   const percentage = Math.min(100, (used / limit) * 100);
+
+  const isPaidPlan = ['starter', 'creator', 'pro'].includes(subscriptionPlan?.toLowerCase());
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -72,27 +71,21 @@ export default function UsageStats({ userData }: any) {
              <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
                 <Clock className="h-4 w-4 text-indigo-400" />
              </div>
-             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Renewal Metrics</span>
+             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Subscription Status</span>
           </div>
-          <CardTitle className="text-xl font-bold text-white">Subscription Status</CardTitle>
+          <CardTitle className="text-xl font-bold text-white">Account Standing</CardTitle>
         </CardHeader>
         <CardContent className="p-8 pt-4 space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Renewal Date</p>
-              <p className="text-sm font-bold text-white">
-                {currentPeriodEnd ? format(new Date(currentPeriodEnd), 'MMM dd, yyyy') : 'N/A'}
+          <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Payment Status</p>
+            <div className="flex items-center gap-1.5">
+              <div className={cn(
+                "h-1.5 w-1.5 rounded-full animate-pulse",
+                isPaidPlan ? "bg-emerald-500" : "bg-amber-500"
+              )} />
+              <p className="text-sm font-bold text-white capitalize">
+                {isPaidPlan ? 'active' : (userData.paymentStatus || 'inactive')}
               </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Payment Status</p>
-              <div className="flex items-center gap-1.5">
-                <div className={cn(
-                  "h-1.5 w-1.5 rounded-full animate-pulse",
-                  userData.paymentStatus === 'active' ? "bg-emerald-500" : "bg-amber-500"
-                )} />
-                <p className="text-sm font-bold text-white capitalize">{userData.paymentStatus || 'Inactive'}</p>
-              </div>
             </div>
           </div>
 
