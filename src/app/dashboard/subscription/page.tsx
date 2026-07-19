@@ -4,14 +4,13 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PlanCard from '@/components/subscription/plan-card';
 import UsageStats from '@/components/subscription/usage-stats';
-import TransactionHistoryTable from '@/components/subscription/transaction-history-table';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Script from 'next/script';
-import { CreditCard, History, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const plans = {
@@ -162,7 +161,7 @@ export default function SubscriptionPage() {
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Billing Studio</p>
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white">Plan & Billing</h1>
           <p className="text-muted-foreground text-xs md:text-sm max-w-md">
-            Manage your subscription tier, monitor usage, and view transaction history.
+            Manage your subscription tier and monitor character usage in real-time.
           </p>
         </div>
         
@@ -199,7 +198,7 @@ export default function SubscriptionPage() {
       <section id="pricing-plans" className="space-y-10">
         <div className="flex items-center gap-3 px-2">
           <Zap className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-bold text-white">Available Tiers</h2>
+          <h2 className="text-xl font-bold text-white">Choose Your Tier</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -214,13 +213,12 @@ export default function SubscriptionPage() {
         </div>
       </section>
 
-      <section className="space-y-6 pt-10">
-        <div className="flex items-center gap-3 px-2">
-          <History className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-bold text-white">Audit Trail</h2>
-        </div>
-        <TransactionHistoryTable />
-      </section>
+      <div className="pt-10 px-2">
+        <p className="text-xs text-muted-foreground italic text-center max-w-2xl mx-auto">
+          Character balance is cryptographically verified. Subscriptions are billed on a recurring basis until cancelled. 
+          Unused monthly characters do not roll over to the next cycle.
+        </p>
+      </div>
     </div>
   );
 }
