@@ -48,7 +48,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useUserRole } from '@/hooks/use-user-role';
-import { doc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -58,7 +58,6 @@ const planLimits: Record<string, number> = {
   starter: 50000,
   creator: 300000,
   pro: 1000000,
-  business: 10000000,
 };
 
 const SectionLabel = ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -366,11 +365,35 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isUserLoading } = useFirebase();
-  const { role, isLoading: isRoleLoading } = useUserRole();
+  const { user, isUserLoading, firestore } = useFirebase();
+  const { role, isLoading: isRoleLoading, userData } = useUserRole();
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useIsMobile();
+
+  // Expiration Check Logic: Runs whenever user data changes
+  useEffect(() => {
+    if (!isUserLoading && user && userData && firestore) {
+      const plan = userData.subscriptionPlan || 'free';
+      const expiry = userData.currentPeriodEnd;
+
+      if (plan !== 'free' && expiry) {
+        const expiryDate = new Date(expiry);
+        if (new Date() > expiryDate) {
+          // Automatic Downgrade & Credit Reset
+          const userRef = doc(firestore, 'users', user.uid);
+          updateDoc(userRef, {
+            subscriptionPlan: 'free',
+            subscriptionType: 'monthly',
+            credits: 0, // Restart credits means reset to zero upon expiration
+            paymentStatus: 'expired',
+            currentPeriodEnd: null,
+            updatedAt: new Date().toISOString()
+          }).catch(err => console.error("[CRITICAL] Failed to auto-expire user plan:", err));
+        }
+      }
+    }
+  }, [user, userData, isUserLoading, firestore]);
 
   useEffect(() => {
     if (!isUserLoading && !isRoleLoading) {
