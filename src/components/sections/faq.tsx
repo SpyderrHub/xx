@@ -21,10 +21,6 @@ const faqs = [
     a: "We currently support over 500 languages, accents, and regional dialects, including massive coverage of Indic languages like Hindi, Telugu, Tamil, and Bengali with native-level prosody."
   },
   {
-    q: "What is the API latency?",
-    a: "Our API is designed for speed. The average time-to-first-byte is ~200ms, and a typical sentence is fully synthesized in under 2 seconds globally."
-  },
-  {
     q: "Can I clone my own voice?",
     a: "Absolutely. Our 'Instant Voice Cloning' feature allows you to create a high-fidelity clone of any speaker with just 30 seconds of reference audio."
   }
