@@ -95,7 +95,10 @@ export default function RefundPolicyPage() {
                   <div className="bg-primary/5 border border-primary/20 p-6 rounded-2xl">
                     <p className="font-bold text-white mb-2">Subscription Cancellations:</p>
                     <p className="text-sm leading-relaxed">
-                      Subscriptions are managed through auto-pay for Credit and Debit card users. To prevent future charges, simply disable auto-pay from your Account → Subscription settings page. Your plan will remain active until the end of the current billing period at no additional cost.
+                    Subscriptions purchased through the QuantisAI Labs website can be managed or canceled through your payment provider (such as Razorpay), depending on your payment method.
+                    </p>
+                    <p className="text-sm leading-relaxed">
+                    Subscriptions purchased through the QuantisAI Labs Android app are managed by Google Play. You can cancel your subscription at any time from the Google Play Store by navigating to Payments & subscriptions → Subscriptions. After cancellation, your subscription will remain active until the end of the current billing period, and you will not be charged again unless you renew.
                     </p>
                   </div>
                   <p className="mt-4">

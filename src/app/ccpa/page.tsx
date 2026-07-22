@@ -84,7 +84,7 @@ export default function CCPAPage() {
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground font-bold uppercase tracking-widest">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-primary" />
-                    Last Updated: March 2024
+                    Last Updated: July 22, 2026
                   </div>
                   <div className="flex items-center gap-2">
                     <Scale className="h-4 w-4 text-primary" />
