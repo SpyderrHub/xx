@@ -5,7 +5,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Zap, Play, Pause, Mic2, Sparkles, Terminal, Globe } from 'lucide-react';
+import { 
+  Loader2, 
+  Zap, 
+  Download, 
+  Play, 
+  Pause,
+  Sparkles,
+  Library,
+  CalendarDays,
+  Clock,
+  Volume2,
+  Mic2,
+  Terminal,
+  Globe
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 

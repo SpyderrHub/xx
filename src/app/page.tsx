@@ -9,7 +9,6 @@ import FeaturesSection from '@/components/sections/features';
 import ExamplePrompts from '@/components/sections/example-prompts';
 import LanguagesSection from '@/components/sections/languages';
 import HowItWorks from '@/components/sections/how-it-works';
-import CodeIntegrationSection from '@/components/sections/code-integration';
 import PricingSection from '@/components/sections/pricing';
 import FaqSection from '@/components/sections/faq';
 import FinalCTASection from '@/components/sections/final-cta';
@@ -35,7 +34,6 @@ export default function Home() {
             <HowItWorks />
             <FeaturesSection />
             <LanguagesSection />
-            <CodeIntegrationSection />
             <PricingSection />
             <FaqSection />
             <FinalCTASection />
