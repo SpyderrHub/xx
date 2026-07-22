@@ -8,14 +8,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { 
   Loader2, 
   Zap, 
-  Download, 
   Play, 
   Pause,
   Sparkles,
-  Library,
-  CalendarDays,
-  Clock,
-  Volume2,
   Mic2,
   Terminal,
   Globe
@@ -176,9 +171,6 @@ export default function VoiceDesignerDemo() {
                             >
                               {isPlaying ? <Pause className="mr-2 h-4 w-4 fill-current" /> : <Play className="mr-2 h-4 w-4 fill-current ml-1" />}
                               {isPlaying ? 'Pause' : 'Play Sample'}
-                            </Button>
-                            <Button asChild variant="outline" className="h-14 w-14 rounded-xl border-white/10 bg-white/5">
-                               <a href={audioUrl} download><Sparkles className="h-5 w-5 text-primary" /></a>
                             </Button>
                           </motion.div>
                         )}
