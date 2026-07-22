@@ -11,7 +11,6 @@ import LanguagesSection from '@/components/sections/languages';
 import HowItWorks from '@/components/sections/how-it-works';
 import PricingSection from '@/components/sections/pricing';
 import FaqSection from '@/components/sections/faq';
-import FinalCTASection from '@/components/sections/final-cta';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -36,7 +35,6 @@ export default function Home() {
             <LanguagesSection />
             <PricingSection />
             <FaqSection />
-            <FinalCTASection />
           </>
         )}
       </main>
