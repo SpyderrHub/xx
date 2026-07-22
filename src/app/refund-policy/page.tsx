@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -123,9 +122,6 @@ export default function RefundPolicyPage() {
                 <Section id="credits" title="3. Character Credits" icon={Zap}>
                   <p>
                     Character credits from monthly or yearly plans do not roll over and are reset at the start of each new billing cycle.
-                  </p>
-                  <p>
-                    <strong>Top-up Packs:</strong> Credits purchased via one-time top-ups never expire and are non-refundable once the transaction is complete, as they provide instant character volume.
                   </p>
                 </Section>
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -108,7 +107,6 @@ export default function TermsPage() {
                   <ul className="list-disc pl-6 space-y-2">
                     <li><strong>Subscriptions:</strong> Monthly and Yearly plans (Starter, Creator, Pro) are billed in advance. All fees are non-refundable except where required by law.</li>
                     <li><strong>Character Limits:</strong> Your monthly character quota resets at the start of each billing cycle. Unused plan characters do not roll over.</li>
-                    <li><strong>Top-up Credits:</strong> Credits purchased via one-time top-ups do not expire and will be used only after your monthly plan balance is exhausted.</li>
                   </ul>
                 </Section>
 
