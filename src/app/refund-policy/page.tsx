@@ -82,7 +82,7 @@ export default function RefundPolicyPage() {
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground font-bold uppercase tracking-widest">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-primary" />
-                    Effective: March 2024
+                    Effective: July 22, 2026
                   </div>
                 </div>
               </header>
