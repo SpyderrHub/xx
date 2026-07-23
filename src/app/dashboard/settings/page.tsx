@@ -8,7 +8,9 @@ import {
   Camera, 
   Save, 
   Loader2, 
-  Upload
+  Upload,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { updateProfile, deleteUser } from 'firebase/auth';
@@ -18,6 +20,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
 
 /**
@@ -63,6 +76,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const [displayName, setDisplayName] = useState('');
   const [photoURL, setPhotoURL] = useState('');
@@ -116,7 +130,6 @@ export default function SettingsPage() {
       if (!presignRes.ok) throw new Error(presignData.message);
 
       // 2. Upload to R2 with Immutable Cache System Headers
-      // Signature will fail if these headers don't match the backend exactly
       const uploadRes = await fetch(presignData.presignedUrl, {
         method: 'PUT',
         headers: { 
@@ -163,6 +176,43 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!user || !firestore) return;
+
+    setIsDeleting(true);
+
+    try {
+      // 1. Delete Firestore Document
+      await deleteDoc(doc(firestore, 'users', user.uid));
+
+      // 2. Delete Auth User
+      await deleteUser(user);
+
+      toast({ 
+        title: "Account Deleted", 
+        description: "Your data has been permanently removed from QuantisAI Labs." 
+      });
+      
+      router.replace('/login');
+    } catch (error: any) {
+      console.error("Deletion failed:", error);
+      if (error.code === 'auth/requires-recent-login') {
+        toast({ 
+          title: "Sensitive Operation", 
+          description: "For security, please log out and back in to delete your account.", 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ 
+          title: "Deletion Error", 
+          description: error.message || "Failed to remove account data.", 
+          variant: "destructive" 
+        });
+      }
+      setIsDeleting(false);
+    }
+  };
+
   const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase();
 
   if (isDocLoading) {
@@ -201,13 +251,13 @@ export default function SettingsPage() {
               </div>
               <h3 className="font-bold text-white text-base md:text-lg">{displayName || 'User'}</h3>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black mt-1">
-                {userData?.plan || 'Free'} Plan
+                {userData?.subscriptionPlan || 'Free'} Plan
               </p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-8">
           <form onSubmit={handleSaveProfile}>
             <Card className="bg-white/[0.02] border-white/5 rounded-[2rem] overflow-hidden">
               <CardHeader className="p-6 md:p-8 border-b border-white/5 bg-white/[0.01]">
@@ -247,6 +297,55 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
           </form>
+
+          {/* Danger Zone */}
+          <Card className="bg-red-500/5 border-red-500/20 rounded-[2rem] overflow-hidden mt-8">
+            <CardHeader className="p-6 md:p-8 border-b border-red-500/10 bg-red-500/[0.02]">
+              <CardTitle className="text-lg md:text-xl font-bold text-red-500 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Danger Zone
+              </CardTitle>
+              <CardDescription className="text-xs md:text-sm text-red-400/70"> Irreversible account actions. Proceed with extreme caution.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 md:p-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-white">Delete Account</p>
+                  <p className="text-xs text-muted-foreground">Permanently remove your account, character credits, and all generated audio data.</p>
+                </div>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      disabled={isDeleting}
+                      className="h-10 md:h-12 px-6 rounded-xl font-black bg-red-600 hover:bg-red-700 transition-all text-xs uppercase tracking-widest"
+                    >
+                      {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                      Delete Permanently
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-black/95 border-red-500/20 backdrop-blur-xl rounded-[2rem]">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-xl font-black text-white">Final Confirmation</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground text-sm leading-relaxed">
+                        Are you sure you want to permanently delete your QuantisAI Labs account? This action cannot be undone. You will immediately lose access to your current character balance and generation history.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-6">
+                      <AlertDialogCancel className="bg-white/5 border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest">Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleDeleteAccount}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-widest"
+                      >
+                        Delete My Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
