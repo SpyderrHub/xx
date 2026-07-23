@@ -178,20 +178,20 @@ export default function VoiceDesignerDemo() {
                    </div>
                 </div>
               </div>
+              
+              <div className="mt-8 flex justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all border-t border-white/5 py-8 bg-white/[0.01]">
+                 <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
+                   <Globe className="h-4 w-4" /> 500+ Languages
+                 </div>
+                 <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
+                   <Zap className="h-4 w-4" /> 2s Latency
+                 </div>
+                 <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
+                   <Sparkles className="h-4 w-4" /> 48kHz Quality
+                 </div>
+              </div>
             </CardContent>
           </Card>
-          
-          <div className="mt-8 flex justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all">
-             <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
-               <Globe className="h-4 w-4" /> 500+ Languages
-             </div>
-             <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
-               <Zap className="h-4 w-4" /> 2s Latency
-             </div>
-             <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
-               <Sparkles className="h-4 w-4" /> 48kHz Quality
-             </div>
-          </div>
         </motion.div>
       </div>
       {audioUrl && (

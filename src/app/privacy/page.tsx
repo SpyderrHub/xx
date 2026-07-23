@@ -35,10 +35,10 @@ const Section = ({ id, title, icon: Icon, children }: { id: string; title: strin
 
 const tocItems = [
   { id: 'introduction', title: '1. Introduction', icon: List },
-  { id: 'collection', title: '2. Data Collection', icon: Database },
-  { id: 'usage', title: '3. Data Usage', icon: Eye },
+  { id: 'collection', title: '2. Information We Collect', icon: Database },
+  { id: 'usage', title: '3. How We Use Your Information', icon: Eye },
   { id: 'sharing', title: '4. Data Sharing', icon: Share2 },
-  { id: 'security', title: '5. Security', icon: Lock },
+  { id: 'security', title: '5. Data Security', icon: Lock },
   { id: 'rights', title: '6. Your Rights', icon: UserCheck },
   { id: 'contact', title: '7. Contact Us', icon: Mail },
 ];
